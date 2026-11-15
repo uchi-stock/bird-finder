@@ -18,6 +18,8 @@ export default defineConfig({
     ...getAppVersionDefine(pkgUrl),
     __APP_VERSION__: JSON.stringify(appVersion),
   },
+  // docs/のMarkdownをテストから読めるようにする（選択肢ツリーの図の一致確認）
+  server: { fs: { allow: [".."] } },
   test: {
     environment: "jsdom",
     setupFiles: ["./src/setupTests.ts"],

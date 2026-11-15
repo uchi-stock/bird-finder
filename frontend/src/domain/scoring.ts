@@ -103,7 +103,8 @@ export function scoreSpecies(obs: Observation, sp: Species): Candidate {
   }
 
   // 場所
-  if (obs.place === undefined) unknown.push("見た場所");
+  // 見えない（声だけ）は場所の手がかりがないので、未入力と同じく加点も減点もしない
+  if (obs.place === undefined || obs.place === "unseen") unknown.push("見た場所");
   else {
     maxScore += WEIGHT.place;
     if (sp.places.includes(obs.place)) {
