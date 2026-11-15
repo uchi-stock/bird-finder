@@ -4,6 +4,7 @@ import { hasAnyInput, identify, pickTop } from "./domain/scoring";
 import { caughtCount, recordCatch, type Collection } from "./domain/collection";
 import { getPrivacySecret, loadCollection, loadSightings, saveCollection, saveSightings } from "./storage";
 import { allowedBehaviors, allowedPlaces, behaviorsAfterPlaceChange } from "./domain/choices";
+import { BEHAVIOR_LABEL, PLACE_LABEL, STEP_TITLES } from "./domain/labels";
 import { timeSlotFromHour } from "./domain/time";
 import { HABITATS, largeImageUrl } from "./domain/habitat";
 import { detectHabitats, getCoords } from "./location";
@@ -56,23 +57,24 @@ const COLORS: { v: Color; label: string; css: string }[] = [
   { v: "red", label: "赤・橙", css: "#e0662a" },
 ];
 const BEHAVIORS: { v: Behavior; label: string; emoji: string }[] = [
-  { v: "swimming", label: "泳ぐ", emoji: "🦆" },
-  { v: "wading", label: "水の中に立つ・歩く", emoji: "🦩" },
-  { v: "perching", label: "止まる・立つ・歩く", emoji: "🐾" },
-  { v: "flying", label: "飛ぶ・滑空する", emoji: "🦅" },
-  { v: "singing", label: "鳴く・歌う", emoji: "🎵" },
-  { v: "foraging", label: "採食する・つつく", emoji: "🐛" },
-  { v: "preening", label: "羽繕いする", emoji: "✨" },
+  { v: "swimming", label: BEHAVIOR_LABEL.swimming, emoji: "🦆" },
+  { v: "wading", label: BEHAVIOR_LABEL.wading, emoji: "🦩" },
+  { v: "perching", label: BEHAVIOR_LABEL.perching, emoji: "🐾" },
+  { v: "flying", label: BEHAVIOR_LABEL.flying, emoji: "🦅" },
+  { v: "singing", label: BEHAVIOR_LABEL.singing, emoji: "🎵" },
+  { v: "foraging", label: BEHAVIOR_LABEL.foraging, emoji: "🐛" },
+  { v: "preening", label: BEHAVIOR_LABEL.preening, emoji: "✨" },
 ];
 const PLACES: { v: Place; label: string; emoji: string }[] = [
-  { v: "feeder", label: "餌台", emoji: "🌻" },
-  { v: "ground", label: "地面の上", emoji: "🌱" },
-  { v: "tree", label: "木や茂みの中", emoji: "🌳" },
-  { v: "wire", label: "柵や電線の上", emoji: "⚡" },
-  { v: "roof", label: "建物や屋根の上", emoji: "🏠" },
-  { v: "water", label: "水辺・水面", emoji: "🌊" },
-  { v: "grass", label: "草むら・ヨシ原", emoji: "🌾" },
-  { v: "sky", label: "空（飛んでいた）", emoji: "☁️" },
+  { v: "feeder", label: PLACE_LABEL.feeder, emoji: "🌻" },
+  { v: "ground", label: PLACE_LABEL.ground, emoji: "🌱" },
+  { v: "tree", label: PLACE_LABEL.tree, emoji: "🌳" },
+  { v: "wire", label: PLACE_LABEL.wire, emoji: "⚡" },
+  { v: "roof", label: PLACE_LABEL.roof, emoji: "🏠" },
+  { v: "water", label: PLACE_LABEL.water, emoji: "🌊" },
+  { v: "grass", label: PLACE_LABEL.grass, emoji: "🌾" },
+  { v: "sky", label: PLACE_LABEL.sky, emoji: "☁️" },
+  { v: "unseen", label: PLACE_LABEL.unseen, emoji: "👂" },
 ];
 
 const TIMES: { v: TimeSlot; label: string; emoji: string }[] = [
@@ -403,7 +405,6 @@ export function App() {
     }
   };
 
-  const STEP_TITLES = ["周辺の環境", "どこで見たか", "行動", "鳴き声", "大きさ", "羽の色", "時間帯・観察日"];
   const stepDone = [habitats.length > 0, place !== undefined, behaviors.length > 0, voice !== "" || noVoice, sizeLevel !== undefined, colors.length > 0, time !== undefined];
   const stepsRef = useRef<HTMLDivElement>(null);
   const [stepIdx, setStepIdx] = useState(0);
@@ -510,6 +511,7 @@ export function App() {
             <section className="step">
               <h2>行動（複数可）</h2>
               {place === "sky" && <p className="hint">空で見たので「飛ぶ」を自動で選んでいます。</p>}
+              {place === "unseen" && <p className="hint">姿が見えないので「鳴く・歌う」を自動で選んでいます。</p>}
               <div className="chips">
                 {BEHAVIORS.filter((b) => allowedBehaviors(place, habitats).includes(b.v)).map((b) => (
                   <button key={b.v} className={behaviors.includes(b.v) ? "chip on" : "chip"} onClick={() => setBehaviors(toggle(behaviors, b.v))}>

@@ -3,7 +3,7 @@ import { allowedBehaviors, allowedPlaces, behaviorsAfterPlaceChange, impliedBeha
 
 describe("allowedPlaces", () => {
   it("環境未選択なら全ての場所", () => {
-    expect(allowedPlaces([])).toHaveLength(8);
+    expect(allowedPlaces([])).toHaveLength(9);
   });
   it("住宅街に水辺・草むらは無い", () => {
     const p = allowedPlaces(["urban"]);
@@ -51,7 +51,20 @@ describe("allowedBehaviors", () => {
     expect(allowedBehaviors(undefined, ["urban"])).not.toContain("swimming");
   });
   it("場所・環境とも未選択なら全て", () => {
-    expect(allowedBehaviors(undefined, [])).toHaveLength(7);
+    const b = allowedBehaviors(undefined, []);
+    expect(b).toHaveLength(6);
+    expect(b).not.toContain("flying");
+  });
+});
+
+describe("見えない（声だけ）", () => {
+  it("どの環境でも選べ、行動は鳴くだけで自動選択される", () => {
+    for (const h of ["waterside", "urban", "woodland", "open"] as const) expect(allowedPlaces([h])).toContain("unseen");
+    expect(allowedBehaviors("unseen", [])).toEqual(["singing"]);
+    expect(impliedBehaviors("unseen")).toEqual(["singing"]);
+  });
+  it("空から見えないへ変えると、飛ぶが外れて鳴くが入る", () => {
+    expect(behaviorsAfterPlaceChange("sky", "unseen", ["flying"])).toEqual(["singing"]);
   });
 });
 

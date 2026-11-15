@@ -155,7 +155,7 @@ describe("App: 前の回答で後続の選択肢を絞る", () => {
     await renderApp();
     await userEvent.click(chip("どこで見たか", "空"));
     await userEvent.click(chip("どこで見たか", "地面の上"));
-    expect(chip("行動", "飛ぶ")).not.toHaveClass("on");
+    expect(chips("行動")).not.toContain("飛ぶ・滑空する");
   });
   it("環境を変えて選べなくなった場所は自動で解除される", async () => {
     await renderApp();
@@ -204,9 +204,15 @@ describe("App: 鳴き声が聞こえなかった", () => {
 });
 
 describe("App: 行動の選択肢と絵文字", () => {
-  it("行動は7つ: 泳ぐ／水の中に立つ・歩く／止まる・立つ・歩く／飛ぶ／鳴く／採食／羽繕い", async () => {
+  it("行動は6つ（飛ぶは空のときだけ）: 泳ぐ／水の中に立つ・歩く／止まる・立つ・歩く／鳴く／採食／羽繕い", async () => {
     await renderApp();
-    expect(chips("行動")).toEqual(["泳ぐ", "水の中に立つ・歩く", "止まる・立つ・歩く", "飛ぶ・滑空する", "鳴く・歌う", "採食する・つつく", "羽繕いする"]);
+    expect(chips("行動")).toEqual(["泳ぐ", "水の中に立つ・歩く", "止まる・立つ・歩く", "鳴く・歌う", "採食する・つつく", "羽繕いする"]);
+  });
+  it("見えない（声だけ）を選ぶと、鳴くが自動で選ばれる", async () => {
+    await renderApp();
+    await userEvent.click(chip("どこで見たか", "見えない（声だけ）"));
+    expect(chips("行動")).toEqual(["鳴く・歌う"]);
+    expect(chip("行動", "鳴く")).toHaveClass("on");
   });
   it("地面の上では、泳ぐ・水の中に立つ・歩くを出さない", async () => {
     await renderApp();
@@ -452,7 +458,7 @@ describe("App: 拡大表示で、先に画像を出す", () => {
   it("飛翔の写真は、大きい版が無いため、同じ画像を使う", async () => {
     useFlightPhoto.mockReturnValue({ thumbnail: "https://c/500px-fly.jpg", pageUrl: "https://c/x", flight: true });
     await renderApp();
-    await userEvent.click(chip("行動", "飛ぶ"));
+    await userEvent.click(chip("どこで見たか", "空"));
     fireEvent.click(firstCard());
     expect((document.querySelector(".lightbox .lb-large") as HTMLImageElement).src).toContain("/500px-fly.jpg");
     expect((document.querySelector(".lightbox .lb-thumb") as HTMLImageElement).src).toContain("/500px-fly.jpg");
@@ -475,7 +481,7 @@ describe("App: 状況に応じた姿の画像", () => {
     usePhoto.mockReturnValue(standing);
     useFlightPhoto.mockReturnValue(flightPhoto);
     await renderApp();
-    await userEvent.click(chip("行動", "飛ぶ"));
+    await userEvent.click(chip("どこで見たか", "空"));
     expect(useFlightPhoto).toHaveBeenLastCalledWith(expect.any(String), true);
     expect(screen.getAllByText("飛翔").length).toBeGreaterThan(0);
     expect(document.querySelector(".results .photo img")).toHaveAttribute("src", flightPhoto.thumbnail);
@@ -493,7 +499,7 @@ describe("App: 状況に応じた姿の画像", () => {
   it("飛翔画像の拡大では、出典の撮影者が無ければ「不明」と表示する", async () => {
     useFlightPhoto.mockReturnValue({ thumbnail: "https://c/500px-fly.jpg", pageUrl: "https://c/x", flight: true });
     await renderApp();
-    await userEvent.click(chip("行動", "飛ぶ"));
+    await userEvent.click(chip("どこで見たか", "空"));
     await userEvent.click(screen.getAllByRole("button", { name: /写真を拡大/ })[0]);
     expect(screen.getByRole("link", { name: /撮影: 不明/ })).toBeInTheDocument();
   });
