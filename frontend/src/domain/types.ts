@@ -9,6 +9,8 @@ export type Season = "spring" | "summer" | "autumn" | "winter";
 export interface Species {
   species_id: string;
   name_ja: string;
+  /** 学名（Wikimedia Commonsでの画像検索に使う） */
+  scientific_name: string;
   size_level: number;
   /** 主な色（体の大部分を占める色） */
   colors: Color[];

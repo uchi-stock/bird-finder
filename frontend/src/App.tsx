@@ -10,7 +10,7 @@ import { detectHabitats } from "./location";
 import ServiceWorkerRegistration from "./components/ServiceWorkerRegistration.jsx";
 import { UpdateNotifier } from "./components/UpdateNotifier";
 import formatBuildTime from "./shared/formatBuildTime.js";
-import { usePhoto } from "./photo";
+import { useFlightPhoto, usePhoto } from "./photo";
 import type { Behavior, Candidate, Color, Habitat, Observation, Place, Species, TimeSlot } from "./domain/types";
 
 const SPECIES = speciesJson as Species[];
@@ -77,24 +77,30 @@ function closeness(c: Candidate): string {
   return "候補のひとつ";
 }
 
-function Photo({ name }: { name: string }) {
-  const photo = usePhoto(name);
+function Photo({ name, scientificName, flying = false }: { name: string; scientificName?: string; flying?: boolean }) {
+  const standing = usePhoto(name);
+  // 飛んでいる状況なら飛翔の画像を探す。見つからなければ通常の画像（多くは止まっている・立っている姿）
+  const flight = useFlightPhoto(scientificName ?? "", flying && Boolean(scientificName));
+  const photo = flying && flight ? flight : standing;
   const [open, setOpen] = useState(false);
   const [largeSrc, setLargeSrc] = useState("");
   useEffect(() => {
-    if (photo) setLargeSrc(largeImageUrl(photo.thumbnail));
+    if (photo) setLargeSrc(photo.flight ? photo.thumbnail : largeImageUrl(photo.thumbnail));
   }, [photo]);
   if (!photo) return <div className="photo empty">写真なし</div>;
   return (
     <>
       <button className="photo" onClick={() => setOpen(true)} aria-label={`${name}の写真を拡大`}>
         <img src={photo.thumbnail} alt={name} loading="lazy" />
+        {photo.flight && <span className="flight-badge">飛翔</span>}
       </button>
       {open && (
         <div className="lightbox" onClick={() => setOpen(false)}>
           <img src={largeSrc} alt={name} onError={() => setLargeSrc(photo.thumbnail)} />
           <a href={photo.pageUrl} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>
-            出典: Wikipedia「{name}」（画像の著作者・ライセンスはリンク先を参照）
+            {photo.flight
+              ? `出典: Wikimedia Commons（撮影: ${photo.credit ?? "不明"} ／ ${photo.license ?? "ライセンスはリンク先を参照"}）`
+              : `出典: Wikipedia「${name}」（画像の著作者・ライセンスはリンク先を参照）`}
           </a>
         </div>
       )}
@@ -157,6 +163,7 @@ function Dex({ collection }: { collection: Collection }) {
           );
         })}
       </ul>
+      <p className="hint">鳥のデータは一般的な図鑑知識に基づく暫定値で、地域の調査資料での確認は未実施です（試作版）。</p>
     </section>
   );
 }
@@ -239,6 +246,25 @@ export function App() {
     setBehaviors((prev) => (prev.every((b) => ok.includes(b)) ? prev : prev.filter((b) => ok.includes(b))));
   }, [habitats, place]);
 
+  const STEP_TITLES = ["周辺の環境", "どこで見たか", "行動", "鳴き声", "大きさ", "羽の色", "時間帯・観察日"];
+  const stepDone = [habitats.length > 0, place !== undefined, behaviors.length > 0, voice !== "" || noVoice, sizeLevel !== undefined, colors.length > 0, time !== undefined];
+  const stepsRef = useRef<HTMLDivElement>(null);
+  const [stepIdx, setStepIdx] = useState(0);
+  const onStepsScroll = () => {
+    const el = stepsRef.current;
+    if (!el) return;
+    const w = el.scrollWidth / STEP_TITLES.length;
+    if (!(w > 0)) return;
+    setStepIdx(Math.min(STEP_TITLES.length - 1, Math.max(0, Math.round(el.scrollLeft / w))));
+  };
+  const goStep = (i: number) => {
+    const el = stepsRef.current;
+    el?.scrollTo?.({ left: i * (el.scrollWidth / STEP_TITLES.length), behavior: "smooth" });
+    setStepIdx(i);
+  };
+  // 飛んでいる状況（行動に「飛ぶ」、または場所が空）なら飛翔の画像を表示する
+  const flying = behaviors.includes("flying") || place === "sky";
+
   const reset = () => {
     setSizeLevel(undefined);
     setColors([]);
@@ -250,187 +276,184 @@ export function App() {
   };
 
   return (
-    <main className="app">
+    <main className={tab === "search" ? "app fit" : "app"}>
       <ServiceWorkerRegistration swUrl={`${import.meta.env.BASE_URL}sw.js`} />
       <UpdateNotifier />
-      <h1>声しか知らない鳥を探す</h1>
-      <p className="version">
-        v{__APP_VERSION__} ・ 更新: {formatBuildTime(__APP_BUILD_TIME__)}
-      </p>
-      <nav className="tabs">
-        <button className={tab === "search" ? "tab on" : "tab"} onClick={() => setTab("search")}>
-          探す
-        </button>
-        <button className={tab === "dex" ? "tab on" : "tab"} onClick={() => setTab("dex")}>
-          図鑑 {caughtCount(collection)}/{SPECIES.length}
-        </button>
-      </nav>
-      {tab === "dex" ? <Dex collection={collection} /> : <>
-      <p className="lead">覚えていることだけ入力してください。分からない項目は飛ばしてOKです。</p>
-
-      <section>
-        <h2>周辺の環境（複数可）</h2>
-        <button className="chip locate" onClick={() => locate()} disabled={locBusy}>
-          {locBusy ? "判定中…" : "📍 現在地から判定する"}
-        </button>
-        <p className="hint">アプリを開いたときと、このボタンを押したときに現在地を使います。座標は保存せず、地図情報（OpenStreetMap）への問い合わせにのみ送られます。</p>
-        <div className="chips">
-          {HABITATS.map((h) => (
-            <button key={h.v} className={habitats.includes(h.v) ? "chip on" : "chip"} onClick={() => setHabitats(toggle(habitats, h.v))}>
-              {h.label}
-            </button>
-          ))}
+      <header className="top">
+        <div>
+          <h1>声しか知らない鳥を探す</h1>
+          <p className="version">
+            v{__APP_VERSION__} ・ 更新: {formatBuildTime(__APP_BUILD_TIME__)}
+          </p>
         </div>
-        {locMsg && <p className="hint">{locMsg}</p>}
-      </section>
-
-      <section>
-        <h2>どこで見たか</h2>
-        {habitats.length > 0 && <p className="hint">選んだ環境にある場所だけ表示しています。</p>}
-        <div className="chips">
-          {PLACES.filter((p) => allowedPlaces(habitats).includes(p.v)).map((p) => (
-            <button key={p.v} className={place === p.v ? "chip on" : "chip"} onClick={() => selectPlace(place === p.v ? undefined : p.v)}>
-              {p.label}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <section>
-        <h2>行動（複数可）</h2>
-        {place === "sky" && <p className="hint">空で見たので「飛ぶ」を自動で選んでいます。</p>}
-        <div className="chips">
-          {BEHAVIORS.filter((b) => allowedBehaviors(place, habitats).includes(b.v)).map((b) => (
-            <button key={b.v} className={behaviors.includes(b.v) ? "chip on" : "chip"} onClick={() => setBehaviors(toggle(behaviors, b.v))}>
-              {b.label}
-            </button>
-          ))}
-        </div>
-      </section>
-
-
-      <section>
-        <h2>鳴き声（オノマトペ）</h2>
-        <input
-          type="text"
-          value={voice}
-          disabled={noVoice}
-          placeholder="例: ホーホケキョ、ピーヒョロロ、チチチ"
-          onChange={(e) => setVoice(e.target.value)}
-        />
-        <div className="chips">
-          <button
-            className={noVoice ? "chip on" : "chip"}
-            onClick={() => {
-              setNoVoice(!noVoice);
-              setVoice("");
-            }}
-          >
-            鳴き声は聞こえなかった
+        <nav className="tabs">
+          <button className={tab === "search" ? "tab on" : "tab"} onClick={() => setTab("search")}>
+            探す
           </button>
-        </div>
-      </section>
-
-      <section>
-        <h2>大きさ</h2>
-        <div className="sizes">
-          {SIZES.map((s) => (
-            <button
-              key={s.level}
-              className={sizeLevel === s.level ? "chip on" : "chip"}
-              onClick={() => setSizeLevel(sizeLevel === s.level ? undefined : s.level)}
-            >
-              {s.level}
-            </button>
-          ))}
-        </div>
-        <p className="hint">
-          {sizeLevel
-            ? `${SIZES[sizeLevel - 1].ref}くらい（${SIZES[sizeLevel - 1].cm}）`
-            : "1（最小）〜7（最大）。もう一度タップで解除"}
-        </p>
-      </section>
-
-      <section>
-        <h2>羽の色（複数可）</h2>
-        <div className="chips">
-          {COLORS.map((c) => (
-            <button key={c.v} className={colors.includes(c.v) ? "chip on" : "chip"} onClick={() => setColors(toggle(colors, c.v))}>
-              <span className="dot" style={{ background: c.css }} />
-              {c.label}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <section>
-        <h2>時間帯</h2>
-        <p className="hint">現在の時刻から自動で選んでいます。違う場合は変更できます。</p>
-        <div className="chips">
-          {TIMES.map((t) => (
-            <button key={t.v} className={time === t.v ? "chip on" : "chip"} onClick={() => setTime(time === t.v ? undefined : t.v)}>
-              {t.label}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <section>
-        <h2>観察日</h2>
-        <label className="row">
-          <input type="checkbox" checked={useDate} onChange={(e) => setUseDate(e.target.checked)} />
-          季節を判定に使う
-        </label>
-        <input type="date" value={date} disabled={!useDate} onChange={(e) => setDate(e.target.value)} />
-      </section>
-
-      <section>
-        <div className="row between">
-          <h2>候補</h2>
-          <button className="link" onClick={reset}>入力をクリア</button>
-        </div>
-        {!inputForResults ? (
-          <p className="hint">上の項目を1つ以上入力すると、近い鳥が表示されます。</p>
-        ) : (
-          <>
-            <p className="hint">※ 点数順の目安です。確率ではありません。</p>
-            <ol className="results">
-              {results.map((c) => (
-                <li key={c.species.species_id}>
-                  <div className="card">
-                    <Photo name={c.species.name_ja} />
-                    <div className="body">
-                      <div className="row between">
-                        <strong>{c.species.name_ja}</strong>
-                        <span className="badge">{closeness(c)}</span>
-                      </div>
-                      <p className="note">{c.species.note}</p>
-                  <p className="reasons">
-                    {c.matching.length > 0 && <span className="ok">一致: {c.matching.join("・")}</span>}
-                    {c.conflicting.length > 0 && <span className="ng">不一致: {c.conflicting.join("・")}</span>}
-                    {c.unknown.length > 0 && <span className="un">未入力: {c.unknown.join("・")}</span>}
-                  </p>
-                  <p className="note">鳴き声の例: {c.species.onomatopoeia.join(" / ")}</p>
-                      <CatchButton speciesId={c.species.species_id} collection={collection} onCatch={onCatch} />
-                    </div>
-                  </div>
-                </li>
+          <button className={tab === "dex" ? "tab on" : "tab"} onClick={() => setTab("dex")}>
+            図鑑 {caughtCount(collection)}/{SPECIES.length}
+          </button>
+        </nav>
+      </header>
+      {tab === "dex" ? (
+        <Dex collection={collection} />
+      ) : (
+        <>
+          <div className="step-nav">
+            <div className="dots">
+              {STEP_TITLES.map((t, i) => (
+                <button key={t} aria-label={`${i + 1}. ${t}`} className={`dot-step${i === stepIdx ? " cur" : ""}${stepDone[i] ? " done" : ""}`} onClick={() => goStep(i)} />
               ))}
-            </ol>
-            {results.length === 0 && (
-              <p className="hint">近い鳥が見つかりませんでした。入力を減らすか、別の特徴に変えてみてください。</p>
+            </div>
+            <span className="step-title">
+              {stepIdx + 1}/{STEP_TITLES.length} {STEP_TITLES[stepIdx]}　← スライド →
+            </span>
+          </div>
+          <div className="steps" ref={stepsRef} onScroll={onStepsScroll}>
+            <section className="step">
+              <h2>周辺の環境（複数可）</h2>
+              <button className="chip locate" onClick={() => locate()} disabled={locBusy}>
+                {locBusy ? "判定中…" : "📍 現在地から判定する"}
+              </button>
+              <div className="chips">
+                {HABITATS.map((h) => (
+                  <button key={h.v} className={habitats.includes(h.v) ? "chip on" : "chip"} onClick={() => setHabitats(toggle(habitats, h.v))}>
+                    {h.label}
+                  </button>
+                ))}
+              </div>
+              {locMsg && <p className="hint">{locMsg}</p>}
+              <p className="hint">現在地は、アプリを開いたときとこのボタンを押したときだけ使います。座標は保存せず、地図情報（OpenStreetMap）への問い合わせにのみ送られます。</p>
+            </section>
+
+            <section className="step">
+              <h2>どこで見たか</h2>
+              {habitats.length > 0 && <p className="hint">選んだ環境にある場所だけ表示しています。</p>}
+              <div className="chips">
+                {PLACES.filter((p) => allowedPlaces(habitats).includes(p.v)).map((p) => (
+                  <button key={p.v} className={place === p.v ? "chip on" : "chip"} onClick={() => selectPlace(place === p.v ? undefined : p.v)}>
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            <section className="step">
+              <h2>行動（複数可）</h2>
+              {place === "sky" && <p className="hint">空で見たので「飛ぶ」を自動で選んでいます。</p>}
+              <div className="chips">
+                {BEHAVIORS.filter((b) => allowedBehaviors(place, habitats).includes(b.v)).map((b) => (
+                  <button key={b.v} className={behaviors.includes(b.v) ? "chip on" : "chip"} onClick={() => setBehaviors(toggle(behaviors, b.v))}>
+                    {b.label}
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            <section className="step">
+              <h2>鳴き声（オノマトペ）</h2>
+              <input
+                type="text"
+                value={voice}
+                disabled={noVoice}
+                placeholder="例: ホーホケキョ、ピーヒョロロ、チチチ"
+                onChange={(e) => setVoice(e.target.value)}
+              />
+              <div className="chips">
+                <button
+                  className={noVoice ? "chip on" : "chip"}
+                  onClick={() => {
+                    setNoVoice(!noVoice);
+                    setVoice("");
+                  }}
+                >
+                  鳴き声は聞こえなかった
+                </button>
+              </div>
+            </section>
+
+            <section className="step">
+              <h2>大きさ</h2>
+              <div className="sizes">
+                {SIZES.map((s) => (
+                  <button key={s.level} className={sizeLevel === s.level ? "chip on" : "chip"} onClick={() => setSizeLevel(sizeLevel === s.level ? undefined : s.level)}>
+                    {s.level}
+                  </button>
+                ))}
+              </div>
+              <p className="hint">
+                {sizeLevel ? `${SIZES[sizeLevel - 1].ref}くらい（${SIZES[sizeLevel - 1].cm}）` : "1（最小）〜7（最大）。もう一度タップで解除"}
+              </p>
+            </section>
+
+            <section className="step">
+              <h2>羽の色（複数可）</h2>
+              <div className="chips">
+                {COLORS.map((c) => (
+                  <button key={c.v} className={colors.includes(c.v) ? "chip on" : "chip"} onClick={() => setColors(toggle(colors, c.v))}>
+                    <span className="dot" style={{ background: c.css }} />
+                    {c.label}
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            <section className="step">
+              <h2>時間帯</h2>
+              <div className="chips">
+                {TIMES.map((t) => (
+                  <button key={t.v} className={time === t.v ? "chip on" : "chip"} onClick={() => setTime(time === t.v ? undefined : t.v)}>
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+              <h2 className="sub">観察日</h2>
+              <label className="row">
+                <input type="checkbox" checked={useDate} onChange={(e) => setUseDate(e.target.checked)} />
+                季節を判定に使う
+              </label>
+              <input type="date" value={date} disabled={!useDate} onChange={(e) => setDate(e.target.value)} />
+            </section>
+          </div>
+
+          <div className="results-area">
+            <div className="row between">
+              <h2>候補</h2>
+              <button className="link" onClick={reset}>入力をクリア</button>
+            </div>
+            {!inputForResults ? (
+              <p className="hint">上のカードを横にスライドして、覚えていることを1つ以上入力すると、近い鳥が表示されます。</p>
+            ) : (
+              <>
+                <p className="hint">※ 点数順の目安です。確率ではありません。</p>
+                <ol className="results">
+                  {results.map((c) => (
+                    <li key={c.species.species_id}>
+                      <div className="card">
+                        <Photo name={c.species.name_ja} scientificName={c.species.scientific_name} flying={flying} />
+                        <div className="body">
+                          <div className="row between">
+                            <strong>{c.species.name_ja}</strong>
+                            <span className="badge">{closeness(c)}</span>
+                          </div>
+                          <p className="note clamp">{c.species.note}</p>
+                          <p className="note clamp">鳴き声: {c.species.onomatopoeia.join(" / ") || "聞こえない"}</p>
+                          <p className="reasons">
+                            {c.matching.length > 0 && <span className="ok">一致: {c.matching.join("・")}</span>}
+                            {c.conflicting.length > 0 && <span className="ng">不一致: {c.conflicting.join("・")}</span>}
+                          </p>
+                          <CatchButton speciesId={c.species.species_id} collection={collection} onCatch={onCatch} />
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+                {results.length === 0 && <p className="hint">近い鳥が見つかりませんでした。入力を減らすか、別の特徴に変えてみてください。</p>}
+              </>
             )}
-          </>
-        )}
-      </section>
-
-      </>}
-
-      <footer>
-        <p>
-          鳥のデータは一般的な図鑑知識に基づく暫定値で、地域の調査資料での確認は未実施です（試作版）。
-        </p>
-      </footer>
+          </div>
+        </>
+      )}
     </main>
   );
 }

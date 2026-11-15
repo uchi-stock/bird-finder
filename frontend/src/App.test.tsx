@@ -5,8 +5,9 @@ import { App } from "./App";
 
 const detectHabitats = vi.fn();
 const usePhoto = vi.fn();
+const useFlightPhoto = vi.fn();
 vi.mock("./location", () => ({ detectHabitats: () => detectHabitats() }));
-vi.mock("./photo", () => ({ usePhoto: (n: string) => usePhoto(n) }));
+vi.mock("./photo", () => ({ usePhoto: (n: string) => usePhoto(n), useFlightPhoto: (s: string, e: boolean) => useFlightPhoto(s, e) }));
 
 const section = (title: string) => screen.getByRole("heading", { name: new RegExp(title) }).closest("section") as HTMLElement;
 const uguisuCard = () => screen.getByText("ウグイス").closest("li") as HTMLElement;
@@ -20,6 +21,7 @@ beforeEach(() => {
   localStorage.clear();
   detectHabitats.mockReset().mockResolvedValue([]);
   usePhoto.mockReset().mockReturnValue(null);
+  useFlightPhoto.mockReset().mockReturnValue(null);
 });
 
 afterEach(() => vi.useRealTimers());
@@ -193,6 +195,77 @@ describe("App: 写真", () => {
     expect(screen.getByRole("link", { name: /出典: Wikipedia/ })).toHaveAttribute("href", "https://w/x");
     await userEvent.click(document.querySelector(".lightbox") as HTMLElement);
     expect(document.querySelector(".lightbox")).toBeNull();
+  });
+});
+
+describe("App: 状況に応じた姿の画像", () => {
+  const standing = { thumbnail: "https://u/330px-stand.jpg", pageUrl: "https://w/stand" };
+  const flightPhoto = { thumbnail: "https://c/500px-fly.jpg", pageUrl: "https://c/File:Fly.jpg", credit: "撮影者A", license: "CC BY 4.0", flight: true };
+  it("止まっている状況では通常の画像を使い、飛翔画像は取得しない", async () => {
+    usePhoto.mockReturnValue(standing);
+    useFlightPhoto.mockReturnValue(flightPhoto);
+    await renderApp();
+    await userEvent.click(chip("行動", "止まる"));
+    expect(screen.queryByText("飛翔")).toBeNull();
+    expect(useFlightPhoto).toHaveBeenLastCalledWith(expect.any(String), false);
+    expect(document.querySelector(".results .photo img")).toHaveAttribute("src", standing.thumbnail);
+  });
+  it("飛んでいる状況（行動:飛ぶ）では飛翔の画像と「飛翔」の印を表示し、出典に撮影者とライセンスを出す", async () => {
+    usePhoto.mockReturnValue(standing);
+    useFlightPhoto.mockReturnValue(flightPhoto);
+    await renderApp();
+    await userEvent.click(chip("行動", "飛ぶ"));
+    expect(useFlightPhoto).toHaveBeenLastCalledWith(expect.any(String), true);
+    expect(screen.getAllByText("飛翔").length).toBeGreaterThan(0);
+    expect(document.querySelector(".results .photo img")).toHaveAttribute("src", flightPhoto.thumbnail);
+    await userEvent.click(screen.getAllByRole("button", { name: /写真を拡大/ })[0]);
+    expect(screen.getByRole("link", { name: /撮影: 撮影者A ／ CC BY 4.0/ })).toHaveAttribute("href", flightPhoto.pageUrl);
+  });
+  it("場所が空なら、飛翔画像が見つからないときは通常の画像に戻す", async () => {
+    usePhoto.mockReturnValue(standing);
+    useFlightPhoto.mockReturnValue(null);
+    await renderApp();
+    await userEvent.click(chip("どこで見たか", "空"));
+    expect(document.querySelector(".results .photo img")).toHaveAttribute("src", standing.thumbnail);
+    expect(screen.queryByText("飛翔")).toBeNull();
+  });
+  it("飛翔画像の拡大では、出典の撮影者が無ければ「不明」と表示する", async () => {
+    useFlightPhoto.mockReturnValue({ thumbnail: "https://c/500px-fly.jpg", pageUrl: "https://c/x", flight: true });
+    await renderApp();
+    await userEvent.click(chip("行動", "飛ぶ"));
+    await userEvent.click(screen.getAllByRole("button", { name: /写真を拡大/ })[0]);
+    expect(screen.getByRole("link", { name: /撮影: 不明/ })).toBeInTheDocument();
+  });
+});
+
+describe("App: 条件の横スライド", () => {
+  it("条件が7枚のカードに分かれ、現在位置と回答済みが分かる", async () => {
+    await renderApp();
+    const dots = screen.getAllByRole("button", { name: /^\d\. / });
+    expect(dots).toHaveLength(7);
+    expect(dots[0]).toHaveClass("cur");
+    expect(dots[6]).toHaveClass("done"); // 時間帯は現在時刻で回答済み
+    await userEvent.click(chip("大きさ", "2"));
+    expect(screen.getByRole("button", { name: "5. 大きさ" })).toHaveClass("done");
+  });
+  it("点をタップするとそのカードへ移動し、現在位置の表示が変わる", async () => {
+    await renderApp();
+    await userEvent.click(screen.getByRole("button", { name: "3. 行動" }));
+    expect(screen.getByRole("button", { name: "3. 行動" })).toHaveClass("cur");
+    expect(screen.getByText(/3\/7 行動/)).toBeInTheDocument();
+  });
+  it("スライドしたら、スクロール位置に応じて現在位置が変わる", async () => {
+    await renderApp();
+    const steps = document.querySelector(".steps") as HTMLElement;
+    Object.defineProperty(steps, "scrollWidth", { configurable: true, value: 700 });
+    Object.defineProperty(steps, "scrollLeft", { configurable: true, value: 200 });
+    fireEvent.scroll(steps);
+    expect(screen.getByRole("button", { name: "3. 行動" })).toHaveClass("cur");
+  });
+  it("幅が取れない環境ではスクロールしても現在位置を変えない", async () => {
+    await renderApp();
+    fireEvent.scroll(document.querySelector(".steps") as HTMLElement);
+    expect(screen.getByRole("button", { name: "1. 周辺の環境" })).toHaveClass("cur");
   });
 });
 
