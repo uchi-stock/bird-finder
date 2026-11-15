@@ -120,6 +120,34 @@ describe("App: 前の回答で後続の選択肢を絞る", () => {
   });
 });
 
+describe("App: 鳴き声が聞こえなかった", () => {
+  it("選ぶとオノマトペ欄が無効になり、入力済みの文字は消える。聞こえない種が出る", async () => {
+    await renderApp();
+    await userEvent.type(screen.getByPlaceholderText(/ホーホケキョ/), "チチチ");
+    await userEvent.click(screen.getByRole("button", { name: "鳴き声は聞こえなかった" }));
+    const input = screen.getByPlaceholderText(/ホーホケキョ/);
+    expect(input).toBeDisabled();
+    expect(input).toHaveValue("");
+    expect(screen.getAllByText(/鳴き声（聞こえない）/).length).toBeGreaterThan(0);
+  });
+  it("もう一度押すと解除できる", async () => {
+    await renderApp();
+    const btn = screen.getByRole("button", { name: "鳴き声は聞こえなかった" });
+    await userEvent.click(btn);
+    await userEvent.click(btn);
+    expect(screen.getByPlaceholderText(/ホーホケキョ/)).toBeEnabled();
+  });
+  it("夕方に空を飛ぶ小さな影で、鳴き声が聞こえなければコウモリが出る", async () => {
+    vi.setSystemTime(new Date(2026, 5, 15, 18, 0, 0));
+    await renderApp();
+    await userEvent.click(chip("どこで見たか", "空"));
+    await userEvent.click(within(section("大きさ")).getByRole("button", { name: "1" }));
+    await userEvent.click(screen.getByRole("button", { name: "鳴き声は聞こえなかった" }));
+    expect(screen.getByText("アブラコウモリ")).toBeInTheDocument();
+    expect(screen.getByText(/鳥ではなくコウモリ/)).toBeInTheDocument();
+  });
+});
+
 describe("App: 現在地から周辺環境", () => {
   it("起動時に現在地から環境を判定して初期値にする", async () => {
     detectHabitats.mockResolvedValue(["waterside"]);
@@ -180,12 +208,12 @@ describe("App: 捕まえる・図鑑", () => {
         vi.advanceTimersByTime(2000);
       });
       expect(within(uguisuCard()).getByText(/NEW!/)).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: /図鑑 1\/43/ })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /図鑑 1\/44/ })).toBeInTheDocument();
       expect(localStorage.getItem("bird-finder:collection:v1")).toContain("japanese_bush_warbler");
-      fireEvent.click(screen.getByRole("button", { name: /図鑑 1\/43/ }));
-      expect(screen.getByText("1 / 43 種を捕まえた")).toBeInTheDocument();
+      fireEvent.click(screen.getByRole("button", { name: /図鑑 1\/44/ }));
+      expect(screen.getByText("1 / 44 種を捕まえた")).toBeInTheDocument();
       expect(screen.getByText("ウグイス")).toBeInTheDocument();
-      expect(screen.getAllByText("？？？")).toHaveLength(42);
+      expect(screen.getAllByText("？？？")).toHaveLength(43);
     } finally {
       vi.useRealTimers();
     }

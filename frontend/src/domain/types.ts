@@ -16,6 +16,8 @@ export interface Species {
   seasons: Season[];
   /** 活発に見られる時間帯（暫定値） */
   times: TimeSlot[];
+  /** 普段は鳴き声が聞こえない（暫定値）。「鳴き声は聞こえなかった」の手がかりにする */
+  silent?: boolean;
   /** 多摩川中流域での出現しやすさ（暫定値。識別確率ではない） */
   abundance: Abundance;
   /** 生息・観察されやすい環境（暫定値） */
@@ -36,6 +38,8 @@ export interface Observation {
   time?: TimeSlot;
   habitats: Habitat[];
   onomatopoeia: string;
+  /** 鳴き声は聞こえなかった（オノマトペは無視する） */
+  noVoice?: boolean;
 }
 
 export interface Candidate {

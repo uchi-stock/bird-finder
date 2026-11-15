@@ -136,6 +136,32 @@ describe("表示する候補の絞り込み（pickTop）", () => {
   });
 });
 
+describe("鳴き声が聞こえなかった／コウモリ", () => {
+  it("聞こえなかった場合、普段聞こえない種だけが加点され、鳴く鳥は減点されない", () => {
+    const r = identify({ ...empty, noVoice: true }, species);
+    const bat = r.find((c) => c.species.species_id === "pipistrelle_bat")!;
+    const lark = r.find((c) => c.species.name_ja === "ウグイス")!;
+    expect(bat.matching).toContain("鳴き声（聞こえない）");
+    expect(lark.score).toBeLessThanOrEqual(1); // 事前情報のみ
+    expect(lark.conflicting).toHaveLength(0);
+    expect(r[0].species.silent).toBe(true);
+  });
+  it("入力が「聞こえなかった」だけでも候補を出す（聞こえない種のみ）", () => {
+    const names = pickTop(identify({ ...empty, noVoice: true }, species)).map((c) => c.species.name_ja);
+    expect(names.length).toBeGreaterThan(0);
+    expect(names.every((n) => ["アブラコウモリ", "カワウ", "ダイサギ"].includes(n))).toBe(true);
+    expect(hasAnyInput({ ...empty, noVoice: true })).toBe(true);
+  });
+  it("夕方・空・小型・聞こえない → アブラコウモリが1位", () => {
+    const r = identify({ ...empty, sizeLevel: 1, place: "sky", time: "evening", month: 6, behaviors: ["flying"], noVoice: true }, species);
+    expect(r[0].species.name_ja).toBe("アブラコウモリ");
+  });
+  it("昼間の鳥の観察ではコウモリは上位に来ない", () => {
+    const r = identify({ ...empty, time: "morning", place: "tree", behaviors: ["singing"], onomatopoeia: "ホーホケキョ" }, species);
+    expect(r[0].species.name_ja).toBe("ウグイス");
+  });
+});
+
 describe("補助関数", () => {
   it("月→季節", () => {
     expect([1, 4, 7, 11].map(monthToSeason)).toEqual(["winter", "spring", "summer", "autumn"]);

@@ -181,6 +181,7 @@ export function App() {
   const [locBusy, setLocBusy] = useState(false);
   const [time, setTime] = useState<TimeSlot | undefined>(() => timeSlotFromHour(new Date().getHours()));
   const [voice, setVoice] = useState("");
+  const [noVoice, setNoVoice] = useState(false);
 
   const obs: Observation = useMemo(
     () => ({
@@ -192,8 +193,9 @@ export function App() {
       time,
       habitats,
       onomatopoeia: voice,
+      noVoice,
     }),
-    [sizeLevel, colors, behaviors, place, date, useDate, time, habitats, voice],
+    [sizeLevel, colors, behaviors, place, date, useDate, time, habitats, voice, noVoice],
   );
   const results = useMemo(() => pickTop(identify(obs, SPECIES)), [obs]);
   // 日付だけでは「何か入力した」とみなさない（初期値が入っているため）
@@ -244,6 +246,7 @@ export function App() {
     setPlace(undefined);
     setTime(timeSlotFromHour(new Date().getHours()));
     setVoice("");
+    setNoVoice(false);
   };
 
   return (
@@ -311,9 +314,21 @@ export function App() {
         <input
           type="text"
           value={voice}
+          disabled={noVoice}
           placeholder="例: ホーホケキョ、ピーヒョロロ、チチチ"
           onChange={(e) => setVoice(e.target.value)}
         />
+        <div className="chips">
+          <button
+            className={noVoice ? "chip on" : "chip"}
+            onClick={() => {
+              setNoVoice(!noVoice);
+              setVoice("");
+            }}
+          >
+            鳴き声は聞こえなかった
+          </button>
+        </div>
       </section>
 
       <section>

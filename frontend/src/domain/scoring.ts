@@ -149,8 +149,15 @@ export function scoreSpecies(obs: Observation, sp: Species): Candidate {
     }
   }
 
-  // 鳴き声（オノマトペ）。一致しなくても減点しない（聞き方の個人差が大きいため）
-  if (!normalizeVoice(obs.onomatopoeia)) unknown.push("鳴き声");
+  // 鳴き声。聞こえなかった場合は、普段聞こえない種だけ加点する（鳴く鳥も静かなことがあるため減点しない）。
+  // オノマトペは一致しなくても減点しない（聞き方の個人差が大きいため）
+  if (obs.noVoice) {
+    maxScore += WEIGHT.voice;
+    if (sp.silent) {
+      score += WEIGHT.voice;
+      matching.push("鳴き声（聞こえない）");
+    }
+  } else if (!normalizeVoice(obs.onomatopoeia)) unknown.push("鳴き声");
   else {
     maxScore += WEIGHT.voice;
     const best = Math.max(...sp.onomatopoeia.map((o) => voiceSimilarity(obs.onomatopoeia, o)));
@@ -190,6 +197,7 @@ export function hasAnyInput(obs: Observation): boolean {
     obs.month !== undefined ||
     obs.time !== undefined ||
     obs.habitats.length > 0 ||
+    obs.noVoice === true ||
     normalizeVoice(obs.onomatopoeia) !== ""
   );
 }
