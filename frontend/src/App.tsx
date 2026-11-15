@@ -1,8 +1,9 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import speciesJson from "./data/species.json";
 import { hasAnyInput, identify, pickTop } from "./domain/scoring";
 import { caughtCount, recordCatch, type Collection } from "./domain/collection";
 import { loadCollection, saveCollection } from "./storage";
+import { timeSlotFromHour } from "./domain/time";
 import { HABITATS } from "./domain/habitat";
 import { detectHabitats } from "./location";
 import { usePhoto } from "./photo";
@@ -169,7 +170,7 @@ export function App() {
   const [habitats, setHabitats] = useState<Habitat[]>([]);
   const [locMsg, setLocMsg] = useState("");
   const [locBusy, setLocBusy] = useState(false);
-  const [time, setTime] = useState<TimeSlot | undefined>();
+  const [time, setTime] = useState<TimeSlot | undefined>(() => timeSlotFromHour(new Date().getHours()));
   const [voice, setVoice] = useState("");
 
   const obs: Observation = useMemo(
@@ -189,9 +190,9 @@ export function App() {
   // 日付だけでは「何か入力した」とみなさない（初期値が入っているため）
   const inputForResults = hasAnyInput({ ...obs, month: undefined });
 
-  const locate = async () => {
+  const locate = async (auto = false) => {
     setLocBusy(true);
-    setLocMsg("");
+    setLocMsg(auto ? "現在地を確認しています…" : "");
     try {
       const found = await detectHabitats();
       setHabitats(found);
@@ -203,14 +204,21 @@ export function App() {
     }
   };
 
+  // アプリを開いた時点で現在地を取得し、周辺環境の初期値にする（StrictModeでの二重実行を防ぐ）
+  const autoLocated = useRef(false);
+  useEffect(() => {
+    if (autoLocated.current) return;
+    autoLocated.current = true;
+    void locate(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const reset = () => {
     setSizeLevel(undefined);
     setColors([]);
     setBehaviors([]);
     setPlace(undefined);
-    setTime(undefined);
-    setHabitats([]);
-    setLocMsg("");
+    setTime(timeSlotFromHour(new Date().getHours()));
     setVoice("");
   };
 
@@ -294,10 +302,10 @@ export function App() {
 
       <section>
         <h2>周辺の環境（複数可）</h2>
-        <button className="chip locate" onClick={locate} disabled={locBusy}>
+        <button className="chip locate" onClick={() => locate()} disabled={locBusy}>
           {locBusy ? "判定中…" : "📍 現在地から判定する"}
         </button>
-        <p className="hint">ボタンを押したときだけ現在地を使います。座標は保存せず、地図情報（OpenStreetMap）への問い合わせにのみ送られます。</p>
+        <p className="hint">アプリを開いたときと、このボタンを押したときに現在地を使います。座標は保存せず、地図情報（OpenStreetMap）への問い合わせにのみ送られます。</p>
         <div className="chips">
           {HABITATS.map((h) => (
             <button key={h.v} className={habitats.includes(h.v) ? "chip on" : "chip"} onClick={() => setHabitats(toggle(habitats, h.v))}>
@@ -310,6 +318,7 @@ export function App() {
 
       <section>
         <h2>時間帯</h2>
+        <p className="hint">現在の時刻から自動で選んでいます。違う場合は変更できます。</p>
         <div className="chips">
           {TIMES.map((t) => (
             <button key={t.v} className={time === t.v ? "chip on" : "chip"} onClick={() => setTime(time === t.v ? undefined : t.v)}>
