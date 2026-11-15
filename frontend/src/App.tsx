@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import speciesJson from "./data/species.json";
 import { hasAnyInput, identify, pickTop } from "./domain/scoring";
 import { caughtCount, recordCatch, type Collection } from "./domain/collection";
@@ -89,12 +89,25 @@ function closeness(c: Candidate): string {
   return "候補のひとつ";
 }
 
-function Photo({ name, scientificName, flying = false }: { name: string; scientificName?: string; flying?: boolean }) {
+interface PhotoProps {
+  name: string;
+  scientificName?: string;
+  flying?: boolean;
+  /** 拡大表示の状態を親が持つ場合に指定する（省略時は自分で持つ） */
+  zoomed?: boolean;
+  onZoomChange?: (zoomed: boolean) => void;
+  /** 拡大表示に添える内容（再生中の表示など） */
+  caption?: ReactNode;
+}
+
+function Photo({ name, scientificName, flying = false, zoomed, onZoomChange, caption }: PhotoProps) {
   const standing = usePhoto(name);
   // 飛んでいる状況なら飛翔の画像を探す。見つからなければ通常の画像（多くは止まっている・立っている姿）
   const flight = useFlightPhoto(scientificName ?? "", flying && Boolean(scientificName));
   const photo = flying && flight ? flight : standing;
-  const [open, setOpen] = useState(false);
+  const [innerOpen, setInnerOpen] = useState(false);
+  const open = zoomed ?? innerOpen;
+  const setOpen = (v: boolean) => (onZoomChange ? onZoomChange(v) : setInnerOpen(v));
   const [largeSrc, setLargeSrc] = useState("");
   useEffect(() => {
     if (photo) setLargeSrc(photo.flight ? photo.thumbnail : largeImageUrl(photo.thumbnail));
@@ -126,6 +139,8 @@ function Photo({ name, scientificName, flying = false }: { name: string; scienti
           }}
         >
           <img src={largeSrc} alt={name} onError={() => setLargeSrc(photo.thumbnail)} />
+          <strong className="lightbox-name">{name}</strong>
+          {caption}
           <a href={photo.pageUrl} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>
             {photo.flight
               ? `出典: Wikimedia Commons（撮影: ${photo.credit ?? "不明"} ／ ${photo.license ?? "ライセンスはリンク先を参照"}）`
@@ -294,6 +309,8 @@ export function App() {
   type NowPlaying = { id: string; name: string; status: "loading" | "playing" | "none" | "error"; info?: CallAudio };
   const [now, setNow] = useState<NowPlaying | null>(null);
   const playToken = useRef(0);
+  // 拡大表示中の候補（カードのタップで、再生と同時に拡大する）
+  const [zoomId, setZoomId] = useState<string | null>(null);
   // 候補をタップで鳴き声を再生（もう一度タップで停止）。iOS対策: 解錠はタップの同期処理内で行う
   const onPlay = async (sp: Species) => {
     if (now?.id === sp.species_id && (now.status === "playing" || now.status === "loading")) {
@@ -513,12 +530,23 @@ export function App() {
                       key={c.species.species_id}
                       className={now?.id === c.species.species_id ? "playing" : undefined}
                       onClick={(e) => {
-                        // 写真の拡大・捕まえる・リンクなどのボタンは、再生の対象外
-                        if (!(e.target as HTMLElement).closest("button, a")) void onPlay(c.species);
+                        // 写真の拡大・捕まえる・リンクなどのボタンは、タップの対象外
+                        if ((e.target as HTMLElement).closest("button, a")) return;
+                        // 再生中の鳥をもう一度タップしたときは停止だけ（拡大しない）。それ以外は再生と拡大を同時に行う
+                        const stopping = now?.id === c.species.species_id && (now.status === "playing" || now.status === "loading");
+                        void onPlay(c.species);
+                        if (!stopping) setZoomId(c.species.species_id);
                       }}
                     >
                       <div className="card">
-                        <Photo name={c.species.name_ja} scientificName={c.species.scientific_name} flying={flying} />
+                        <Photo
+                          name={c.species.name_ja}
+                          scientificName={c.species.scientific_name}
+                          flying={flying}
+                          zoomed={zoomId === c.species.species_id}
+                          onZoomChange={(z) => setZoomId(z ? c.species.species_id : null)}
+                          caption={now?.id === c.species.species_id ? <PlayStatus now={now} /> : null}
+                        />
                         <div className="body">
                           <div className="row between">
                             <strong>

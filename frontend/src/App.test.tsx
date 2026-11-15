@@ -323,6 +323,71 @@ describe("App: 鳥をタップで鳴き声を再生", () => {
   });
 });
 
+describe("App: タップで再生と同時に画像を拡大", () => {
+  const photo = { thumbnail: "https://u/330px-a.jpg", pageUrl: "https://w/x" };
+  it("カードをタップすると、再生と同時に写真が拡大され、名前と再生中の表示（録音者・ライセンス）が載る", async () => {
+    usePhoto.mockReturnValue(photo);
+    await renderApp();
+    fireEvent.click(firstCard());
+    const box = await waitFor(() => {
+      const el = document.querySelector(".lightbox") as HTMLElement;
+      expect(el).not.toBeNull();
+      expect(within(el).getByText(/もう一度タップで停止/)).toBeInTheDocument();
+      return el;
+    });
+    expect(unlockAudio).toHaveBeenCalledTimes(1);
+    expect(box.querySelector(".lightbox-name")).toHaveTextContent(/.+/);
+    expect(within(box).getByText(/録音者A ／ CC BY 4.0/)).toBeInTheDocument();
+  });
+  it("写真が無い鳥は、再生のみで拡大しない", async () => {
+    usePhoto.mockReturnValue(null);
+    await renderApp();
+    fireEvent.click(firstCard());
+    await screen.findByText(/もう一度タップで停止/);
+    expect(document.querySelector(".lightbox")).toBeNull();
+  });
+  it("拡大表示をタップすると閉じるが、音声は再生を続ける", async () => {
+    usePhoto.mockReturnValue(photo);
+    await renderApp();
+    fireEvent.click(firstCard());
+    await waitFor(() => expect(document.querySelector(".lightbox")).not.toBeNull());
+    fireEvent.click(document.querySelector(".lightbox") as HTMLElement);
+    expect(document.querySelector(".lightbox")).toBeNull();
+    expect(stopAudio).not.toHaveBeenCalled();
+    expect(screen.getByText(/もう一度タップで停止/)).toBeInTheDocument();
+  });
+  it("再生中の鳥をもう一度タップすると、停止するだけで拡大しない", async () => {
+    usePhoto.mockReturnValue(photo);
+    await renderApp();
+    fireEvent.click(firstCard());
+    await waitFor(() => expect(document.querySelector(".lightbox")).not.toBeNull());
+    fireEvent.click(document.querySelector(".lightbox") as HTMLElement);
+    fireEvent.click(firstCard());
+    expect(stopAudio).toHaveBeenCalled();
+    expect(document.querySelector(".lightbox")).toBeNull();
+  });
+  it("別の鳥をタップすると、拡大も再生もそちらに切り替わる", async () => {
+    usePhoto.mockReturnValue(photo);
+    await renderApp();
+    const cards = within(screen.getByRole("list")).getAllByRole("listitem");
+    fireEvent.click(cards[0]);
+    await waitFor(() => expect(document.querySelectorAll(".lightbox")).toHaveLength(1));
+    fireEvent.click(document.querySelector(".lightbox") as HTMLElement);
+    fireEvent.click(cards[1]);
+    await waitFor(() => expect(document.querySelectorAll(".lightbox")).toHaveLength(1));
+    expect(cards[1].querySelector(".lightbox")).not.toBeNull();
+    expect(cards[0].querySelector(".lightbox")).toBeNull();
+  });
+  it("写真の角の🔍ボタンは、音声なしで拡大のみ行う", async () => {
+    usePhoto.mockReturnValue(photo);
+    await renderApp();
+    fireEvent.click(within(firstCard()).getByRole("button", { name: /写真を拡大/ }));
+    expect(document.querySelector(".lightbox")).not.toBeNull();
+    expect(unlockAudio).not.toHaveBeenCalled();
+    expect(screen.queryByText(/もう一度タップで停止/)).toBeNull();
+  });
+});
+
 describe("App: 状況に応じた姿の画像", () => {
   const standing = { thumbnail: "https://u/330px-stand.jpg", pageUrl: "https://w/stand" };
   const flightPhoto = { thumbnail: "https://c/500px-fly.jpg", pageUrl: "https://c/File:Fly.jpg", credit: "撮影者A", license: "CC BY 4.0", flight: true };

@@ -128,3 +128,8 @@ footer { font-size:.75rem; opacity:.7; padding:8px 0 24px; }
 .photo .zoom { position:absolute; right:4px; top:4px; width:30px; height:30px; padding:0; border-radius:50%; border:none; background:rgba(0,0,0,.55); color:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; }
 .photo .zoom .emoji { margin:0; }
 .photo { cursor:inherit; }
+
+/* 拡大表示: 名前と再生中の表示を載せる */
+.lightbox-name { color:#fff; font-size:1.1rem; }
+.lightbox .play-status { color:#fff; white-space:normal; text-align:center; margin:0; }
+.lightbox .play-status a { color:#9fe0b5; }
