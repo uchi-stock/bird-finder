@@ -1,4 +1,4 @@
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { computeVersion, gitCommitCount, resolveVersion, resolveVersionFromPackage } from "./appVersion.js";
 
@@ -48,7 +48,8 @@ describe("resolveVersion", () => {
 });
 
 describe("resolveVersionFromPackage", () => {
-  const pkgPath = fileURLToPath(new URL("./package.json", import.meta.url));
+  // このテストはfrontend/で実行される（npm test）。jsdom環境ではURLの扱いが異なるため、パスで指定する
+  const pkgPath = join(process.cwd(), "package.json");
   it("package.jsonのversionを基準にして、コミット数から作る", () => {
     const full = runner({ "git rev-parse --is-shallow-repository": "false", "git rev-list --count HEAD": "57" });
     expect(resolveVersionFromPackage(pkgPath, {}, full)).toMatch(/^0\.1\.57$/);
