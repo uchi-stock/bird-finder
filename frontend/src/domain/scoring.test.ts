@@ -53,8 +53,9 @@ describe("未入力・矛盾の扱い", () => {
     expect(many.score).toBeLessThan(one.score);
   });
   it("鳴き声が一致しなくても減点しない", () => {
-    const c = identify({ ...empty, onomatopoeia: "ゾゾゾゾ" }, species)[0];
-    expect(c.score).toBe(0);
+    const r = identify({ ...empty, onomatopoeia: "ゾゾゾゾ" }, species);
+    // 加わるのは地域での出現しやすさ（最大+1）のみ。減点・矛盾はない
+    expect(r.every((c) => c.score >= 0 && c.score <= 1 && c.conflicting.length === 0)).toBe(true);
   });
 });
 
@@ -68,8 +69,9 @@ describe("時間帯", () => {
     const r = identify({ ...empty, time: "evening" }, species);
     const kite = r.find((c) => c.species.name_ja === "トビ")!;
     expect(kite.conflicting).toContain("時間帯");
-    expect(kite.score).toBeLessThan(0);
-    expect(kite.score).toBeGreaterThan(-1);
+    const atDay = identify({ ...empty, time: "day" }, species).find((c) => c.species.name_ja === "トビ")!;
+    expect(kite.score).toBeLessThan(atDay.score);
+    expect(atDay.score - kite.score).toBeLessThan(2);
     expect(r).toHaveLength(species.length);
   });
   it("朝にアオサギは時間帯が一致する", () => {
@@ -86,6 +88,27 @@ describe("周辺環境", () => {
   });
   it("未入力なら周辺環境は加点も減点もしない", () => {
     expect(identify(empty, species)[0].unknown).toContain("周辺環境");
+  });
+});
+
+describe("地域での出現しやすさ（事前情報）", () => {
+  const sparrow = species.find((s) => s.species_id === "sparrow")!;
+  const rareTwin: Species = { ...sparrow, species_id: "twin", name_ja: "あ", abundance: "rare" };
+  it("入力が同じなら、よく見られる鳥が稀な鳥より上位になる", () => {
+    const r = identify({ ...empty, sizeLevel: 2 }, [rareTwin, sparrow]);
+    expect(r[0].species.species_id).toBe("sparrow");
+  });
+  it("稀な鳥でも減点・除外されない", () => {
+    const r = identify({ ...empty, sizeLevel: 2 }, [rareTwin, sparrow]);
+    expect(r).toHaveLength(2);
+    expect(r[1].score).toBeGreaterThanOrEqual(2);
+  });
+  it("未入力のときは出現しやすさだけで順位をつけない（全種スコア0）", () => {
+    expect(identify(empty, species).every((c) => c.score === 0)).toBe(true);
+  });
+  it("事前情報は入力一致より小さい（一致した稀な鳥が、一致しないよく見る鳥に勝つ）", () => {
+    const r = identify({ ...empty, sizeLevel: 7 }, [sparrow, { ...rareTwin, size_level: 7 }]);
+    expect(r[0].species.species_id).toBe("twin");
   });
 });
 

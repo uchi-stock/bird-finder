@@ -45,7 +45,8 @@
    "urban",
    "woodland",
    "open"
-  ]
+  ],
+  "abundance": "very_common"
  },
  {
   "species_id": "starling",
@@ -91,7 +92,8 @@
    "urban",
    "woodland",
    "open"
-  ]
+  ],
+  "abundance": "very_common"
  },
  {
   "species_id": "brown_eared_bulbul",
@@ -133,7 +135,8 @@
   "habitats": [
    "urban",
    "woodland"
-  ]
+  ],
+  "abundance": "very_common"
  },
  {
   "species_id": "rock_dove",
@@ -175,7 +178,8 @@
   ],
   "habitats": [
    "urban"
-  ]
+  ],
+  "abundance": "very_common"
  },
  {
   "species_id": "oriental_turtle_dove",
@@ -219,7 +223,8 @@
    "urban",
    "woodland",
    "open"
-  ]
+  ],
+  "abundance": "common"
  },
  {
   "species_id": "large_billed_crow",
@@ -262,7 +267,8 @@
   "habitats": [
    "urban",
    "woodland"
-  ]
+  ],
+  "abundance": "very_common"
  },
  {
   "species_id": "carrion_crow",
@@ -305,7 +311,8 @@
    "urban",
    "open",
    "waterside"
-  ]
+  ],
+  "abundance": "very_common"
  },
  {
   "species_id": "great_tit",
@@ -347,7 +354,8 @@
   "habitats": [
    "urban",
    "woodland"
-  ]
+  ],
+  "abundance": "common"
  },
  {
   "species_id": "japanese_white_eye",
@@ -389,7 +397,8 @@
   "habitats": [
    "urban",
    "woodland"
-  ]
+  ],
+  "abundance": "common"
  },
  {
   "species_id": "azure_winged_magpie",
@@ -431,7 +440,8 @@
   "habitats": [
    "urban",
    "woodland"
-  ]
+  ],
+  "abundance": "common"
  },
  {
   "species_id": "barn_swallow",
@@ -472,7 +482,8 @@
   ],
   "habitats": [
    "urban"
-  ]
+  ],
+  "abundance": "common"
  },
  {
   "species_id": "blue_rock_thrush",
@@ -512,7 +523,8 @@
   ],
   "habitats": [
    "urban"
-  ]
+  ],
+  "abundance": "common"
  },
  {
   "species_id": "white_wagtail",
@@ -553,7 +565,8 @@
   "habitats": [
    "waterside",
    "open"
-  ]
+  ],
+  "abundance": "very_common"
  },
  {
   "species_id": "japanese_wagtail",
@@ -594,7 +607,8 @@
   "habitats": [
    "waterside",
    "open"
-  ]
+  ],
+  "abundance": "common"
  },
  {
   "species_id": "grey_wagtail",
@@ -636,7 +650,8 @@
   "habitats": [
    "waterside",
    "open"
-  ]
+  ],
+  "abundance": "uncommon"
  },
  {
   "species_id": "oriental_greenfinch",
@@ -680,7 +695,8 @@
    "urban",
    "woodland",
    "open"
-  ]
+  ],
+  "abundance": "very_common"
  },
  {
   "species_id": "dusky_thrush",
@@ -717,7 +733,8 @@
   "habitats": [
    "open",
    "urban"
-  ]
+  ],
+  "abundance": "common"
  },
  {
   "species_id": "bull_headed_shrike",
@@ -760,7 +777,8 @@
   "habitats": [
    "urban",
    "woodland"
-  ]
+  ],
+  "abundance": "common"
  },
  {
   "species_id": "meadow_bunting",
@@ -803,7 +821,8 @@
   "habitats": [
    "woodland",
    "open"
-  ]
+  ],
+  "abundance": "common"
  },
  {
   "species_id": "black_faced_bunting",
@@ -841,7 +860,8 @@
   ],
   "habitats": [
    "open"
-  ]
+  ],
+  "abundance": "uncommon"
  },
  {
   "species_id": "daurian_redstart",
@@ -883,7 +903,8 @@
    "urban",
    "woodland",
    "open"
-  ]
+  ],
+  "abundance": "common"
  },
  {
   "species_id": "japanese_bush_warbler",
@@ -921,7 +942,8 @@
   "habitats": [
    "woodland",
    "open"
-  ]
+  ],
+  "abundance": "common"
  },
  {
   "species_id": "oriental_reed_warbler",
@@ -956,7 +978,8 @@
   ],
   "habitats": [
    "open"
-  ]
+  ],
+  "abundance": "uncommon"
  },
  {
   "species_id": "spot_billed_duck",
@@ -998,7 +1021,8 @@
   "habitats": [
    "waterside",
    "open"
-  ]
+  ],
+  "abundance": "very_common"
  },
  {
   "species_id": "mallard",
@@ -1035,7 +1059,8 @@
   ],
   "habitats": [
    "waterside"
-  ]
+  ],
+  "abundance": "common"
  },
  {
   "species_id": "eurasian_teal",
@@ -1072,7 +1097,8 @@
   ],
   "habitats": [
    "waterside"
-  ]
+  ],
+  "abundance": "common"
  },
  {
   "species_id": "eurasian_wigeon",
@@ -1111,7 +1137,8 @@
   "habitats": [
    "waterside",
    "open"
-  ]
+  ],
+  "abundance": "uncommon"
  },
  {
   "species_id": "great_cormorant",
@@ -1153,7 +1180,8 @@
   ],
   "habitats": [
    "waterside"
-  ]
+  ],
+  "abundance": "very_common"
  },
  {
   "species_id": "grey_heron",
@@ -1192,7 +1220,8 @@
   ],
   "habitats": [
    "waterside"
-  ]
+  ],
+  "abundance": "common"
  },
  {
   "species_id": "great_egret",
@@ -1228,7 +1257,8 @@
   ],
   "habitats": [
    "waterside"
-  ]
+  ],
+  "abundance": "common"
  },
  {
   "species_id": "little_egret",
@@ -1266,7 +1296,8 @@
   ],
   "habitats": [
    "waterside"
-  ]
+  ],
+  "abundance": "common"
  },
  {
   "species_id": "common_coot",
@@ -1304,7 +1335,8 @@
   ],
   "habitats": [
    "waterside"
-  ]
+  ],
+  "abundance": "common"
  },
  {
   "species_id": "little_grebe",
@@ -1343,7 +1375,8 @@
   ],
   "habitats": [
    "waterside"
-  ]
+  ],
+  "abundance": "common"
  },
  {
   "species_id": "black_headed_gull",
@@ -1381,7 +1414,8 @@
   ],
   "habitats": [
    "waterside"
-  ]
+  ],
+  "abundance": "common"
  },
  {
   "species_id": "common_sandpiper",
@@ -1421,7 +1455,8 @@
   "habitats": [
    "waterside",
    "open"
-  ]
+  ],
+  "abundance": "common"
  },
  {
   "species_id": "common_kingfisher",
@@ -1462,7 +1497,8 @@
   "habitats": [
    "waterside",
    "woodland"
-  ]
+  ],
+  "abundance": "common"
  },
  {
   "species_id": "little_ringed_plover",
@@ -1500,7 +1536,8 @@
   "habitats": [
    "waterside",
    "open"
-  ]
+  ],
+  "abundance": "uncommon"
  },
  {
   "species_id": "black_kite",
@@ -1537,7 +1574,8 @@
    "waterside",
    "urban",
    "woodland"
-  ]
+  ],
+  "abundance": "common"
  },
  {
   "species_id": "osprey",
@@ -1573,7 +1611,8 @@
   ],
   "habitats": [
    "waterside"
-  ]
+  ],
+  "abundance": "uncommon"
  },
  {
   "species_id": "common_kestrel",
@@ -1611,7 +1650,8 @@
   ],
   "habitats": [
    "urban"
-  ]
+  ],
+  "abundance": "uncommon"
  },
  {
   "species_id": "northern_goshawk",
@@ -1649,7 +1689,8 @@
   ],
   "habitats": [
    "woodland"
-  ]
+  ],
+  "abundance": "rare"
  },
  {
   "species_id": "rose_ringed_parakeet",
@@ -1687,7 +1728,8 @@
   "habitats": [
    "urban",
    "woodland"
-  ]
+  ],
+  "abundance": "uncommon"
  },
  {
   "species_id": "chinese_hwamei",
@@ -1726,6 +1768,7 @@
   "habitats": [
    "woodland",
    "open"
-  ]
+  ],
+  "abundance": "uncommon"
  }
 ]
