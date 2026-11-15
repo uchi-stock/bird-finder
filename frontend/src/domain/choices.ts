@@ -1,7 +1,7 @@
 import type { Behavior, Habitat, Place } from "./types";
 
 export const ALL_PLACES: Place[] = ["feeder", "ground", "tree", "wire", "roof", "water", "grass", "sky"];
-export const ALL_BEHAVIORS: Behavior[] = ["swimming", "perching", "flying", "singing", "foraging", "preening"];
+export const ALL_BEHAVIORS: Behavior[] = ["swimming", "wading", "perching", "flying", "singing", "foraging", "preening"];
 
 /** 周辺環境ごとに、現実にあり得る「どこで見たか」 */
 const HABITAT_PLACES: Record<Habitat, Place[]> = {
@@ -21,12 +21,12 @@ export function allowedPlaces(habitats: Habitat[]): Place[] {
 /**
  * 場所・環境から決まる「行動」の選択肢。
  * - 空: 飛ぶ／鳴く のみ（飛ぶは自動選択される）
- * - 泳ぐ・水辺を歩く: 水辺の場所、または水辺の環境（未選択含む）のときだけ
+ * - 泳ぐ・水の中に立つ・歩く: 場所が水辺・水面のとき、または場所が未選択で環境が水辺（未選択含む）のときだけ
  */
 export function allowedBehaviors(place: Place | undefined, habitats: Habitat[]): Behavior[] {
   if (place === "sky") return ["flying", "singing"];
-  const swimOk = place === "water" || (place === undefined ? habitats.length === 0 || habitats.includes("waterside") : habitats.includes("waterside"));
-  return ALL_BEHAVIORS.filter((b) => b !== "swimming" || swimOk);
+  const inWater = place === "water" || (place === undefined && (habitats.length === 0 || habitats.includes("waterside")));
+  return ALL_BEHAVIORS.filter((b) => (b !== "swimming" && b !== "wading") || inWater);
 }
 
 /** 場所から自動で決まる行動（空なら飛ぶ） */

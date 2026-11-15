@@ -98,7 +98,7 @@ export function scoreSpecies(obs: Observation, sp: Species): Candidate {
     // 泳いでいたのに泳がない鳥は明確な矛盾
     if (obs.behaviors.includes("swimming") && !sp.behaviors.includes("swimming")) {
       score -= CONFLICT_PENALTY;
-      conflicting.push("行動（泳ぐ・水辺）");
+      conflicting.push("行動（泳ぐ）");
     }
   }
 

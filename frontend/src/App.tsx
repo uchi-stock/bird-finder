@@ -15,15 +15,25 @@ import type { Behavior, Candidate, Color, Habitat, Observation, Place, Species, 
 
 const SPECIES = speciesJson as Species[];
 
+/** ボタンの絵文字（読み上げ対象外にするため、表示はEmojiコンポーネントを使う） */
+function Emoji({ c }: { c: string }) {
+  return (
+    <span className="emoji" aria-hidden="true">
+      {c}
+    </span>
+  );
+}
+
 const SIZES = [
-  { level: 1, ref: "キクイタダキ", cm: "約10cm" },
-  { level: 2, ref: "スズメ", cm: "約14cm" },
-  { level: 3, ref: "ツバメ", cm: "約17cm" },
-  { level: 4, ref: "ヒヨドリ", cm: "約28cm" },
-  { level: 5, ref: "ハト", cm: "約33cm" },
-  { level: 6, ref: "カラス", cm: "約50cm" },
-  { level: 7, ref: "アオサギ", cm: "約90cm" },
+  { level: 1, ref: "キクイタダキ", cm: "約10cm", emoji: "🐥" },
+  { level: 2, ref: "スズメ", cm: "約14cm", emoji: "🐤" },
+  { level: 3, ref: "ツバメ", cm: "約17cm", emoji: "🐦" },
+  { level: 4, ref: "ヒヨドリ", cm: "約28cm", emoji: "🦜" },
+  { level: 5, ref: "ハト", cm: "約33cm", emoji: "🕊️" },
+  { level: 6, ref: "カラス", cm: "約50cm", emoji: "🦉" },
+  { level: 7, ref: "アオサギ", cm: "約90cm", emoji: "🦢" },
 ];
+const HABITAT_EMOJI: Record<Habitat, string> = { waterside: "🏞️", urban: "🏘️", woodland: "🌳", open: "🌾" };
 const COLORS: { v: Color; label: string; css: string }[] = [
   { v: "brown", label: "茶", css: "#8b5a2b" },
   { v: "black", label: "黒", css: "#222" },
@@ -34,30 +44,31 @@ const COLORS: { v: Color; label: string; css: string }[] = [
   { v: "yellow", label: "黄", css: "#e8c81a" },
   { v: "red", label: "赤・橙", css: "#e0662a" },
 ];
-const BEHAVIORS: { v: Behavior; label: string }[] = [
-  { v: "swimming", label: "泳ぐ・水辺を歩く" },
-  { v: "perching", label: "止まる・立つ" },
-  { v: "flying", label: "飛ぶ・滑空する" },
-  { v: "singing", label: "鳴く・歌う" },
-  { v: "foraging", label: "採食する・つつく" },
-  { v: "preening", label: "羽繕いする" },
+const BEHAVIORS: { v: Behavior; label: string; emoji: string }[] = [
+  { v: "swimming", label: "泳ぐ", emoji: "🦆" },
+  { v: "wading", label: "水の中に立つ・歩く", emoji: "🦩" },
+  { v: "perching", label: "止まる・立つ・歩く", emoji: "🐾" },
+  { v: "flying", label: "飛ぶ・滑空する", emoji: "🦅" },
+  { v: "singing", label: "鳴く・歌う", emoji: "🎵" },
+  { v: "foraging", label: "採食する・つつく", emoji: "🐛" },
+  { v: "preening", label: "羽繕いする", emoji: "✨" },
 ];
-const PLACES: { v: Place; label: string }[] = [
-  { v: "feeder", label: "餌台" },
-  { v: "ground", label: "地面の上" },
-  { v: "tree", label: "木や茂みの中" },
-  { v: "wire", label: "柵や電線の上" },
-  { v: "roof", label: "建物や屋根の上" },
-  { v: "water", label: "水辺・水面" },
-  { v: "grass", label: "草むら・ヨシ原" },
-  { v: "sky", label: "空（飛んでいた）" },
+const PLACES: { v: Place; label: string; emoji: string }[] = [
+  { v: "feeder", label: "餌台", emoji: "🌻" },
+  { v: "ground", label: "地面の上", emoji: "🌱" },
+  { v: "tree", label: "木や茂みの中", emoji: "🌳" },
+  { v: "wire", label: "柵や電線の上", emoji: "⚡" },
+  { v: "roof", label: "建物や屋根の上", emoji: "🏠" },
+  { v: "water", label: "水辺・水面", emoji: "🌊" },
+  { v: "grass", label: "草むら・ヨシ原", emoji: "🌾" },
+  { v: "sky", label: "空（飛んでいた）", emoji: "☁️" },
 ];
 
-const TIMES: { v: TimeSlot; label: string }[] = [
-  { v: "morning", label: "朝（〜9時ごろ）" },
-  { v: "day", label: "日中" },
-  { v: "evening", label: "夕方" },
-  { v: "night", label: "夜" },
+const TIMES: { v: TimeSlot; label: string; emoji: string }[] = [
+  { v: "morning", label: "朝（〜9時ごろ）", emoji: "🌅" },
+  { v: "day", label: "日中", emoji: "☀️" },
+  { v: "evening", label: "夕方", emoji: "🌇" },
+  { v: "night", label: "夜", emoji: "🌙" },
 ];
 
 function toggle<T>(list: T[], v: T): T[] {
@@ -127,6 +138,7 @@ function CatchButton({ speciesId, collection, onCatch }: { speciesId: string; co
   return (
     <div className="catch">
       <button className="catch-btn" onClick={start} disabled={phase === "throw" || phase === "shake"}>
+        <Emoji c="⚾" />
         {phase === "throw" || phase === "shake" ? "…" : owned > 0 ? "もう一度捕まえる" : "捕まえる"}
       </button>
       {(phase === "throw" || phase === "shake") && <span className={`ball ${phase}`} aria-hidden="true" />}
@@ -288,9 +300,11 @@ export function App() {
         </div>
         <nav className="tabs">
           <button className={tab === "search" ? "tab on" : "tab"} onClick={() => setTab("search")}>
+            <Emoji c="🔍" />
             探す
           </button>
           <button className={tab === "dex" ? "tab on" : "tab"} onClick={() => setTab("dex")}>
+            <Emoji c="📖" />
             図鑑 {caughtCount(collection)}/{SPECIES.length}
           </button>
         </nav>
@@ -313,11 +327,12 @@ export function App() {
             <section className="step">
               <h2>周辺の環境（複数可）</h2>
               <button className="chip locate" onClick={() => locate()} disabled={locBusy}>
-                {locBusy ? "判定中…" : "📍 現在地から判定する"}
+                {locBusy ? "判定中…" : <><Emoji c="📍" />現在地から判定する</>}
               </button>
               <div className="chips">
                 {HABITATS.map((h) => (
                   <button key={h.v} className={habitats.includes(h.v) ? "chip on" : "chip"} onClick={() => setHabitats(toggle(habitats, h.v))}>
+                    <Emoji c={HABITAT_EMOJI[h.v]} />
                     {h.label}
                   </button>
                 ))}
@@ -332,6 +347,7 @@ export function App() {
               <div className="chips">
                 {PLACES.filter((p) => allowedPlaces(habitats).includes(p.v)).map((p) => (
                   <button key={p.v} className={place === p.v ? "chip on" : "chip"} onClick={() => selectPlace(place === p.v ? undefined : p.v)}>
+                    <Emoji c={p.emoji} />
                     {p.label}
                   </button>
                 ))}
@@ -344,6 +360,7 @@ export function App() {
               <div className="chips">
                 {BEHAVIORS.filter((b) => allowedBehaviors(place, habitats).includes(b.v)).map((b) => (
                   <button key={b.v} className={behaviors.includes(b.v) ? "chip on" : "chip"} onClick={() => setBehaviors(toggle(behaviors, b.v))}>
+                    <Emoji c={b.emoji} />
                     {b.label}
                   </button>
                 ))}
@@ -367,6 +384,7 @@ export function App() {
                     setVoice("");
                   }}
                 >
+                  <Emoji c="🔇" />
                   鳴き声は聞こえなかった
                 </button>
               </div>
@@ -377,6 +395,7 @@ export function App() {
               <div className="sizes">
                 {SIZES.map((s) => (
                   <button key={s.level} className={sizeLevel === s.level ? "chip on" : "chip"} onClick={() => setSizeLevel(sizeLevel === s.level ? undefined : s.level)}>
+                    <Emoji c={s.emoji} />
                     {s.level}
                   </button>
                 ))}
@@ -403,6 +422,7 @@ export function App() {
               <div className="chips">
                 {TIMES.map((t) => (
                   <button key={t.v} className={time === t.v ? "chip on" : "chip"} onClick={() => setTime(time === t.v ? undefined : t.v)}>
+                    <Emoji c={t.emoji} />
                     {t.label}
                   </button>
                 ))}

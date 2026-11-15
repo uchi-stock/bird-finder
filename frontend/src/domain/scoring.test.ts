@@ -194,6 +194,32 @@ describe("羽の色の2段階（主な色・部分的な色）", () => {
   });
 });
 
+describe("行動の整理（泳ぐ／水の中に立つ・歩く／止まる・立つ・歩く）", () => {
+  const by = (obs: Observation, name: string) => identify(obs, species).find((c) => c.species.name_ja === name)!;
+  it("水の中に立つ・歩くは、サギ類・シギ類が一致する", () => {
+    for (const n of ["アオサギ", "ダイサギ", "コサギ", "イソシギ", "コチドリ"]) {
+      expect(by({ ...empty, behaviors: ["wading"] }, n).matching, n).toContain("行動");
+    }
+  });
+  it("水の中に立つ・歩くは、泳ぐカモ類（カイツブリ）では一致しない", () => {
+    expect(by({ ...empty, behaviors: ["wading"] }, "カイツブリ").matching).not.toContain("行動");
+  });
+  it("セキレイ類は泳がない（泳ぐを選ぶと矛盾）が、止まる・立つ・歩くは一致する", () => {
+    expect(by({ ...empty, behaviors: ["swimming"] }, "ハクセキレイ").conflicting).toContain("行動（泳ぐ）");
+    expect(by({ ...empty, behaviors: ["perching"] }, "ハクセキレイ").matching).toContain("行動");
+  });
+  it("泳ぐは、カモ類・カイツブリ・オオバンが一致する", () => {
+    for (const n of ["カルガモ", "カイツブリ", "オオバン"]) expect(by({ ...empty, behaviors: ["swimming"] }, n).matching, n).toContain("行動");
+  });
+  it("地上を歩く鳥は止まる・立つ・歩くに一致する（ムクドリ・ハト・ツグミ）", () => {
+    for (const n of ["ムクドリ", "ドバト", "ツグミ"]) expect(by({ ...empty, behaviors: ["perching"] }, n).matching, n).toContain("行動");
+  });
+  it("水辺・水の中に立つ・歩く → サギ類が上位3件に入る", () => {
+    const names = pickTop(identify({ ...empty, place: "water", habitats: ["waterside"], behaviors: ["wading"] }, species)).map((c) => c.species.name_ja);
+    expect(names.some((n) => ["アオサギ", "ダイサギ", "コサギ"].includes(n))).toBe(true);
+  });
+});
+
 describe("補助関数", () => {
   it("月→季節", () => {
     expect([1, 4, 7, 11].map(monthToSeason)).toEqual(["winter", "spring", "summer", "autumn"]);

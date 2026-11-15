@@ -1,5 +1,5 @@
 export type Color = "brown" | "black" | "white" | "gray" | "blue" | "green" | "yellow" | "red";
-export type Behavior = "swimming" | "perching" | "flying" | "singing" | "foraging" | "preening";
+export type Behavior = "swimming" | "wading" | "perching" | "flying" | "singing" | "foraging" | "preening";
 export type Place = "feeder" | "ground" | "tree" | "wire" | "roof" | "water" | "grass" | "sky";
 export type TimeSlot = "morning" | "day" | "evening" | "night";
 export type Habitat = "waterside" | "urban" | "woodland" | "open";
