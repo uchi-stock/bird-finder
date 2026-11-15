@@ -1,8 +1,10 @@
 import { useMemo, useState } from "react";
 import speciesJson from "./data/species.json";
 import { hasAnyInput, identify } from "./domain/scoring";
+import { HABITATS } from "./domain/habitat";
+import { detectHabitats } from "./location";
 import { usePhoto } from "./photo";
-import type { Behavior, Candidate, Color, Observation, Place, Species, TimeSlot } from "./domain/types";
+import type { Behavior, Candidate, Color, Habitat, Observation, Place, Species, TimeSlot } from "./domain/types";
 
 const SPECIES = speciesJson as Species[];
 
@@ -95,6 +97,9 @@ export function App() {
   const [place, setPlace] = useState<Place | undefined>();
   const [date, setDate] = useState(todayStr());
   const [useDate, setUseDate] = useState(true);
+  const [habitats, setHabitats] = useState<Habitat[]>([]);
+  const [locMsg, setLocMsg] = useState("");
+  const [locBusy, setLocBusy] = useState(false);
   const [time, setTime] = useState<TimeSlot | undefined>();
   const [voice, setVoice] = useState("");
   const [showAll, setShowAll] = useState(false);
@@ -107,14 +112,29 @@ export function App() {
       place,
       month: useDate && date ? Number(date.split("-")[1]) : undefined,
       time,
+      habitats,
       onomatopoeia: voice,
     }),
-    [sizeLevel, colors, behaviors, place, date, useDate, time, voice],
+    [sizeLevel, colors, behaviors, place, date, useDate, time, habitats, voice],
   );
   const results = useMemo(() => identify(obs, SPECIES), [obs]);
   // 日付だけでは「何か入力した」とみなさない（初期値が入っているため）
   const inputForResults = hasAnyInput({ ...obs, month: undefined });
   const shown = showAll ? results : results.slice(0, 8);
+
+  const locate = async () => {
+    setLocBusy(true);
+    setLocMsg("");
+    try {
+      const found = await detectHabitats();
+      setHabitats(found);
+      setLocMsg(found.length > 0 ? "現在地の周辺から判定しました。違う場合はタップで修正できます。" : "周辺の環境を判定できませんでした。手動で選んでください。");
+    } catch (e) {
+      setLocMsg(e instanceof Error ? e.message : "現在地を取得できませんでした");
+    } finally {
+      setLocBusy(false);
+    }
+  };
 
   const reset = () => {
     setSizeLevel(undefined);
@@ -122,6 +142,8 @@ export function App() {
     setBehaviors([]);
     setPlace(undefined);
     setTime(undefined);
+    setHabitats([]);
+    setLocMsg("");
     setVoice("");
     setShowAll(false);
   };
@@ -193,6 +215,22 @@ export function App() {
             </button>
           ))}
         </div>
+      </section>
+
+      <section>
+        <h2>周辺の環境（複数可）</h2>
+        <button className="chip locate" onClick={locate} disabled={locBusy}>
+          {locBusy ? "判定中…" : "📍 現在地から判定する"}
+        </button>
+        <p className="hint">ボタンを押したときだけ現在地を使います。座標は保存せず、地図情報（OpenStreetMap）への問い合わせにのみ送られます。</p>
+        <div className="chips">
+          {HABITATS.map((h) => (
+            <button key={h.v} className={habitats.includes(h.v) ? "chip on" : "chip"} onClick={() => setHabitats(toggle(habitats, h.v))}>
+              {h.label}
+            </button>
+          ))}
+        </div>
+        {locMsg && <p className="hint">{locMsg}</p>}
       </section>
 
       <section>
