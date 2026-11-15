@@ -93,7 +93,7 @@ describe("App: 候補の表示", () => {
       expect(within(li).queryByText(/鳴き声:/)).toBeNull();
       expect(li.textContent).not.toMatch(/%|％/); // 確率（パーセント）としては表示しない
     }
-    expect(screen.getByText(/確率ではありません/)).toBeInTheDocument();
+    expect(screen.queryByText(/確率ではありません/)).toBeNull(); // 注意文言は「ⓘ」のモーダルへ移した
   });
   it("写真がある鳥は画像だけ（名前は出さない）。写真が無い鳥は、枠に名前を出して見分けられるようにする", async () => {
     usePhoto.mockReturnValue({ thumbnail: "https://u/330px-a.jpg", pageUrl: "https://w/x" });
@@ -317,7 +317,7 @@ describe("App: 鳥をタップで鳴き声を再生", () => {
     fireEvent.click(firstCard());
     expect(stopAudio).toHaveBeenCalled();
     await waitFor(() => expect(screen.queryAllByText(/もう一度タップで停止/)).toHaveLength(0));
-    expect(screen.getByText(/鳥をタップすると鳴き声を再生します/)).toBeInTheDocument();
+    expect(screen.queryByText(/鳥をタップすると鳴き声を再生します/)).toBeNull();
   });
   it("音源が見つからなければ理由を表示し、再生しない", async () => {
     fetchCallAudio.mockResolvedValue(null);
@@ -502,6 +502,19 @@ describe("App: 状況に応じた姿の画像", () => {
     await userEvent.click(chip("どこで見たか", "空"));
     await userEvent.click(screen.getAllByRole("button", { name: /写真を拡大/ })[0]);
     expect(screen.getByRole("link", { name: /撮影: 不明/ })).toBeInTheDocument();
+  });
+});
+
+describe("App: 注意文言のモーダル", () => {
+  it("注意文言は画面に出さず、ⓘを押すとモーダルで見られ、閉じられる", async () => {
+    await renderApp();
+    expect(screen.queryByText(/点数順の目安/)).toBeNull();
+    await userEvent.click(screen.getByRole("button", { name: "使い方と注意" }));
+    const dialog = screen.getByRole("dialog", { name: "使い方と注意" });
+    expect(within(dialog).getByText(/確率ではありません/)).toBeInTheDocument();
+    expect(within(dialog).getByText(/暫定値/)).toBeInTheDocument();
+    await userEvent.click(within(dialog).getByRole("button", { name: "閉じる" }));
+    expect(screen.queryByRole("dialog", { name: "使い方と注意" })).toBeNull();
   });
 });
 

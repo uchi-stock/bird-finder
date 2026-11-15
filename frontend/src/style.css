@@ -191,3 +191,15 @@ footer { font-size:.75rem; opacity:.7; padding:8px 0 24px; }
 .top > div:first-child { flex:1 1 auto; min-width:0; }
 .top .version { white-space:normal; line-height:1.25; font-size:.62rem; }
 .top .tabs { flex:none; }
+
+/* 注意文言のモーダル */
+.help-btn { padding:0 4px; border:none; background:transparent; color:var(--fg); font-size:1.2rem; opacity:.7; flex:none; }
+.help-modal { position:fixed; inset:0; background:rgba(0,0,0,.6); display:flex; align-items:center; justify-content:center; padding:16px; z-index:40; }
+.help-box { background:var(--card); color:var(--fg); border-radius:12px; padding:16px; max-width:420px; width:100%; max-height:80dvh; overflow:auto; }
+.help-box h2 { margin:0 0 8px; font-size:1.05rem; }
+.help-box ul { margin:0 0 12px; padding-left:1.2em; font-size:.9rem; line-height:1.6; }
+.help-close { width:100%; padding:10px; border-radius:10px; border:none; background:var(--acc); color:var(--accfg); font-weight:bold; }
+.top > div { min-width:0; }
+.top h1 { font-size:1rem; line-height:1.25; margin:0; }
+.top h1 { white-space:normal; }
+@media (max-width:400px) { .top h1 { font-size:.8rem; } .top .tab { padding:6px 7px; font-size:12px; } }

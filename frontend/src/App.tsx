@@ -12,6 +12,7 @@ import { addSighting, countWithoutLocation, toMapPoints, type Sighting } from ".
 import ServiceWorkerRegistration from "./components/ServiceWorkerRegistration.jsx";
 import { UpdateNotifier } from "./components/UpdateNotifier";
 import { PrivacySettings } from "./components/PrivacySettings";
+import { HelpNotes } from "./components/HelpNotes";
 import formatBuildTime from "./shared/formatBuildTime.js";
 import { useFlightPhoto, usePhoto } from "./photo";
 import { fetchCallAudio, playAudio, stopAudio, unlockAudio, type CallAudio } from "./callAudio";
@@ -273,7 +274,6 @@ function Dex({ collection }: { collection: Collection }) {
           );
         })}
       </ul>
-      <p className="hint">鳥のデータは一般的な図鑑知識に基づく暫定値で、地域の調査資料での確認は未実施です（試作版）。</p>
       <PrivacySettings />
     </section>
   );
@@ -445,6 +445,7 @@ export function App() {
           </p>
         </div>
         <nav className="tabs">
+          <HelpNotes />
           <button className={tab === "search" ? "tab on" : "tab"} onClick={() => setTab("search")}>
             <Emoji c="🔍" />
             探す
@@ -492,7 +493,6 @@ export function App() {
                 ))}
               </div>
               {locMsg && <p className="hint">{locMsg}</p>}
-              <p className="hint">現在地は、アプリを開いたときとこのボタンを押したときだけ使います。座標は保存せず、地図情報（OpenStreetMap）への問い合わせにのみ送られます。</p>
             </section>
 
             <section className="step">
@@ -600,7 +600,7 @@ export function App() {
               <p className="hint">上のカードを横にスライドして、覚えていることを1つ以上入力すると、近い鳥が表示されます。</p>
             ) : (
               <>
-                {now ? <PlayStatus now={now} /> : <p className="hint">※ 点数順の目安です。確率ではありません。　鳥をタップすると鳴き声を再生します。</p>}
+                {now && <PlayStatus now={now} />}
                 <ol className="results">
                   {results.map((c) => (
                     <li
