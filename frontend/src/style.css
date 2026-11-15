@@ -32,3 +32,25 @@ footer { font-size:.75rem; opacity:.7; padding:8px 0 24px; }
 .lightbox img { max-width:100%; max-height:75vh; border-radius:8px; }
 .lightbox a { color:#fff; font-size:.8rem; }
 .locate { margin-bottom:6px; } .chip:disabled { opacity:.6; }
+.tabs { display:flex; gap:8px; margin:8px 0; position:sticky; top:0; background:var(--bg); padding:6px 0; z-index:5; }
+.tab { flex:1; padding:12px; border-radius:10px; border:1px solid var(--line); background:var(--card); color:var(--fg); font-size:15px; font-weight:bold; }
+.tab.on { background:var(--acc); color:var(--accfg); border-color:var(--acc); }
+.catch { display:flex; align-items:center; gap:10px; margin-top:8px; min-height:44px; position:relative; }
+.catch-btn { padding:10px 16px; border-radius:999px; border:none; background:#e8453c; color:#fff; font-size:15px; font-weight:bold; min-height:44px; }
+.catch-btn:disabled { opacity:.6; }
+.ball { width:28px; height:28px; border-radius:50%; background:linear-gradient(#e8453c 0 46%, #222 46% 54%, #fff 54% 100%); border:2px solid #222; display:inline-block; }
+.ball.throw { animation: toss .6s ease-out; }
+.ball.shake { animation: wobble .5s ease-in-out 3; }
+@keyframes toss { from { transform: translate(-60px, 40px) scale(.4); opacity:.2; } to { transform: translate(0,0) scale(1); opacity:1; } }
+@keyframes wobble { 0%,100% { transform: rotate(0); } 25% { transform: rotate(-25deg); } 75% { transform: rotate(25deg); } }
+.got { font-weight:bold; animation: pop .4s ease-out; }
+.new { color:#e8453c; }
+@keyframes pop { from { transform: scale(.5); opacity:0; } to { transform: scale(1); opacity:1; } }
+.bar { height:10px; border-radius:999px; background:var(--line); overflow:hidden; margin:6px 0 12px; }
+.bar > div { height:100%; background:var(--acc); transition: width .4s; }
+.dex { list-style:none; padding:0; margin:0; display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; }
+.dex li { display:flex; flex-direction:column; align-items:center; gap:2px; font-size:.8rem; text-align:center; }
+.dex li.lock { opacity:.55; }
+.dex .photo { width:100%; height:auto; aspect-ratio:1; }
+.photo.q { font-size:2rem; font-weight:bold; }
+@media (prefers-reduced-motion: reduce) { .ball, .got { animation: none; } }

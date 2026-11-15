@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import speciesJson from "./data/species.json";
 import { hasAnyInput, identify } from "./domain/scoring";
+import { caughtCount, recordCatch, type Collection } from "./domain/collection";
+import { loadCollection, saveCollection } from "./storage";
 import { HABITATS } from "./domain/habitat";
 import { detectHabitats } from "./location";
 import { usePhoto } from "./photo";
@@ -90,6 +92,65 @@ function Photo({ name }: { name: string }) {
   );
 }
 
+type CatchPhase = "idle" | "throw" | "shake" | "done";
+
+function CatchButton({ speciesId, collection, onCatch }: { speciesId: string; collection: Collection; onCatch: (id: string) => { isNew: boolean; count: number } }) {
+  const [phase, setPhase] = useState<CatchPhase>("idle");
+  const [result, setResult] = useState<{ isNew: boolean; count: number } | null>(null);
+  const start = () => {
+    if (phase === "throw" || phase === "shake") return;
+    setResult(null);
+    setPhase("throw");
+    setTimeout(() => setPhase("shake"), 600);
+    setTimeout(() => {
+      setResult(onCatch(speciesId));
+      setPhase("done");
+    }, 1900);
+  };
+  const owned = collection[speciesId]?.count ?? 0;
+  return (
+    <div className="catch">
+      <button className="catch-btn" onClick={start} disabled={phase === "throw" || phase === "shake"}>
+        {phase === "throw" || phase === "shake" ? "…" : owned > 0 ? "もう一度捕まえる" : "捕まえる"}
+      </button>
+      {(phase === "throw" || phase === "shake") && <span className={`ball ${phase}`} aria-hidden="true" />}
+      {phase === "done" && result && (
+        <span className="got">
+          {result.isNew ? <b className="new">NEW! </b> : null}ゲット！{result.isNew ? "" : `（${result.count}回目）`}
+        </span>
+      )}
+    </div>
+  );
+}
+
+function Dex({ collection }: { collection: Collection }) {
+  const total = SPECIES.length;
+  const got = caughtCount(collection);
+  return (
+    <section>
+      <h2>図鑑</h2>
+      <p className="hint">
+        {got} / {total} 種を捕まえた
+      </p>
+      <div className="bar">
+        <div style={{ width: `${(got / total) * 100}%` }} />
+      </div>
+      <ul className="dex">
+        {SPECIES.map((s) => {
+          const c = collection[s.species_id];
+          return (
+            <li key={s.species_id} className={c ? "got" : "lock"}>
+              {c ? <Photo name={s.name_ja} /> : <div className="photo empty q">？</div>}
+              <span>{c ? s.name_ja : "？？？"}</span>
+              {c && <small>{c.count}回</small>}
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+}
+
 export function App() {
   const [sizeLevel, setSizeLevel] = useState<number | undefined>();
   const [colors, setColors] = useState<Color[]>([]);
@@ -97,6 +158,14 @@ export function App() {
   const [place, setPlace] = useState<Place | undefined>();
   const [date, setDate] = useState(todayStr());
   const [useDate, setUseDate] = useState(true);
+  const [tab, setTab] = useState<"search" | "dex">("search");
+  const [collection, setCollection] = useState<Collection>(loadCollection);
+  const onCatch = (id: string) => {
+    const r = recordCatch(collection, id, new Date());
+    setCollection(r.collection);
+    saveCollection(r.collection);
+    return { isNew: r.isNew, count: r.count };
+  };
   const [habitats, setHabitats] = useState<Habitat[]>([]);
   const [locMsg, setLocMsg] = useState("");
   const [locBusy, setLocBusy] = useState(false);
@@ -151,6 +220,15 @@ export function App() {
   return (
     <main className="app">
       <h1>声しか知らない鳥を探す</h1>
+      <nav className="tabs">
+        <button className={tab === "search" ? "tab on" : "tab"} onClick={() => setTab("search")}>
+          探す
+        </button>
+        <button className={tab === "dex" ? "tab on" : "tab"} onClick={() => setTab("dex")}>
+          図鑑 {caughtCount(collection)}/{SPECIES.length}
+        </button>
+      </nav>
+      {tab === "dex" ? <Dex collection={collection} /> : <>
       <p className="lead">覚えていることだけ入力してください。分からない項目は飛ばしてOKです。</p>
 
       <section>
@@ -280,6 +358,7 @@ export function App() {
                     {c.unknown.length > 0 && <span className="un">未入力: {c.unknown.join("・")}</span>}
                   </p>
                   <p className="note">鳴き声の例: {c.species.onomatopoeia.join(" / ")}</p>
+                      <CatchButton speciesId={c.species.species_id} collection={collection} onCatch={onCatch} />
                     </div>
                   </div>
                 </li>
@@ -293,6 +372,8 @@ export function App() {
           </>
         )}
       </section>
+
+      </>}
 
       <footer>
         <p>
