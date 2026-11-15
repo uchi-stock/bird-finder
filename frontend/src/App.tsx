@@ -3,6 +3,7 @@ import speciesJson from "./data/species.json";
 import { hasAnyInput, identify, pickTop } from "./domain/scoring";
 import { caughtCount, recordCatch, type Collection } from "./domain/collection";
 import { loadCollection, saveCollection } from "./storage";
+import { allowedBehaviors, allowedPlaces, impliedBehaviors } from "./domain/choices";
 import { timeSlotFromHour } from "./domain/time";
 import { HABITATS } from "./domain/habitat";
 import { detectHabitats } from "./location";
@@ -46,6 +47,7 @@ const PLACES: { v: Place; label: string }[] = [
   { v: "roof", label: "建物や屋根の上" },
   { v: "water", label: "水辺・水面" },
   { v: "grass", label: "草むら・ヨシ原" },
+  { v: "sky", label: "空（飛んでいた）" },
 ];
 
 const TIMES: { v: TimeSlot; label: string }[] = [
@@ -213,6 +215,21 @@ export function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const selectPlace = (p: Place | undefined) => {
+    setPlace(p);
+    // 場所から決まる行動（空なら飛ぶ）は自動で選ぶ
+    setBehaviors((prev) => Array.from(new Set([...prev, ...impliedBehaviors(p)])));
+  };
+
+  // 環境・場所の変更で不可能になった選択を自動で解除する（同じような質問を繰り返さない）
+  useEffect(() => {
+    if (place !== undefined && !allowedPlaces(habitats).includes(place)) setPlace(undefined);
+  }, [habitats, place]);
+  useEffect(() => {
+    const ok = allowedBehaviors(place, habitats);
+    setBehaviors((prev) => (prev.every((b) => ok.includes(b)) ? prev : prev.filter((b) => ok.includes(b))));
+  }, [habitats, place]);
+
   const reset = () => {
     setSizeLevel(undefined);
     setColors([]);
@@ -235,6 +252,47 @@ export function App() {
       </nav>
       {tab === "dex" ? <Dex collection={collection} /> : <>
       <p className="lead">覚えていることだけ入力してください。分からない項目は飛ばしてOKです。</p>
+
+      <section>
+        <h2>周辺の環境（複数可）</h2>
+        <button className="chip locate" onClick={() => locate()} disabled={locBusy}>
+          {locBusy ? "判定中…" : "📍 現在地から判定する"}
+        </button>
+        <p className="hint">アプリを開いたときと、このボタンを押したときに現在地を使います。座標は保存せず、地図情報（OpenStreetMap）への問い合わせにのみ送られます。</p>
+        <div className="chips">
+          {HABITATS.map((h) => (
+            <button key={h.v} className={habitats.includes(h.v) ? "chip on" : "chip"} onClick={() => setHabitats(toggle(habitats, h.v))}>
+              {h.label}
+            </button>
+          ))}
+        </div>
+        {locMsg && <p className="hint">{locMsg}</p>}
+      </section>
+
+      <section>
+        <h2>どこで見たか</h2>
+        {habitats.length > 0 && <p className="hint">選んだ環境にある場所だけ表示しています。</p>}
+        <div className="chips">
+          {PLACES.filter((p) => allowedPlaces(habitats).includes(p.v)).map((p) => (
+            <button key={p.v} className={place === p.v ? "chip on" : "chip"} onClick={() => selectPlace(place === p.v ? undefined : p.v)}>
+              {p.label}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section>
+        <h2>行動（複数可）</h2>
+        {place === "sky" && <p className="hint">空で見たので「飛ぶ」を自動で選んでいます。</p>}
+        <div className="chips">
+          {BEHAVIORS.filter((b) => allowedBehaviors(place, habitats).includes(b.v)).map((b) => (
+            <button key={b.v} className={behaviors.includes(b.v) ? "chip on" : "chip"} onClick={() => setBehaviors(toggle(behaviors, b.v))}>
+              {b.label}
+            </button>
+          ))}
+        </div>
+      </section>
+
 
       <section>
         <h2>鳴き声（オノマトペ）</h2>
@@ -276,44 +334,6 @@ export function App() {
             </button>
           ))}
         </div>
-      </section>
-
-      <section>
-        <h2>行動（複数可）</h2>
-        <div className="chips">
-          {BEHAVIORS.map((b) => (
-            <button key={b.v} className={behaviors.includes(b.v) ? "chip on" : "chip"} onClick={() => setBehaviors(toggle(behaviors, b.v))}>
-              {b.label}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <section>
-        <h2>どこで見たか</h2>
-        <div className="chips">
-          {PLACES.map((p) => (
-            <button key={p.v} className={place === p.v ? "chip on" : "chip"} onClick={() => setPlace(place === p.v ? undefined : p.v)}>
-              {p.label}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <section>
-        <h2>周辺の環境（複数可）</h2>
-        <button className="chip locate" onClick={() => locate()} disabled={locBusy}>
-          {locBusy ? "判定中…" : "📍 現在地から判定する"}
-        </button>
-        <p className="hint">アプリを開いたときと、このボタンを押したときに現在地を使います。座標は保存せず、地図情報（OpenStreetMap）への問い合わせにのみ送られます。</p>
-        <div className="chips">
-          {HABITATS.map((h) => (
-            <button key={h.v} className={habitats.includes(h.v) ? "chip on" : "chip"} onClick={() => setHabitats(toggle(habitats, h.v))}>
-              {h.label}
-            </button>
-          ))}
-        </div>
-        {locMsg && <p className="hint">{locMsg}</p>}
       </section>
 
       <section>
