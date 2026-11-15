@@ -63,7 +63,7 @@ flowchart LR
   H_open --> P_unseen
 ```
 
-![選択肢の図（rendered）](https://raw.githubusercontent.com/uchi-stock/bird-finder/docs-diagrams/latest/selection-options-1.png)
+![選択肢の図（rendered）](https://raw.githubusercontent.com/uchi-stock/bird-finder/docs-diagrams/latest/selection-options-1.png?5011e99b36a783ae72a5afba1cc14e726e14f8d4)
 
 </details>
 
@@ -130,7 +130,7 @@ flowchart LR
   P_unseen ==>|自動で選ばれる| B_singing
 ```
 
-![選択肢の図（rendered）](https://raw.githubusercontent.com/uchi-stock/bird-finder/docs-diagrams/latest/selection-options-2.png)
+![選択肢の図（rendered）](https://raw.githubusercontent.com/uchi-stock/bird-finder/docs-diagrams/latest/selection-options-2.png?5011e99b36a783ae72a5afba1cc14e726e14f8d4)
 
 </details>
 
@@ -150,7 +150,7 @@ flowchart LR
   S0 --> S1 --> S2 --> S3 --> S4 --> S5 --> S6
 ```
 
-![選択肢の図（rendered）](https://raw.githubusercontent.com/uchi-stock/bird-finder/docs-diagrams/latest/selection-options-3.png)
+![選択肢の図（rendered）](https://raw.githubusercontent.com/uchi-stock/bird-finder/docs-diagrams/latest/selection-options-3.png?5011e99b36a783ae72a5afba1cc14e726e14f8d4)
 
 </details>
 
@@ -172,6 +172,6 @@ flowchart LR
   ALL --> COMMON
 ```
 
-![選択肢の図（rendered）](https://raw.githubusercontent.com/uchi-stock/bird-finder/docs-diagrams/latest/selection-options-4.png)
+![選択肢の図（rendered）](https://raw.githubusercontent.com/uchi-stock/bird-finder/docs-diagrams/latest/selection-options-4.png?5011e99b36a783ae72a5afba1cc14e726e14f8d4)
 
 </details>
