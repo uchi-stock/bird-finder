@@ -33,3 +33,10 @@ export function allowedBehaviors(place: Place | undefined, habitats: Habitat[]):
 export function impliedBehaviors(place: Place | undefined): Behavior[] {
   return place === "sky" ? ["flying"] : [];
 }
+
+/** 場所を変えたときの行動の整理: 前の場所から自動で入った行動は外し、新しい場所から決まる行動を足す */
+export function behaviorsAfterPlaceChange(prev: Place | undefined, next: Place | undefined, behaviors: Behavior[]): Behavior[] {
+  const implied = new Set(impliedBehaviors(prev));
+  const kept = prev === next ? behaviors : behaviors.filter((b) => !implied.has(b));
+  return Array.from(new Set([...kept, ...impliedBehaviors(next)]));
+}

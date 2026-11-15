@@ -3,9 +3,9 @@ import speciesJson from "./data/species.json";
 import { hasAnyInput, identify, pickTop } from "./domain/scoring";
 import { caughtCount, recordCatch, type Collection } from "./domain/collection";
 import { loadCollection, saveCollection } from "./storage";
-import { allowedBehaviors, allowedPlaces, impliedBehaviors } from "./domain/choices";
+import { allowedBehaviors, allowedPlaces, behaviorsAfterPlaceChange } from "./domain/choices";
 import { timeSlotFromHour } from "./domain/time";
-import { HABITATS } from "./domain/habitat";
+import { HABITATS, largeImageUrl } from "./domain/habitat";
 import { detectHabitats } from "./location";
 import ServiceWorkerRegistration from "./components/ServiceWorkerRegistration.jsx";
 import { UpdateNotifier } from "./components/UpdateNotifier";
@@ -80,6 +80,10 @@ function closeness(c: Candidate): string {
 function Photo({ name }: { name: string }) {
   const photo = usePhoto(name);
   const [open, setOpen] = useState(false);
+  const [largeSrc, setLargeSrc] = useState("");
+  useEffect(() => {
+    if (photo) setLargeSrc(largeImageUrl(photo.thumbnail));
+  }, [photo]);
   if (!photo) return <div className="photo empty">写真なし</div>;
   return (
     <>
@@ -88,7 +92,7 @@ function Photo({ name }: { name: string }) {
       </button>
       {open && (
         <div className="lightbox" onClick={() => setOpen(false)}>
-          <img src={photo.thumbnail.replace(/\/\d+px-/, "/800px-")} alt={name} />
+          <img src={largeSrc} alt={name} onError={() => setLargeSrc(photo.thumbnail)} />
           <a href={photo.pageUrl} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>
             出典: Wikipedia「{name}」（画像の著作者・ライセンスはリンク先を参照）
           </a>
@@ -219,9 +223,9 @@ export function App() {
   }, []);
 
   const selectPlace = (p: Place | undefined) => {
+    // 場所から決まる行動（空なら飛ぶ）は自動で選び、場所を変えたら自動で入った行動は外す
+    setBehaviors((prev) => behaviorsAfterPlaceChange(place, p, prev));
     setPlace(p);
-    // 場所から決まる行動（空なら飛ぶ）は自動で選ぶ
-    setBehaviors((prev) => Array.from(new Set([...prev, ...impliedBehaviors(p)])));
   };
 
   // 環境・場所の変更で不可能になった選択を自動で解除する（同じような質問を繰り返さない）

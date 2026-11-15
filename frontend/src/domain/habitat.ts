@@ -46,3 +46,31 @@ nwr${a}["leisure"~"^(park|garden|nature_reserve)$"];
 way${a}["building"];
 );out tags qt 300;`;
 }
+
+/** Nominatim（逆ジオコーディング）の結果から環境を推定する簡易版。Overpassが全滅したときの代替 */
+export interface NominatimResult {
+  category?: string;
+  class?: string;
+  type?: string;
+  address?: Record<string, string>;
+}
+
+export function habitatsFromNominatim(r: NominatimResult): Habitat[] {
+  const cls = r.category ?? r.class ?? "";
+  const type = r.type ?? "";
+  const addr = r.address ?? {};
+  const out = new Set<Habitat>();
+  if (cls === "waterway" || (cls === "natural" && /^(water|wetland|bay)$/.test(type))) out.add("waterside");
+  if (/^(river|riverbank|stream|canal)$/.test(addr.water ?? "") || addr.river || addr.stream) out.add("waterside");
+  if (cls === "natural" && /^(wood|scrub|grassland|heath)$/.test(type)) out.add(type === "wood" ? "woodland" : "open");
+  if (cls === "leisure" && /^(park|garden|nature_reserve)$/.test(type)) out.add("woodland");
+  if (cls === "landuse" && /^(forest)$/.test(type)) out.add("woodland");
+  if (cls === "landuse" && /^(farmland|meadow|grass|orchard)$/.test(type)) out.add("open");
+  if (cls === "building" || cls === "highway" || (cls === "landuse" && /^(residential|commercial|retail|industrial)$/.test(type)) || addr.house_number || addr.neighbourhood || addr.quarter) out.add("urban");
+  return Array.from(out);
+}
+
+/** Wikipediaのサムネイルurlを、許可されている標準サイズ（500px）に差し替える（800px等は400で拒否される） */
+export function largeImageUrl(thumbnail: string, width = 500): string {
+  return thumbnail.replace(/\/\d+px-/, `/${width}px-`);
+}
