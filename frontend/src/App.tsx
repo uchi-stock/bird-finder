@@ -7,6 +7,9 @@ import { allowedBehaviors, allowedPlaces, impliedBehaviors } from "./domain/choi
 import { timeSlotFromHour } from "./domain/time";
 import { HABITATS } from "./domain/habitat";
 import { detectHabitats } from "./location";
+import ServiceWorkerRegistration from "./components/ServiceWorkerRegistration.jsx";
+import { UpdateNotifier } from "./components/UpdateNotifier";
+import formatBuildTime from "./shared/formatBuildTime.js";
 import { usePhoto } from "./photo";
 import type { Behavior, Candidate, Color, Habitat, Observation, Place, Species, TimeSlot } from "./domain/types";
 
@@ -241,7 +244,12 @@ export function App() {
 
   return (
     <main className="app">
+      <ServiceWorkerRegistration swUrl={`${import.meta.env.BASE_URL}sw.js`} />
+      <UpdateNotifier />
       <h1>声しか知らない鳥を探す</h1>
+      <p className="version">
+        v{__APP_VERSION__} ・ 更新: {formatBuildTime(__APP_BUILD_TIME__)}
+      </p>
       <nav className="tabs">
         <button className={tab === "search" ? "tab on" : "tab"} onClick={() => setTab("search")}>
           探す

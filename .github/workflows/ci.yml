@@ -18,5 +18,7 @@ jobs:
     with:
       self_ref: v2.124.0
       packages: '[{"dir":"frontend","build":true,"node_version":"22"}]'
+      # dev-standardsのsymlink共有（sw.js等）の欠落・リンク切れを検知する
+      enable_standards_check: true
     secrets:
       BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
