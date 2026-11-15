@@ -81,14 +81,42 @@ describe("App: 基本表示", () => {
 });
 
 describe("App: 候補の表示", () => {
-  it("大きさを選ぶと最大3件の候補と、一致・未入力の理由を表示する", async () => {
+  it("大きさを選ぶと最大3件の候補を出し、検索結果は画像と近さの段階だけを表示する（詳細・理由は出さない）", async () => {
     await renderApp();
     await userEvent.click(within(section("大きさ")).getByRole("button", { name: "2" }));
     const items = within(screen.getByRole("list")).queryAllByRole("listitem");
     expect(items.length).toBeLessThanOrEqual(3);
     expect(items.length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/一致:/).length).toBeGreaterThan(0);
+    for (const li of items) {
+      expect(li.querySelector(".badge")).toHaveTextContent(/かなり近い|近い|候補のひとつ/);
+      expect(within(li).queryByText(/一致:/)).toBeNull();
+      expect(within(li).queryByText(/鳴き声:/)).toBeNull();
+      expect(li.textContent).not.toMatch(/%|％/); // 確率（パーセント）としては表示しない
+    }
     expect(screen.getByText(/確率ではありません/)).toBeInTheDocument();
+  });
+  it("写真がある鳥は画像だけ（名前は出さない）。写真が無い鳥は、枠に名前を出して見分けられるようにする", async () => {
+    usePhoto.mockReturnValue({ thumbnail: "https://u/330px-a.jpg", pageUrl: "https://w/x" });
+    await renderApp();
+    await userEvent.click(within(section("大きさ")).getByRole("button", { name: "2" }));
+    const withPhoto = within(screen.getByRole("list")).getAllByRole("listitem")[0];
+    expect(withPhoto.querySelector(".photo img")).not.toBeNull();
+    expect(withPhoto.querySelector(".empty-name")).toBeNull();
+    usePhoto.mockReturnValue(null);
+    await userEvent.click(within(section("大きさ")).getByRole("button", { name: "3" })); // 再描画
+    const noPhoto = within(screen.getByRole("list")).getAllByRole("listitem")[0];
+    expect(noPhoto.querySelector(".empty-name")).toHaveTextContent(/.+/);
+  });
+  it("詳細は拡大表示に出る: 名前・近さ・説明・鳴き声・一致／不一致／未入力の理由", async () => {
+    await renderApp();
+    await userEvent.click(within(section("大きさ")).getByRole("button", { name: "2" }));
+    fireEvent.click(firstCard());
+    const box = document.querySelector(".lightbox") as HTMLElement;
+    expect(box.querySelector(".lightbox-name")).toHaveTextContent(/.+/);
+    expect(box.querySelector(".badge")).toHaveTextContent(/かなり近い|近い|候補のひとつ/);
+    expect(within(box).getAllByText(/鳴き声:/).length).toBeGreaterThan(0);
+    expect(within(box).getByText(/一致:/)).toBeInTheDocument();
+    expect(within(box).getByText(/未入力:/)).toBeInTheDocument();
   });
   it("鳴き声が一致する鳥が無ければ、無理に出さず案内する", async () => {
     await renderApp();
@@ -153,7 +181,8 @@ describe("App: 鳴き声が聞こえなかった", () => {
     const input = screen.getByPlaceholderText(/ホーホケキョ/);
     expect(input).toBeDisabled();
     expect(input).toHaveValue("");
-    expect(screen.getAllByText(/鳴き声（聞こえない）/).length).toBeGreaterThan(0);
+    fireEvent.click(firstCard()); // 理由は拡大表示（詳細）に出る
+    expect(within(document.querySelector(".lightbox") as HTMLElement).getAllByText(/鳴き声（聞こえない）/).length).toBeGreaterThan(0);
   });
   it("もう一度押すと解除できる", async () => {
     await renderApp();
@@ -169,7 +198,8 @@ describe("App: 鳴き声が聞こえなかった", () => {
     await userEvent.click(within(section("大きさ")).getByRole("button", { name: "1" }));
     await userEvent.click(screen.getByRole("button", { name: "鳴き声は聞こえなかった" }));
     expect(screen.getByText("アブラコウモリ")).toBeInTheDocument();
-    expect(screen.getByText(/鳥ではなくコウモリ/)).toBeInTheDocument();
+    fireEvent.click(screen.getByText("アブラコウモリ").closest("li") as HTMLElement); // 説明は拡大表示（詳細）に出る
+    expect(within(document.querySelector(".lightbox") as HTMLElement).getByText(/鳥ではなくコウモリ/)).toBeInTheDocument();
   });
 });
 
