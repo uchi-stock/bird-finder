@@ -7,6 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Overpass
+        continue-on-error: true
         run: |
           Q='[out:json][timeout:15];(
           nwr(around:200,35.6400,139.5500)["natural"~"^(water|wetland|wood|grassland|scrub|heath)$"];
@@ -17,11 +18,12 @@ jobs:
           );out tags qt 300;'
           for ep in https://overpass-api.de/api/interpreter https://overpass.kumi.systems/api/interpreter https://overpass.private.coffee/api/interpreter; do
             echo "== $ep"
-            curl -s -m 30 -o /tmp/o.txt -w "status=%{http_code} time=%{time_total}\n" -H "Origin: https://uchi-stock.github.io" -D /tmp/h.txt --data-urlencode "data=$Q" "$ep"
+            curl -s -m 25 -o /tmp/o.txt -w "status=%{http_code} time=%{time_total}\n" -H "Origin: https://uchi-stock.github.io" -D /tmp/h.txt --data-urlencode "data=$Q" "$ep" || true
             grep -i "access-control" /tmp/h.txt || echo "no CORS header"
             head -c 300 /tmp/o.txt; echo
           done
       - name: Wikimedia thumb sizes
+        if: always()
         run: |
           J=$(curl -s "https://ja.wikipedia.org/api/rest_v1/page/summary/%E3%82%B9%E3%82%BA%E3%83%A1")
           T=$(echo "$J" | python3 -c "import sys,json;d=json.load(sys.stdin);print(d['thumbnail']['source']);print(d.get('originalimage',{}).get('source'))")
