@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { MAX_BODY_BYTES, createHandler, sourceId } from "./postSighting";
 
 const NOW = new Date("2026-11-15T10:00:00Z");
-const ENV = { SIGHTINGS_TABLE: "sightings", RATE_TABLE: "rate", ALLOWED_ORIGIN: "https://uchi-stock.github.io", RATE_PEPPER: "pepper", DAILY_LIMIT: "2", TTL_DAYS: "90" };
+const ENV = { SIGHTINGS_TABLE: "sightings", RATE_TABLE: "rate", ALLOWED_ORIGIN: "https://uchi-stock.github.io", RATE_PEPPER: "pepper", DAILY_LIMIT: "2" };
 const good = { speciesId: "sparrow", date: "2026-11-15", lat: 35.6506, lon: 139.5407 };
 const event = (body, ip = "203.0.113.9") => ({ body: typeof body === "string" ? body : JSON.stringify(body), requestContext: { http: { sourceIp: ip } } });
 
@@ -24,7 +24,7 @@ function make({ rateOk = true, failOn = null } = {}) {
 }
 
 describe("POST /sightings", () => {
-  it("正しい投稿を保存する（区画・日付・種・ぼかし済みの位置・90日後のTTLだけ）", async () => {
+  it("正しい投稿を保存する（区画・日付・種・ぼかし済みの位置だけ。期限なく保存する）", async () => {
     const { sent, handler } = make();
     const res = await handler(event(good));
     expect(res.statusCode).toBe(201);
@@ -38,9 +38,8 @@ describe("POST /sightings", () => {
       date: { S: "2026-11-15" },
       lat: { N: "35.6506" },
       lon: { N: "139.5407" },
-      expiresAt: { N: String(Math.floor(NOW.getTime() / 1000) + 90 * 86400) },
     });
-    expect(Object.keys(put.Item).sort()).toEqual(["date", "expiresAt", "lat", "lon", "sk", "speciesId", "tile"]); // IP・端末IDなどは保存しない
+    expect(Object.keys(put.Item).sort()).toEqual(["date", "lat", "lon", "sk", "speciesId", "tile"]); // IP・端末IDなどは保存しない
   });
   it("アクセス元のIPは、そのままでは保存されず、上限の数え上げの鍵はハッシュになる", async () => {
     const { sent, handler } = make();
@@ -83,7 +82,7 @@ describe("POST /sightings", () => {
     expect(res.body).not.toContain("boom");
     vi.restoreAllMocks();
   });
-  it("設定が無い場合の既定値（上限30・90日）で動く", async () => {
+  it("設定が無い場合の既定値（上限30）で動く", async () => {
     const ddb = { send: vi.fn(async () => ({})) };
     const h = createHandler({ ddb, env: { SIGHTINGS_TABLE: "s", RATE_TABLE: "r", ALLOWED_ORIGIN: "o" }, now: () => NOW });
     expect((await h(event(good))).statusCode).toBe(201);

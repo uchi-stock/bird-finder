@@ -4,7 +4,6 @@ frameworkVersion: '4'
 
 custom:
   allowedOrigin: https://uchi-stock.github.io
-  ttlDays: 90
   dailyLimit: 30
 
 provider:
@@ -27,7 +26,6 @@ provider:
     RATE_TABLE: ${self:service}-${sls:stage}-rate
     ALLOWED_ORIGIN: ${self:custom.allowedOrigin}
     DAILY_LIMIT: ${self:custom.dailyLimit}
-    TTL_DAYS: ${self:custom.ttlDays}
     # アクセス元（IP）のハッシュに混ぜる秘密の値。デプロイのたびにCDが新しく作る（コードやログには残さない）
     RATE_PEPPER: ${env:RATE_PEPPER, 'local-dev-pepper'}
   iam:
@@ -62,7 +60,7 @@ functions:
 
 resources:
   Resources:
-    # 見つけた鳥。区画（約5km四方）ごとに、新しい日付から取得する。90日後にDynamoDBのTTLで自動削除する
+    # 見つけた鳥。区画（約5km四方）ごとに、新しい日付から取得する。期限なく保存する（TTLは無効）
     SightingsTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -78,9 +76,10 @@ resources:
             KeyType: HASH
           - AttributeName: sk
             KeyType: RANGE
+        # 以前は90日で自動削除していた。永久保存にしたため、TTLを無効にする（項目を消したときの設定の残りを防ぐ）
         TimeToLiveSpecification:
           AttributeName: expiresAt
-          Enabled: true
+          Enabled: false
     # 投稿回数の上限（アクセス元のハッシュ×日付）。TTLで25時間後に自動削除する
     RateLimitTable:
       Type: AWS::DynamoDB::Table
