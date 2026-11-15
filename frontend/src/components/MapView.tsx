@@ -1,0 +1,110 @@
+import { useEffect, useRef, useState } from "react";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import type { MapPoint } from "../domain/sightings";
+import type { LatLon } from "../domain/privacy";
+
+interface Props {
+  points: MapPoint[];
+  /** 種IDから、表示名と絵文字を引く */
+  speciesLabel: (id: string) => { name: string; emoji: string };
+  /** 位置の無い記録の件数（地図に出せない旨の案内に使う） */
+  withoutLocation: number;
+  /** 現在地を取得する（失敗時はrejectする） */
+  locate: () => Promise<LatLon>;
+}
+
+const DEFAULT_CENTER: [number, number] = [35.65, 139.54]; // 多摩川中流域
+const TILE_URL = "https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png";
+// 出典: 地図は国土地理院、周辺環境の判定はOpenStreetMapのデータを使っているため、あわせて表示する
+const ATTRIBUTION =
+  '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noreferrer">地理院タイル</a> ・ データ: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors';
+
+function popupContent(name: string, p: MapPoint): HTMLElement {
+  const el = document.createElement("div");
+  const strong = document.createElement("strong");
+  strong.textContent = name;
+  const info = document.createElement("div");
+  info.textContent = `${p.date}・${p.count}件（約1kmの範囲）`;
+  el.append(strong, info);
+  return el;
+}
+
+/** 地図に、見つけた鳥をプロットする。位置はぼかし済みの点だけを受け取る（正確な位置は渡さない） */
+export default function MapView({ points, speciesLabel, withoutLocation, locate }: Props) {
+  const elRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<L.Map | null>(null);
+  const layerRef = useRef<L.LayerGroup | null>(null);
+  const meRef = useRef<L.CircleMarker | null>(null);
+  const [msg, setMsg] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (!elRef.current || mapRef.current) return;
+    const map = L.map(elRef.current, { zoomControl: false, attributionControl: true }).setView(DEFAULT_CENTER, 11);
+    map.attributionControl.setPrefix(false);
+    L.tileLayer(TILE_URL, { attribution: ATTRIBUTION, maxZoom: 18 }).addTo(map);
+    layerRef.current = L.layerGroup().addTo(map);
+    mapRef.current = map;
+    return () => {
+      map.remove();
+      mapRef.current = null;
+      layerRef.current = null;
+      meRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    const layer = layerRef.current;
+    if (!map || !layer) return;
+    layer.clearLayers();
+    for (const p of points) {
+      const { name, emoji } = speciesLabel(p.speciesId);
+      const icon = L.divIcon({
+        className: "bird-pin",
+        html: `<span class="pin-emoji">${emoji}</span>${p.count > 1 ? `<b class="pin-count">${p.count}</b>` : ""}`,
+        iconSize: [34, 34],
+        iconAnchor: [17, 17],
+      });
+      L.marker([p.lat, p.lon], { icon, title: name }).bindPopup(popupContent(name, p)).addTo(layer);
+    }
+    if (points.length > 0) map.fitBounds(L.latLngBounds(points.map((p) => [p.lat, p.lon] as [number, number])), { padding: [40, 40], maxZoom: 14 });
+  }, [points, speciesLabel]);
+
+  const goToMe = async () => {
+    setBusy(true);
+    setMsg("");
+    try {
+      const me = await locate();
+      const map = mapRef.current;
+      if (!map) return;
+      meRef.current?.remove();
+      meRef.current = L.circleMarker([me.lat, me.lon], { radius: 8, color: "#1d6fe0", fillColor: "#3b8cff", fillOpacity: 0.9 }).addTo(map);
+      map.setView([me.lat, me.lon], 14);
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : "現在地を取得できませんでした");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="map-wrap">
+      <div className="map-canvas" ref={elRef} data-testid="map-canvas" />
+      <button type="button" className="map-locate" onClick={goToMe} disabled={busy}>
+        <span className="emoji" aria-hidden="true">
+          📍
+        </span>
+        {busy ? "取得中…" : "現在地へ"}
+      </button>
+      {points.length === 0 && (
+        <p className="map-note" role="status">
+          見つけた場所つきの記録がありません。鳥を捕まえると、見つけた場所（約1kmにぼかした位置）がここに出ます。
+        </p>
+      )}
+      {withoutLocation > 0 && <p className="map-note small">位置が取れなかった記録が{withoutLocation}件あります（地図には出ません）。</p>}
+      {msg && <p className="map-note small">{msg}</p>}
+    </div>
+  );
+}

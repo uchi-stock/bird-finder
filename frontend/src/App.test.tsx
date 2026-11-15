@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { App } from "./App";
 
 const detectHabitats = vi.fn();
+const getCoords = vi.fn();
 const usePhoto = vi.fn();
 const fetchCallAudio = vi.fn();
 const playAudio = vi.fn();
@@ -16,7 +17,7 @@ vi.mock("./callAudio", () => ({
   stopAudio: () => stopAudio(),
   unlockAudio: () => unlockAudio(),
 }));
-vi.mock("./location", () => ({ detectHabitats: () => detectHabitats(), getCoords: () => Promise.reject(new Error("未使用")) }));
+vi.mock("./location", () => ({ detectHabitats: () => detectHabitats(), getCoords: () => getCoords() }));
 vi.mock("./photo", () => ({ usePhoto: (n: string) => usePhoto(n), useFlightPhoto: (s: string, e: boolean) => useFlightPhoto(s, e) }));
 
 const section = (title: string) => screen.getByRole("heading", { name: new RegExp(title) }).closest("section") as HTMLElement;
@@ -37,6 +38,7 @@ beforeEach(() => {
   vi.setSystemTime(new Date(2026, 10, 15, 7, 0, 0));
   localStorage.clear();
   detectHabitats.mockReset().mockResolvedValue([]);
+  getCoords.mockReset().mockRejectedValue(new Error("位置なし"));
   usePhoto.mockReset().mockReturnValue(null);
   useFlightPhoto.mockReset().mockReturnValue(null);
   fetchCallAudio.mockReset().mockResolvedValue({ src: "https://u/a.mp3", pageUrl: "https://c/File:a", title: "a.ogg", credit: "録音者A", license: "CC BY 4.0" });
@@ -535,6 +537,57 @@ describe("App: 捕まえる・図鑑", () => {
     await renderApp();
     await userEvent.click(screen.getByRole("button", { name: /図鑑/ }));
     expect(screen.getByRole("heading", { name: /自宅の登録（共有から除外）/ })).toBeInTheDocument();
+  });
+  it("捕まえたとき現在地が取れれば、見つけた場所つきで記録され、地図タブにピンが出る（位置はぼかされる）", async () => {
+    getCoords.mockResolvedValue({ lat: 35.6506, lon: 139.5407 });
+    vi.useRealTimers();
+    vi.useFakeTimers({ shouldAdvanceTime: true, now: new Date(2026, 10, 15, 7, 0, 0) });
+    try {
+      await renderApp();
+      fireEvent.change(screen.getByPlaceholderText(/ホーホケキョ/), { target: { value: "ホーホケキョ" } });
+      await openDetail();
+      fireEvent.click(within(detail()).getByRole("button", { name: "捕まえる" }));
+      await act(async () => {
+        vi.advanceTimersByTime(2000);
+      });
+      const saved = JSON.parse(localStorage.getItem("bird-finder:sightings:v1") ?? "[]");
+      expect(saved).toHaveLength(1);
+      expect(saved[0]).toMatchObject({ speciesId: "japanese_bush_warbler", date: "2026-11-15", lat: 35.6506, lon: 139.5407 });
+      fireEvent.click(detail());
+      fireEvent.click(screen.getByRole("button", { name: /地図/ }));
+      expect(await screen.findByTestId("map-canvas")).toBeInTheDocument();
+      await waitFor(() => expect(document.querySelectorAll(".bird-pin")).toHaveLength(1));
+      expect(document.body.textContent).not.toContain("35.6506"); // 正確な位置は地図に出さない
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+  it("現在地が取れなかった捕獲は位置なしで記録され、地図に出せない旨を案内する", async () => {
+    vi.useRealTimers();
+    vi.useFakeTimers({ shouldAdvanceTime: true, now: new Date(2026, 10, 15, 7, 0, 0) });
+    try {
+      await renderApp();
+      fireEvent.change(screen.getByPlaceholderText(/ホーホケキョ/), { target: { value: "ホーホケキョ" } });
+      await openDetail();
+      fireEvent.click(within(detail()).getByRole("button", { name: "捕まえる" }));
+      await act(async () => {
+        vi.advanceTimersByTime(2000);
+      });
+      fireEvent.click(detail());
+      fireEvent.click(screen.getByRole("button", { name: /地図/ }));
+      expect(await screen.findByText(/位置が取れなかった記録が1件あります/)).toBeInTheDocument();
+      expect(document.querySelectorAll(".bird-pin")).toHaveLength(0);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+  it("地図タブには出典と、記録が無いときの案内が出る。探すタブへ戻れる", async () => {
+    await renderApp();
+    await userEvent.click(screen.getByRole("button", { name: /地図/ }));
+    expect(await screen.findByText(/見つけた場所つきの記録がありません/)).toBeInTheDocument();
+    expect(document.querySelector(".leaflet-control-attribution")).toHaveTextContent("OpenStreetMap");
+    await userEvent.click(screen.getByRole("button", { name: "探す" }));
+    expect(screen.getByPlaceholderText(/ホーホケキョ/)).toBeInTheDocument();
   });
   it("探すタブへ戻れる", async () => {
     await renderApp();

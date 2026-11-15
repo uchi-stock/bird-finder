@@ -1,5 +1,6 @@
 import type { Collection } from "./domain/collection";
 import type { LatLon } from "./domain/privacy";
+import type { Sighting } from "./domain/sightings";
 
 const KEY = "bird-finder:collection:v1";
 
@@ -72,5 +73,26 @@ export function clearHome(): void {
     localStorage.removeItem(HOME_KEY);
   } catch {
     /* 消せなくても動作に影響しない */
+  }
+}
+
+// ---- 捕まえた記録（見つけた場所つき）。正確な位置は端末内にだけ残す ----
+
+const SIGHTINGS_KEY = "bird-finder:sightings:v1";
+
+export function loadSightings(): Sighting[] {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(SIGHTINGS_KEY) ?? "[]");
+    return Array.isArray(parsed) ? (parsed as Sighting[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveSightings(list: Sighting[]): void {
+  try {
+    localStorage.setItem(SIGHTINGS_KEY, JSON.stringify(list));
+  } catch {
+    /* 保存できなくても動作に影響しない */
   }
 }

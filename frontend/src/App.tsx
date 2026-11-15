@@ -1,12 +1,13 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import speciesJson from "./data/species.json";
 import { hasAnyInput, identify, pickTop } from "./domain/scoring";
 import { caughtCount, recordCatch, type Collection } from "./domain/collection";
-import { loadCollection, saveCollection } from "./storage";
+import { getPrivacySecret, loadCollection, loadSightings, saveCollection, saveSightings } from "./storage";
 import { allowedBehaviors, allowedPlaces, behaviorsAfterPlaceChange } from "./domain/choices";
 import { timeSlotFromHour } from "./domain/time";
 import { HABITATS, largeImageUrl } from "./domain/habitat";
-import { detectHabitats } from "./location";
+import { detectHabitats, getCoords } from "./location";
+import { addSighting, countWithoutLocation, toMapPoints, type Sighting } from "./domain/sightings";
 import ServiceWorkerRegistration from "./components/ServiceWorkerRegistration.jsx";
 import { UpdateNotifier } from "./components/UpdateNotifier";
 import { PrivacySettings } from "./components/PrivacySettings";
@@ -16,6 +17,14 @@ import { fetchCallAudio, playAudio, stopAudio, unlockAudio, type CallAudio } fro
 import type { Behavior, Candidate, Color, Habitat, Observation, Place, Species, TimeSlot } from "./domain/types";
 
 const SPECIES = speciesJson as Species[];
+// 地図は大きいので、地図タブを開いたときに読み込む
+const MapView = lazy(() => import("./components/MapView"));
+
+/** 地図のピンに使う、種IDから表示名・絵文字を引く（コウモリ以外は鳥） */
+function speciesLabel(id: string): { name: string; emoji: string } {
+  const sp = SPECIES.find((s) => s.species_id === id);
+  return { name: sp?.name_ja ?? id, emoji: id === "pipistrelle_bat" ? "🦇" : "🐦" };
+}
 
 /** ボタンの絵文字（読み上げ対象外にするため、表示はEmojiコンポーネントを使う） */
 function Emoji({ c }: { c: string }) {
@@ -249,14 +258,32 @@ export function App() {
   const [place, setPlace] = useState<Place | undefined>();
   const [date, setDate] = useState(todayStr());
   const [useDate, setUseDate] = useState(true);
-  const [tab, setTab] = useState<"search" | "dex">("search");
+  const [tab, setTab] = useState<"search" | "dex" | "map">("search");
+  const [sightings, setSightings] = useState<Sighting[]>(loadSightings);
   const [collection, setCollection] = useState<Collection>(loadCollection);
   const onCatch = (id: string) => {
     const r = recordCatch(collection, id, new Date());
     setCollection(r.collection);
     saveCollection(r.collection);
+    void recordSighting(id);
     return { isNew: r.isNew, count: r.count };
   };
+  // 捕まえた場所（現在地）と日付を、端末内の記録に追加する。位置が取れなければ位置なしで記録する
+  const recordSighting = async (id: string) => {
+    let pos = null;
+    try {
+      pos = await getCoords();
+    } catch {
+      /* 位置なしで記録する */
+    }
+    setSightings((prev) => {
+      const next = addSighting(prev, id, todayStr(), pos, new Date());
+      saveSightings(next);
+      return next;
+    });
+  };
+  // 地図に出す点。位置は必ずぼかしを通す（正確な位置は地図に渡さない）
+  const mapPoints = useMemo(() => toMapPoints(sightings, getPrivacySecret()), [sightings]);
   const [habitats, setHabitats] = useState<Habitat[]>([]);
   const [locMsg, setLocMsg] = useState("");
   const [locBusy, setLocBusy] = useState(false);
@@ -380,7 +407,7 @@ export function App() {
   };
 
   return (
-    <main className={tab === "search" ? "app fit" : "app"}>
+    <main className={tab === "dex" ? "app" : "app fit"}>
       <ServiceWorkerRegistration swUrl={`${import.meta.env.BASE_URL}sw.js`} />
       <UpdateNotifier />
       <header className="top">
@@ -399,10 +426,18 @@ export function App() {
             <Emoji c="📖" />
             図鑑 {caughtCount(collection)}/{SPECIES.length}
           </button>
+          <button className={tab === "map" ? "tab on" : "tab"} onClick={() => setTab("map")}>
+            <Emoji c="🗺️" />
+            地図
+          </button>
         </nav>
       </header>
       {tab === "dex" ? (
         <Dex collection={collection} />
+      ) : tab === "map" ? (
+        <Suspense fallback={<p className="hint">地図を読み込み中…</p>}>
+          <MapView points={mapPoints} speciesLabel={speciesLabel} withoutLocation={countWithoutLocation(sightings)} locate={getCoords} />
+        </Suspense>
       ) : (
         <>
           <div className="step-nav">

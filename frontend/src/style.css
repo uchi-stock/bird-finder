@@ -143,3 +143,18 @@ footer { font-size:.75rem; opacity:.7; padding:8px 0 24px; }
 .lightbox a { text-align:center; }
 .privacy { margin-top:16px; border-top:1px solid var(--line); padding-top:8px; }
 .privacy h2 { font-size:.95rem; }
+
+/* 3つのタブ（探す・図鑑・地図）を、ヘッダーに収める */
+.top h1 { font-size:.85rem; }
+.top .tab { padding:6px 8px; font-size:12px; }
+.top .tab .emoji { margin-right:2px; }
+/* 地図 */
+.map-wrap { flex:1; min-height:0; position:relative; margin-top:6px; border-radius:12px; overflow:hidden; border:1px solid var(--line); }
+.map-canvas { position:absolute; inset:0; background:#e9efe6; }
+.map-locate { position:absolute; right:10px; top:10px; z-index:500; padding:8px 12px; min-height:40px; border-radius:999px; border:1px solid var(--line); background:var(--card); color:var(--fg); font-size:14px; font-weight:bold; }
+.map-note { position:absolute; left:10px; right:10px; bottom:34px; z-index:500; margin:0; padding:8px 10px; border-radius:8px; background:var(--card); color:var(--fg); font-size:.85rem; border:1px solid var(--line); }
+.map-note.small { bottom:auto; top:58px; right:auto; max-width:70%; font-size:.75rem; }
+.bird-pin { background:none; border:none; }
+.bird-pin .pin-emoji { display:flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:50%; background:#fff; border:2px solid var(--acc); font-size:18px; box-shadow:0 1px 4px rgba(0,0,0,.35); }
+.bird-pin .pin-count { position:absolute; right:-4px; top:-4px; min-width:18px; height:18px; padding:0 4px; border-radius:9px; background:#e8453c; color:#fff; font-size:11px; line-height:18px; text-align:center; }
+.leaflet-container { font:inherit; }

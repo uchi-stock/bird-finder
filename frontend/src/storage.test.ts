@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { clearHome, getPrivacySecret, loadCollection, loadHome, saveCollection, saveHome } from "./storage";
+import { clearHome, getPrivacySecret, loadCollection, loadHome, loadSightings, saveCollection, saveHome, saveSightings } from "./storage";
 
 beforeEach(() => {
   localStorage.clear();
@@ -70,5 +70,30 @@ describe("プライバシーの保存（秘密の値・自宅）", () => {
     });
     expect(saveHome({ lat: 1, lon: 2 })).toBe(false);
     expect(() => clearHome()).not.toThrow();
+  });
+});
+
+describe("捕まえた記録（見つけた場所つき）の保存", () => {
+  const s = [{ id: "a", speciesId: "sparrow", date: "2026-11-15", lat: 35.6, lon: 139.5 }];
+  it("保存した記録を読み戻せる。未保存なら空", () => {
+    expect(loadSightings()).toEqual([]);
+    saveSightings(s);
+    expect(loadSightings()).toEqual(s);
+  });
+  it("壊れたデータ・配列でないデータは空として扱う", () => {
+    localStorage.setItem("bird-finder:sightings:v1", "{broken");
+    expect(loadSightings()).toEqual([]);
+    localStorage.setItem("bird-finder:sightings:v1", JSON.stringify({ a: 1 }));
+    expect(loadSightings()).toEqual([]);
+  });
+  it("localStorageが使えなくても例外にならない", () => {
+    vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
+      throw new Error("blocked");
+    });
+    vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new Error("blocked");
+    });
+    expect(loadSightings()).toEqual([]);
+    expect(() => saveSightings(s)).not.toThrow();
   });
 });
