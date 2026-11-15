@@ -50,7 +50,8 @@
    "black",
    "white",
    "gray"
-  ]
+  ],
+  "scientific_name": "Passer montanus"
  },
  {
   "species_id": "starling",
@@ -101,7 +102,8 @@
    "gray",
    "white",
    "red"
-  ]
+  ],
+  "scientific_name": "Spodiopsar cineraceus"
  },
  {
   "species_id": "brown_eared_bulbul",
@@ -149,7 +151,8 @@
   "colors_minor": [
    "brown",
    "white"
-  ]
+  ],
+  "scientific_name": "Hypsipetes amaurotis"
  },
  {
   "species_id": "rock_dove",
@@ -196,7 +199,8 @@
   "colors_minor": [
    "white",
    "black"
-  ]
+  ],
+  "scientific_name": "Columba livia"
  },
  {
   "species_id": "oriental_turtle_dove",
@@ -244,7 +248,8 @@
   "silent": false,
   "colors_minor": [
    "black"
-  ]
+  ],
+  "scientific_name": "Streptopelia orientalis"
  },
  {
   "species_id": "large_billed_crow",
@@ -291,7 +296,8 @@
   ],
   "abundance": "very_common",
   "silent": false,
-  "colors_minor": []
+  "colors_minor": [],
+  "scientific_name": "Corvus macrorhynchos"
  },
  {
   "species_id": "carrion_crow",
@@ -338,7 +344,8 @@
   ],
   "abundance": "very_common",
   "silent": false,
-  "colors_minor": []
+  "colors_minor": [],
+  "scientific_name": "Corvus corone"
  },
  {
   "species_id": "great_tit",
@@ -384,7 +391,8 @@
   "colors_minor": [
    "black",
    "green"
-  ]
+  ],
+  "scientific_name": "Parus minor"
  },
  {
   "species_id": "japanese_white_eye",
@@ -430,7 +438,8 @@
   "colors_minor": [
    "white",
    "yellow"
-  ]
+  ],
+  "scientific_name": "Zosterops japonicus"
  },
  {
   "species_id": "azure_winged_magpie",
@@ -477,7 +486,8 @@
   "colors_minor": [
    "black",
    "white"
-  ]
+  ],
+  "scientific_name": "Cyanopica cyanus"
  },
  {
   "species_id": "barn_swallow",
@@ -523,7 +533,8 @@
   "colors_minor": [
    "white",
    "red"
-  ]
+  ],
+  "scientific_name": "Hirundo rustica"
  },
  {
   "species_id": "blue_rock_thrush",
@@ -567,7 +578,8 @@
   "colors_minor": [
    "red",
    "brown"
-  ]
+  ],
+  "scientific_name": "Monticola solitarius"
  },
  {
   "species_id": "white_wagtail",
@@ -612,7 +624,8 @@
   "silent": false,
   "colors_minor": [
    "gray"
-  ]
+  ],
+  "scientific_name": "Motacilla alba"
  },
  {
   "species_id": "japanese_wagtail",
@@ -657,7 +670,8 @@
   "silent": false,
   "colors_minor": [
    "gray"
-  ]
+  ],
+  "scientific_name": "Motacilla grandis"
  },
  {
   "species_id": "grey_wagtail",
@@ -703,7 +717,8 @@
   "colors_minor": [
    "black",
    "white"
-  ]
+  ],
+  "scientific_name": "Motacilla cinerea"
  },
  {
   "species_id": "oriental_greenfinch",
@@ -751,7 +766,8 @@
   "colors_minor": [
    "yellow",
    "green"
-  ]
+  ],
+  "scientific_name": "Chloris sinica"
  },
  {
   "species_id": "dusky_thrush",
@@ -792,7 +808,8 @@
   "colors_minor": [
    "white",
    "red"
-  ]
+  ],
+  "scientific_name": "Turdus eunomus"
  },
  {
   "species_id": "bull_headed_shrike",
@@ -839,7 +856,8 @@
    "black",
    "white",
    "red"
-  ]
+  ],
+  "scientific_name": "Lanius bucephalus"
  },
  {
   "species_id": "meadow_bunting",
@@ -886,7 +904,8 @@
    "white",
    "black",
    "gray"
-  ]
+  ],
+  "scientific_name": "Emberiza cioides"
  },
  {
   "species_id": "black_faced_bunting",
@@ -928,7 +947,8 @@
   "colors_minor": [
    "brown",
    "gray"
-  ]
+  ],
+  "scientific_name": "Emberiza spodocephala"
  },
  {
   "species_id": "daurian_redstart",
@@ -974,7 +994,8 @@
   "colors_minor": [
    "black",
    "white"
-  ]
+  ],
+  "scientific_name": "Phoenicurus auroreus"
  },
  {
   "species_id": "japanese_bush_warbler",
@@ -1016,7 +1037,8 @@
   "silent": false,
   "colors_minor": [
    "gray"
-  ]
+  ],
+  "scientific_name": "Horornis diphone"
  },
  {
   "species_id": "oriental_reed_warbler",
@@ -1055,7 +1077,8 @@
   "silent": false,
   "colors_minor": [
    "white"
-  ]
+  ],
+  "scientific_name": "Acrocephalus orientalis"
  },
  {
   "species_id": "spot_billed_duck",
@@ -1101,7 +1124,8 @@
    "black",
    "white",
    "yellow"
-  ]
+  ],
+  "scientific_name": "Anas zonorhyncha"
  },
  {
   "species_id": "mallard",
@@ -1142,7 +1166,8 @@
   "silent": false,
   "colors_minor": [
    "white"
-  ]
+  ],
+  "scientific_name": "Anas platyrhynchos"
  },
  {
   "species_id": "eurasian_teal",
@@ -1183,7 +1208,8 @@
   "colors_minor": [
    "green",
    "white"
-  ]
+  ],
+  "scientific_name": "Anas crecca"
  },
  {
   "species_id": "eurasian_wigeon",
@@ -1226,7 +1252,8 @@
   "colors_minor": [
    "white",
    "black"
-  ]
+  ],
+  "scientific_name": "Mareca penelope"
  },
  {
   "species_id": "great_cormorant",
@@ -1273,7 +1300,8 @@
   "silent": true,
   "colors_minor": [
    "white"
-  ]
+  ],
+  "scientific_name": "Phalacrocorax carbo"
  },
  {
   "species_id": "grey_heron",
@@ -1317,7 +1345,8 @@
   "colors_minor": [
    "white",
    "black"
-  ]
+  ],
+  "scientific_name": "Ardea cinerea"
  },
  {
   "species_id": "great_egret",
@@ -1357,7 +1386,8 @@
   ],
   "abundance": "common",
   "silent": true,
-  "colors_minor": []
+  "colors_minor": [],
+  "scientific_name": "Ardea alba"
  },
  {
   "species_id": "little_egret",
@@ -1399,7 +1429,8 @@
   "colors_minor": [
    "black",
    "yellow"
-  ]
+  ],
+  "scientific_name": "Egretta garzetta"
  },
  {
   "species_id": "common_coot",
@@ -1441,7 +1472,8 @@
   "silent": false,
   "colors_minor": [
    "white"
-  ]
+  ],
+  "scientific_name": "Fulica atra"
  },
  {
   "species_id": "little_grebe",
@@ -1484,7 +1516,8 @@
    "gray",
    "black",
    "white"
-  ]
+  ],
+  "scientific_name": "Tachybaptus ruficollis"
  },
  {
   "species_id": "black_headed_gull",
@@ -1527,7 +1560,8 @@
    "gray",
    "black",
    "red"
-  ]
+  ],
+  "scientific_name": "Chroicocephalus ridibundus"
  },
  {
   "species_id": "common_sandpiper",
@@ -1571,7 +1605,8 @@
   "colors_minor": [
    "white",
    "gray"
-  ]
+  ],
+  "scientific_name": "Actitis hypoleucos"
  },
  {
   "species_id": "common_kingfisher",
@@ -1617,7 +1652,8 @@
   "colors_minor": [
    "red",
    "white"
-  ]
+  ],
+  "scientific_name": "Alcedo atthis"
  },
  {
   "species_id": "little_ringed_plover",
@@ -1659,7 +1695,8 @@
   "colors_minor": [
    "white",
    "black"
-  ]
+  ],
+  "scientific_name": "Charadrius dubius"
  },
  {
   "species_id": "black_kite",
@@ -1700,7 +1737,8 @@
   ],
   "abundance": "common",
   "silent": false,
-  "colors_minor": []
+  "colors_minor": [],
+  "scientific_name": "Milvus migrans"
  },
  {
   "species_id": "osprey",
@@ -1740,7 +1778,8 @@
   ],
   "abundance": "uncommon",
   "silent": false,
-  "colors_minor": []
+  "colors_minor": [],
+  "scientific_name": "Pandion haliaetus"
  },
  {
   "species_id": "common_kestrel",
@@ -1783,7 +1822,8 @@
    "gray",
    "black",
    "white"
-  ]
+  ],
+  "scientific_name": "Falco tinnunculus"
  },
  {
   "species_id": "northern_goshawk",
@@ -1826,7 +1866,8 @@
   "colors_minor": [
    "white",
    "brown"
-  ]
+  ],
+  "scientific_name": "Accipiter gentilis"
  },
  {
   "species_id": "rose_ringed_parakeet",
@@ -1869,7 +1910,8 @@
   "silent": false,
   "colors_minor": [
    "red"
-  ]
+  ],
+  "scientific_name": "Psittacula krameri"
  },
  {
   "species_id": "chinese_hwamei",
@@ -1912,7 +1954,8 @@
   "silent": false,
   "colors_minor": [
    "white"
-  ]
+  ],
+  "scientific_name": "Garrulax canorus"
  },
  {
   "species_id": "pipistrelle_bat",
@@ -1952,6 +1995,7 @@
   "colors_minor": [
    "black",
    "gray"
-  ]
+  ],
+  "scientific_name": "Pipistrellus abramus"
  }
 ]
