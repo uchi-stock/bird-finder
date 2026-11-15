@@ -1,0 +1,62 @@
+name: Deploy backend (AWS)
+
+# 共有バックエンド（みんなが見つけた鳥のAPI）を、AWSへデプロイする。backend/配下を変更したときだけ動く
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "backend/**"
+      - ".github/workflows/cd-backend.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      ORIGIN: https://uchi-stock.github.io
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: true
+
+      # アクセス元（IP）のハッシュに混ぜる秘密の値。デプロイのたびに新しく作り、ログ・コードに残さない
+      - name: 秘密の値を作る
+        run: |
+          pepper=$(openssl rand -hex 32)
+          echo "::add-mask::$pepper"
+          echo "RATE_PEPPER=$pepper" >> "$GITHUB_ENV"
+
+      - name: デプロイする
+        uses: bamiyanapp/dev-standards/.github/actions/deploy-serverless@v2.124.0
+        with:
+          working-directory: backend
+          deploy-command: npx osls deploy --stage prod
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: APIのURLを調べる
+        id: url
+        uses: bamiyanapp/dev-standards/.github/actions/resolve-serverless-backend-url@v2.124.0
+        with:
+          stage: prod
+          working-directory: backend
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      # デプロイ後に、実際のAPIへ動作確認をする（失敗したらこのジョブが失敗する）
+      - name: 動作確認（実際のAPI）
+        env:
+          URL: ${{ steps.url.outputs.backend-url }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ap-northeast-1
+        run: bash backend/scripts/smoke.sh

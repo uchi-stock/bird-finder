@@ -1,0 +1,98 @@
+# みんなが見つけた鳥の投稿・取得API（ログインなし）。API Gateway（HTTP API）+ Lambda + DynamoDB
+service: bird-finder-api
+frameworkVersion: '4'
+
+custom:
+  allowedOrigin: https://uchi-stock.github.io
+  ttlDays: 90
+  dailyLimit: 30
+
+provider:
+  name: aws
+  runtime: nodejs22.x
+  region: ap-northeast-1
+  stage: ${opt:stage, 'prod'}
+  memorySize: 128
+  timeout: 10
+  logRetentionInDays: 14
+  httpApi:
+    cors:
+      allowedOrigins:
+        - ${self:custom.allowedOrigin}
+      allowedMethods: [GET, POST, OPTIONS]
+      allowedHeaders: [Content-Type]
+      maxAge: 3600
+  environment:
+    SIGHTINGS_TABLE: ${self:service}-${sls:stage}-sightings
+    RATE_TABLE: ${self:service}-${sls:stage}-rate
+    ALLOWED_ORIGIN: ${self:custom.allowedOrigin}
+    DAILY_LIMIT: ${self:custom.dailyLimit}
+    TTL_DAYS: ${self:custom.ttlDays}
+    # アクセス元（IP）のハッシュに混ぜる秘密の値。デプロイのたびにCDが新しく作る（コードやログには残さない）
+    RATE_PEPPER: ${env:RATE_PEPPER, 'local-dev-pepper'}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action: [dynamodb:PutItem, dynamodb:Query]
+          Resource: !GetAtt SightingsTable.Arn
+        - Effect: Allow
+          Action: [dynamodb:UpdateItem]
+          Resource: !GetAtt RateLimitTable.Arn
+
+package:
+  patterns:
+    - '!**'
+    - 'src/**'
+    - '!src/**/*.test.js'
+
+functions:
+  postSighting:
+    handler: src/handlers/postSighting.handler
+    events:
+      - httpApi:
+          method: POST
+          path: /sightings
+  getSightings:
+    handler: src/handlers/getSightings.handler
+    events:
+      - httpApi:
+          method: GET
+          path: /sightings
+
+resources:
+  Resources:
+    # 見つけた鳥。区画（約5km四方）ごとに、新しい日付から取得する。90日後にDynamoDBのTTLで自動削除する
+    SightingsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.SIGHTINGS_TABLE}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: tile
+            AttributeType: S
+          - AttributeName: sk
+            AttributeType: S
+        KeySchema:
+          - AttributeName: tile
+            KeyType: HASH
+          - AttributeName: sk
+            KeyType: RANGE
+        TimeToLiveSpecification:
+          AttributeName: expiresAt
+          Enabled: true
+    # 投稿回数の上限（アクセス元のハッシュ×日付）。TTLで25時間後に自動削除する
+    RateLimitTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.RATE_TABLE}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: idDate
+            AttributeType: S
+        KeySchema:
+          - AttributeName: idDate
+            KeyType: HASH
+        TimeToLiveSpecification:
+          AttributeName: expiresAt
+          Enabled: true

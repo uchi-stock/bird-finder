@@ -34,3 +34,5 @@ commit_msg*.txt
 
 # product specific
 *.tsbuildinfo
+.serverless/
+backend/coverage/
