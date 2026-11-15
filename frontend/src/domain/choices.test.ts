@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { allowedBehaviors, allowedPlaces, impliedBehaviors } from "./choices";
+import { allowedBehaviors, allowedPlaces, behaviorsAfterPlaceChange, impliedBehaviors } from "./choices";
 
 describe("allowedPlaces", () => {
   it("環境未選択なら全ての場所", () => {
@@ -47,5 +47,23 @@ describe("impliedBehaviors", () => {
   it("空なら飛ぶが自動で決まる", () => {
     expect(impliedBehaviors("sky")).toEqual(["flying"]);
     expect(impliedBehaviors("ground")).toEqual([]);
+  });
+});
+
+describe("behaviorsAfterPlaceChange", () => {
+  it("空を選ぶと飛ぶが自動で入る", () => {
+    expect(behaviorsAfterPlaceChange(undefined, "sky", [])).toEqual(["flying"]);
+  });
+  it("空から地面へ変えると、自動で入った飛ぶは外れる", () => {
+    expect(behaviorsAfterPlaceChange("sky", "ground", ["flying"])).toEqual([]);
+  });
+  it("空を解除（未選択）しても飛ぶは外れる", () => {
+    expect(behaviorsAfterPlaceChange("sky", undefined, ["flying"])).toEqual([]);
+  });
+  it("他の行動は残る", () => {
+    expect(behaviorsAfterPlaceChange("sky", "ground", ["flying", "singing"])).toEqual(["singing"]);
+  });
+  it("場所が変わらないときは行動を変えない", () => {
+    expect(behaviorsAfterPlaceChange("sky", "sky", ["flying", "singing"])).toEqual(["flying", "singing"]);
   });
 });
