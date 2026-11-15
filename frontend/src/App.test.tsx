@@ -257,10 +257,11 @@ describe("App: 鳥をタップで鳴き声を再生", () => {
     await renderApp();
     fireEvent.click(firstCard());
     expect(unlockAudio).toHaveBeenCalledTimes(1); // タップの同期処理内
-    await waitFor(() => expect(screen.getByText(/もう一度タップで停止/)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getAllByText(/もう一度タップで停止/).length).toBeGreaterThan(0));
     expect(playAudio).toHaveBeenCalledWith("https://u/a.mp3", expect.any(Function));
-    expect(screen.getByText(/録音者A ／ CC BY 4.0/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "出典(Commons)" })).toHaveAttribute("href", "https://c/File:a");
+    // 録音者・ライセンス・出典は、結果欄と拡大表示の両方に出る
+    expect(screen.getAllByText(/録音者A ／ CC BY 4.0/).length).toBeGreaterThan(0);
+    for (const link of screen.getAllByRole("link", { name: "出典(Commons)" })) expect(link).toHaveAttribute("href", "https://c/File:a");
     expect(firstCard()).toHaveClass("playing");
   });
   it("探している間は「音源を探しています」を表示する", async () => {
@@ -268,38 +269,38 @@ describe("App: 鳥をタップで鳴き声を再生", () => {
     fetchCallAudio.mockReturnValue(new Promise((r) => (resolve = r)));
     await renderApp();
     fireEvent.click(firstCard());
-    expect(await screen.findByText(/音源を探しています/)).toBeInTheDocument();
+    expect((await screen.findAllByText(/音源を探しています/))[0]).toBeInTheDocument();
     await act(async () => resolve(null));
   });
   it("もう一度タップすると停止する", async () => {
     await renderApp();
     fireEvent.click(firstCard());
-    await screen.findByText(/もう一度タップで停止/);
+    (await screen.findAllByText(/もう一度タップで停止/))[0];
     fireEvent.click(firstCard());
     expect(stopAudio).toHaveBeenCalled();
-    await waitFor(() => expect(screen.queryByText(/もう一度タップで停止/)).toBeNull());
+    await waitFor(() => expect(screen.queryAllByText(/もう一度タップで停止/)).toHaveLength(0));
     expect(screen.getByText(/鳥をタップすると鳴き声を再生します/)).toBeInTheDocument();
   });
   it("音源が見つからなければ理由を表示し、再生しない", async () => {
     fetchCallAudio.mockResolvedValue(null);
     await renderApp();
     fireEvent.click(firstCard());
-    expect(await screen.findByText(/音源は見つかりませんでした/)).toBeInTheDocument();
+    expect((await screen.findAllByText(/音源は見つかりませんでした/))[0]).toBeInTheDocument();
     expect(playAudio).not.toHaveBeenCalled();
   });
   it("再生が拒否されたら、対処を案内する", async () => {
     playAudio.mockRejectedValue(new Error("NotAllowedError"));
     await renderApp();
     fireEvent.click(firstCard());
-    expect(await screen.findByText(/再生できませんでした/)).toBeInTheDocument();
+    expect((await screen.findAllByText(/再生できませんでした/))[0]).toBeInTheDocument();
   });
   it("再生が終わると表示が元に戻る", async () => {
     await renderApp();
     fireEvent.click(firstCard());
-    await screen.findByText(/もう一度タップで停止/);
+    (await screen.findAllByText(/もう一度タップで停止/))[0];
     const onEnded = playAudio.mock.calls[0][1] as () => void;
     act(() => onEnded());
-    expect(screen.queryByText(/もう一度タップで停止/)).toBeNull();
+    expect(screen.queryAllByText(/もう一度タップで停止/)).toHaveLength(0);
   });
   it("別の鳥をタップすると、そちらに切り替わる（古い取得結果は無視する）", async () => {
     let resolveFirst!: (v: unknown) => void;
@@ -308,15 +309,14 @@ describe("App: 鳥をタップで鳴き声を再生", () => {
     const cards = within(screen.getByRole("list")).getAllByRole("listitem");
     fireEvent.click(cards[0]);
     fireEvent.click(cards[1]);
-    await screen.findByText(/もう一度タップで停止/);
+    (await screen.findAllByText(/もう一度タップで停止/))[0];
     await act(async () => resolveFirst({ src: "https://u/old.mp3", pageUrl: "x", title: "old" }));
     expect(playAudio).toHaveBeenCalledTimes(1);
     expect(playAudio.mock.calls[0][0]).toBe("https://u/a.mp3");
   });
-  it("捕まえる・写真の拡大のボタンでは再生しない", async () => {
+  it("写真の拡大のボタンでは再生しない", async () => {
     usePhoto.mockReturnValue({ thumbnail: "https://u/330px-a.jpg", pageUrl: "https://w/x" });
     await renderApp();
-    fireEvent.click(within(firstCard()).getByRole("button", { name: /捕まえる/ }));
     fireEvent.click(within(firstCard()).getByRole("button", { name: /写真を拡大/ }));
     expect(unlockAudio).not.toHaveBeenCalled();
     expect(fetchCallAudio).not.toHaveBeenCalled();
@@ -339,12 +339,12 @@ describe("App: タップで再生と同時に画像を拡大", () => {
     expect(box.querySelector(".lightbox-name")).toHaveTextContent(/.+/);
     expect(within(box).getByText(/録音者A ／ CC BY 4.0/)).toBeInTheDocument();
   });
-  it("写真が無い鳥は、再生のみで拡大しない", async () => {
+  it("写真が無い鳥でも拡大表示（鳥の詳細）が開き、「写真なし」と再生中の表示が出る", async () => {
     usePhoto.mockReturnValue(null);
     await renderApp();
     fireEvent.click(firstCard());
-    await screen.findByText(/もう一度タップで停止/);
-    expect(document.querySelector(".lightbox")).toBeNull();
+    await waitFor(() => expect(within(document.querySelector(".lightbox") as HTMLElement).getAllByText(/もう一度タップで停止/).length).toBeGreaterThan(0));
+    expect(within(document.querySelector(".lightbox") as HTMLElement).getByText("写真なし")).toBeInTheDocument();
   });
   it("拡大表示をタップすると閉じるが、音声は再生を続ける", async () => {
     usePhoto.mockReturnValue(photo);
@@ -354,7 +354,7 @@ describe("App: タップで再生と同時に画像を拡大", () => {
     fireEvent.click(document.querySelector(".lightbox") as HTMLElement);
     expect(document.querySelector(".lightbox")).toBeNull();
     expect(stopAudio).not.toHaveBeenCalled();
-    expect(screen.getByText(/もう一度タップで停止/)).toBeInTheDocument();
+    expect(screen.getAllByText(/もう一度タップで停止/).length).toBeGreaterThan(0);
   });
   it("再生中の鳥をもう一度タップすると、停止するだけで拡大しない", async () => {
     usePhoto.mockReturnValue(photo);
@@ -384,7 +384,7 @@ describe("App: タップで再生と同時に画像を拡大", () => {
     fireEvent.click(within(firstCard()).getByRole("button", { name: /写真を拡大/ }));
     expect(document.querySelector(".lightbox")).not.toBeNull();
     expect(unlockAudio).not.toHaveBeenCalled();
-    expect(screen.queryByText(/もう一度タップで停止/)).toBeNull();
+    expect(screen.queryAllByText(/もう一度タップで停止/)).toHaveLength(0);
   });
 });
 
@@ -459,20 +459,36 @@ describe("App: 条件の横スライド", () => {
   });
 });
 
+const detail = () => document.querySelector(".lightbox") as HTMLElement;
+const openDetail = async () => {
+  fireEvent.click(uguisuCard());
+  await waitFor(() => expect(detail()).not.toBeNull());
+};
+
 describe("App: 捕まえる・図鑑", () => {
-  it("捕まえるとゲット演出が出て、図鑑に反映され、保存される", async () => {
+  it("検索結果のカードには「捕まえる」ボタンが無い", async () => {
+    await renderApp();
+    fireEvent.change(screen.getByPlaceholderText(/ホーホケキョ/), { target: { value: "ホーホケキョ" } });
+    expect(screen.queryAllByRole("button", { name: /捕まえる/ })).toHaveLength(0);
+  });
+  it("鳥の拡大表示で捕まえると、ゲット演出が出て、図鑑に反映され、保存される", async () => {
     vi.useRealTimers(); // beforeEachのDateのみのフェイクを解除してから、setTimeoutも含めて偽装する
     vi.useFakeTimers({ shouldAdvanceTime: true, now: new Date(2026, 10, 15, 7, 0, 0) });
     try {
       await renderApp();
       fireEvent.change(screen.getByPlaceholderText(/ホーホケキョ/), { target: { value: "ホーホケキョ" } });
-      fireEvent.click(within(uguisuCard()).getByRole("button", { name: "捕まえる" }));
+      await openDetail();
+      fireEvent.click(within(detail()).getByRole("button", { name: "捕まえる" }));
       await act(async () => {
         vi.advanceTimersByTime(2000);
       });
-      expect(within(uguisuCard()).getByText(/NEW!/)).toBeInTheDocument();
+      expect(within(detail()).getByText(/NEW!/)).toBeInTheDocument();
+      expect(detail()).not.toBeNull(); // ボタンを押しても拡大表示は閉じない
       expect(screen.getByRole("button", { name: /図鑑 1\/44/ })).toBeInTheDocument();
       expect(localStorage.getItem("bird-finder:collection:v1")).toContain("japanese_bush_warbler");
+      fireEvent.click(detail()); // 背景をタップして閉じる
+      expect(detail()).toBeNull();
+      expect(within(uguisuCard()).getByRole("img", { name: "捕獲済み" })).toBeInTheDocument();
       fireEvent.click(screen.getByRole("button", { name: /図鑑 1\/44/ }));
       expect(screen.getByText("1 / 44 種を捕まえた")).toBeInTheDocument();
       expect(screen.getByText("ウグイス")).toBeInTheDocument();
@@ -481,6 +497,14 @@ describe("App: 捕まえる・図鑑", () => {
       vi.useRealTimers();
     }
   });
+  it("写真が無い鳥でも、拡大表示を開いて捕まえられる", async () => {
+    usePhoto.mockReturnValue(null);
+    await renderApp();
+    fireEvent.change(screen.getByPlaceholderText(/ホーホケキョ/), { target: { value: "ホーホケキョ" } });
+    await openDetail();
+    expect(within(detail()).getAllByText("写真なし").length).toBeGreaterThan(0);
+    expect(within(detail()).getByRole("button", { name: "捕まえる" })).toBeInTheDocument();
+  });
   it("2回目は「もう一度捕まえる」で回数が増え、NEW!は出ない", async () => {
     localStorage.setItem("bird-finder:collection:v1", JSON.stringify({ japanese_bush_warbler: { firstAt: "2026-01-01T00:00:00.000Z", count: 1 } }));
     vi.useRealTimers(); // beforeEachのDateのみのフェイクを解除してから、setTimeoutも含めて偽装する
@@ -488,15 +512,24 @@ describe("App: 捕まえる・図鑑", () => {
     try {
       await renderApp();
       fireEvent.change(screen.getByPlaceholderText(/ホーホケキョ/), { target: { value: "ホーホケキョ" } });
-      fireEvent.click(within(uguisuCard()).getByRole("button", { name: "もう一度捕まえる" }));
+      await openDetail();
+      fireEvent.click(within(detail()).getByRole("button", { name: "もう一度捕まえる" }));
       await act(async () => {
         vi.advanceTimersByTime(2000);
       });
-      expect(within(uguisuCard()).queryByText(/NEW!/)).toBeNull();
-      expect(within(uguisuCard()).getByText(/2回目/)).toBeInTheDocument();
+      expect(within(detail()).queryByText(/NEW!/)).toBeNull();
+      expect(within(detail()).getByText(/2回目/)).toBeInTheDocument();
     } finally {
       vi.useRealTimers();
     }
+  });
+  it("捕まえ済みの鳥のカードには「捕獲済み」の印が出て、未捕獲の鳥には出ない", async () => {
+    localStorage.setItem("bird-finder:collection:v1", JSON.stringify({ japanese_bush_warbler: { firstAt: "2026-01-01T00:00:00.000Z", count: 1 } }));
+    await renderApp();
+    fireEvent.change(screen.getByPlaceholderText(/ホーホケキョ/), { target: { value: "ホーホケキョ" } });
+    expect(within(uguisuCard()).getByRole("img", { name: "捕獲済み" })).toBeInTheDocument();
+    const others = within(screen.getByRole("list")).getAllByRole("listitem").filter((li) => li !== uguisuCard());
+    for (const li of others) expect(within(li).queryByRole("img", { name: "捕獲済み" })).toBeNull();
   });
   it("探すタブへ戻れる", async () => {
     await renderApp();
