@@ -35,11 +35,23 @@ describe("allowedBehaviors", () => {
   it("水辺・水面なら泳ぐを出す", () => {
     expect(allowedBehaviors("water", ["waterside"])).toContain("swimming");
   });
-  it("川辺環境の地面では、水辺を歩くを出す", () => {
-    expect(allowedBehaviors("ground", ["waterside"])).toContain("swimming");
+  it("水辺・水面なら、水の中に立つ・歩くも出す", () => {
+    expect(allowedBehaviors("water", ["waterside"])).toContain("wading");
+  });
+  it("川辺環境でも、地面の上では泳ぐ・水の中に立つ・歩くは出さない（地上を歩くのは「止まる・立つ・歩く」）", () => {
+    const b = allowedBehaviors("ground", ["waterside"]);
+    expect(b).not.toContain("swimming");
+    expect(b).not.toContain("wading");
+    expect(b).toContain("perching");
+  });
+  it("場所未選択で環境が水辺なら、泳ぐ・水の中に立つ・歩くを出す", () => {
+    expect(allowedBehaviors(undefined, ["waterside"])).toEqual(expect.arrayContaining(["swimming", "wading"]));
+  });
+  it("場所未選択で環境が住宅街なら出さない", () => {
+    expect(allowedBehaviors(undefined, ["urban"])).not.toContain("swimming");
   });
   it("場所・環境とも未選択なら全て", () => {
-    expect(allowedBehaviors(undefined, [])).toHaveLength(6);
+    expect(allowedBehaviors(undefined, [])).toHaveLength(7);
   });
 });
 

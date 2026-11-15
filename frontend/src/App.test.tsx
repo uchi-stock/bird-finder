@@ -11,7 +11,14 @@ vi.mock("./photo", () => ({ usePhoto: (n: string) => usePhoto(n), useFlightPhoto
 
 const section = (title: string) => screen.getByRole("heading", { name: new RegExp(title) }).closest("section") as HTMLElement;
 const uguisuCard = () => screen.getByText("ウグイス").closest("li") as HTMLElement;
-const chips = (title: string) => within(section(title)).getAllByRole("button").map((b) => b.textContent ?? "");
+// 絵文字（aria-hidden）を除いたボタンの文字
+const labelOf = (b: HTMLElement) =>
+  Array.from(b.childNodes)
+    .filter((n) => !(n instanceof HTMLElement && n.getAttribute("aria-hidden") === "true"))
+    .map((n) => n.textContent ?? "")
+    .join("")
+    .trim();
+const chips = (title: string) => within(section(title)).getAllByRole("button").map(labelOf);
 const chip = (title: string, label: string) => within(section(title)).getByRole("button", { name: new RegExp(label) });
 
 beforeEach(() => {
@@ -147,6 +154,37 @@ describe("App: 鳴き声が聞こえなかった", () => {
     await userEvent.click(screen.getByRole("button", { name: "鳴き声は聞こえなかった" }));
     expect(screen.getByText("アブラコウモリ")).toBeInTheDocument();
     expect(screen.getByText(/鳥ではなくコウモリ/)).toBeInTheDocument();
+  });
+});
+
+describe("App: 行動の選択肢と絵文字", () => {
+  it("行動は7つ: 泳ぐ／水の中に立つ・歩く／止まる・立つ・歩く／飛ぶ／鳴く／採食／羽繕い", async () => {
+    await renderApp();
+    expect(chips("行動")).toEqual(["泳ぐ", "水の中に立つ・歩く", "止まる・立つ・歩く", "飛ぶ・滑空する", "鳴く・歌う", "採食する・つつく", "羽繕いする"]);
+  });
+  it("地面の上では、泳ぐ・水の中に立つ・歩くを出さない", async () => {
+    await renderApp();
+    await userEvent.click(chip("どこで見たか", "地面の上"));
+    const behaviors = chips("行動");
+    expect(behaviors).not.toContain("泳ぐ");
+    expect(behaviors).not.toContain("水の中に立つ・歩く");
+    expect(behaviors).toContain("止まる・立つ・歩く");
+  });
+  it("水辺・水面では、泳ぐと水の中に立つ・歩くを選べる", async () => {
+    await renderApp();
+    await userEvent.click(chip("どこで見たか", "水辺・水面"));
+    expect(chips("行動")).toEqual(expect.arrayContaining(["泳ぐ", "水の中に立つ・歩く"]));
+  });
+  it("絵文字は読み上げ対象外（aria-hidden）で、各ボタンに付いている", async () => {
+    await renderApp();
+    for (const title of ["周辺の環境", "どこで見たか", "行動", "鳴き声", "大きさ", "時間帯"]) {
+      for (const b of within(section(title)).getAllByRole("button")) {
+        expect(b.querySelector('.emoji[aria-hidden="true"]'), `${title}: ${labelOf(b)}`).not.toBeNull();
+      }
+    }
+    expect(screen.getByRole("button", { name: "探す" }).querySelector(".emoji")).not.toBeNull();
+    expect(screen.getByRole("button", { name: /図鑑 0\/44/ }).querySelector(".emoji")).not.toBeNull();
+    expect(screen.getByRole("button", { name: /現在地から判定する/ }).querySelector(".emoji")).not.toBeNull();
   });
 });
 

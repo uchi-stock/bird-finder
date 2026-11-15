@@ -107,3 +107,15 @@ footer { font-size:.75rem; opacity:.7; padding:8px 0 24px; }
 .note.clamp, .results .reasons span { line-height:1.3; }
 .results .catch { min-height:32px; margin-top:2px; }
 .results .catch-btn { min-height:32px; padding:4px 12px; }
+
+.emoji { margin-right:4px; font-size:1.05em; line-height:1; }
+.chip .emoji { margin-right:6px; }
+/* 絵文字を付けたぶん大きくなったヘッダー・ボタンを詰めて、一画面に収める */
+.top h1 { font-size:.95rem; white-space:nowrap; }
+.top .version { font-size:.68rem; white-space:nowrap; }
+.top .tab { padding:6px 9px; font-size:13px; white-space:nowrap; }
+.top .tabs { gap:6px; }
+.step .chip { font-size:14px; padding:4px 10px; min-height:38px; }
+.step .chip .emoji { margin-right:4px; }
+.sizes .chip { min-width:44px; }
+.step { max-height:27dvh; }
