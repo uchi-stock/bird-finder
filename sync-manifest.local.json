@@ -4,5 +4,9 @@
     { "source": "shared/ui/formatBuildTime.js", "target": "frontend/src/shared/formatBuildTime.js" },
     { "source": "shared/pwa/sw.js", "target": "frontend/public/sw.js" },
     { "source": "shared/pwa/ServiceWorkerRegistration.jsx", "target": "frontend/src/components/ServiceWorkerRegistration.jsx" }
+  ],
+  "copies": [
+    { "source": "shared/lambda/dailyRateLimit.js", "target": "backend/src/shared/dailyRateLimit.js" },
+    { "source": "shared/lambda/httpResponse.js", "target": "backend/src/shared/httpResponse.js" }
   ]
 }
