@@ -9,6 +9,7 @@ import { HABITATS, largeImageUrl } from "./domain/habitat";
 import { detectHabitats } from "./location";
 import ServiceWorkerRegistration from "./components/ServiceWorkerRegistration.jsx";
 import { UpdateNotifier } from "./components/UpdateNotifier";
+import { PrivacySettings } from "./components/PrivacySettings";
 import formatBuildTime from "./shared/formatBuildTime.js";
 import { useFlightPhoto, usePhoto } from "./photo";
 import { fetchCallAudio, playAudio, stopAudio, unlockAudio, type CallAudio } from "./callAudio";
@@ -236,6 +237,7 @@ function Dex({ collection }: { collection: Collection }) {
         })}
       </ul>
       <p className="hint">鳥のデータは一般的な図鑑知識に基づく暫定値で、地域の調査資料での確認は未実施です（試作版）。</p>
+      <PrivacySettings />
     </section>
   );
 }

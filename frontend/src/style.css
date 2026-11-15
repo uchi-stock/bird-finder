@@ -141,3 +141,5 @@ footer { font-size:.75rem; opacity:.7; padding:8px 0 24px; }
 .badges { display:inline-flex; align-items:center; gap:4px; }
 .caught { font-size:.9rem; }
 .lightbox a { text-align:center; }
+.privacy { margin-top:16px; border-top:1px solid var(--line); padding-top:8px; }
+.privacy h2 { font-size:.95rem; }

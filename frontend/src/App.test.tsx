@@ -16,7 +16,7 @@ vi.mock("./callAudio", () => ({
   stopAudio: () => stopAudio(),
   unlockAudio: () => unlockAudio(),
 }));
-vi.mock("./location", () => ({ detectHabitats: () => detectHabitats() }));
+vi.mock("./location", () => ({ detectHabitats: () => detectHabitats(), getCoords: () => Promise.reject(new Error("未使用")) }));
 vi.mock("./photo", () => ({ usePhoto: (n: string) => usePhoto(n), useFlightPhoto: (s: string, e: boolean) => useFlightPhoto(s, e) }));
 
 const section = (title: string) => screen.getByRole("heading", { name: new RegExp(title) }).closest("section") as HTMLElement;
@@ -530,6 +530,11 @@ describe("App: 捕まえる・図鑑", () => {
     expect(within(uguisuCard()).getByRole("img", { name: "捕獲済み" })).toBeInTheDocument();
     const others = within(screen.getByRole("list")).getAllByRole("listitem").filter((li) => li !== uguisuCard());
     for (const li of others) expect(within(li).queryByRole("img", { name: "捕獲済み" })).toBeNull();
+  });
+  it("図鑑タブに、自宅の登録（共有から除外）が表示される", async () => {
+    await renderApp();
+    await userEvent.click(screen.getByRole("button", { name: /図鑑/ }));
+    expect(screen.getByRole("heading", { name: /自宅の登録（共有から除外）/ })).toBeInTheDocument();
   });
   it("探すタブへ戻れる", async () => {
     await renderApp();
