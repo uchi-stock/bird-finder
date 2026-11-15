@@ -2,6 +2,11 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import getAppVersionDefine from "./getAppVersionDefine.js"; // dev-standardsからsymlink共有
+import { resolveVersionFromPackage } from "./appVersion.js";
+
+const pkgUrl = new URL("./package.json", import.meta.url);
+// バージョンは「major.minor.mainのコミット数」（正式なバージョン管理の導入までの暫定。appVersion.js参照）
+const appVersion = resolveVersionFromPackage(pkgUrl);
 
 // GitHub Pagesのプロジェクトページ（/bird-finder/）配信のため相対baseにする
 export default defineConfig({
@@ -10,7 +15,8 @@ export default defineConfig({
   // symlink共有したコンポーネントがreact等をこのパッケージから解決できるようにする
   resolve: { preserveSymlinks: true },
   define: {
-    ...getAppVersionDefine(new URL("./package.json", import.meta.url)),
+    ...getAppVersionDefine(pkgUrl),
+    __APP_VERSION__: JSON.stringify(appVersion),
   },
   test: {
     environment: "jsdom",
