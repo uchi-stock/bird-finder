@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { loadCollection, saveCollection } from "./storage";
+import { clearHome, getPrivacySecret, loadCollection, loadHome, saveCollection, saveHome } from "./storage";
 
 beforeEach(() => {
   localStorage.clear();
@@ -31,5 +31,44 @@ describe("storage", () => {
     });
     expect(loadCollection()).toEqual({});
     expect(() => saveCollection({})).not.toThrow();
+  });
+});
+
+describe("プライバシーの保存（秘密の値・自宅）", () => {
+  it("秘密の値は初回に作られ、以降は同じ値を返す（32桁の16進）", () => {
+    const a = getPrivacySecret();
+    expect(a).toMatch(/^[0-9a-f]{32}$/);
+    expect(getPrivacySecret()).toBe(a);
+  });
+  it("localStorageが使えなくても、起動中は同じ値を返す", () => {
+    vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
+      throw new Error("blocked");
+    });
+    const a = getPrivacySecret();
+    expect(a).toMatch(/^[0-9a-f]{32}$/);
+    expect(getPrivacySecret()).toBe(a);
+  });
+  it("自宅は保存・読み出し・削除できる", () => {
+    expect(loadHome()).toBeNull();
+    expect(saveHome({ lat: 35.6, lon: 139.5 })).toBe(true);
+    expect(loadHome()).toEqual({ lat: 35.6, lon: 139.5 });
+    clearHome();
+    expect(loadHome()).toBeNull();
+  });
+  it("壊れた自宅データは未登録として扱う", () => {
+    localStorage.setItem("bird-finder:home:v1", "{broken");
+    expect(loadHome()).toBeNull();
+    localStorage.setItem("bird-finder:home:v1", JSON.stringify({ lat: "x" }));
+    expect(loadHome()).toBeNull();
+  });
+  it("保存・削除できない環境でも例外にならない", () => {
+    vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new Error("blocked");
+    });
+    vi.spyOn(Storage.prototype, "removeItem").mockImplementation(() => {
+      throw new Error("blocked");
+    });
+    expect(saveHome({ lat: 1, lon: 2 })).toBe(false);
+    expect(() => clearHome()).not.toThrow();
   });
 });

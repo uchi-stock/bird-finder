@@ -1,4 +1,5 @@
 import { classifyHabitats, habitatsFromNominatim, overpassQuery } from "./domain/habitat";
+import type { LatLon } from "./domain/privacy";
 import type { Habitat } from "./domain/types";
 
 // 公開Overpassは混雑・制限で失敗しやすいため、複数の接続先へ同時に問い合わせ、最初の成功を使う
@@ -89,4 +90,10 @@ export async function detectHabitats(): Promise<Habitat[]> {
   }
   if (habitats.length > 0) writeCache(key, habitats);
   return habitats;
+}
+
+/** 現在地の座標を取得する（自宅の登録・共有の判断に使う。取得した座標は呼び出し側が端末内でだけ扱う） */
+export async function getCoords(): Promise<LatLon> {
+  const pos = await getPosition();
+  return { lat: pos.coords.latitude, lon: pos.coords.longitude };
 }
