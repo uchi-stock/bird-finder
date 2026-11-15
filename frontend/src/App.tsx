@@ -11,6 +11,7 @@ import ServiceWorkerRegistration from "./components/ServiceWorkerRegistration.js
 import { UpdateNotifier } from "./components/UpdateNotifier";
 import formatBuildTime from "./shared/formatBuildTime.js";
 import { useFlightPhoto, usePhoto } from "./photo";
+import { fetchCallAudio, playAudio, stopAudio, unlockAudio, type CallAudio } from "./callAudio";
 import type { Behavior, Candidate, Color, Habitat, Observation, Place, Species, TimeSlot } from "./domain/types";
 
 const SPECIES = speciesJson as Species[];
@@ -101,12 +102,29 @@ function Photo({ name, scientificName, flying = false }: { name: string; scienti
   if (!photo) return <div className="photo empty">写真なし</div>;
   return (
     <>
-      <button className="photo" onClick={() => setOpen(true)} aria-label={`${name}の写真を拡大`}>
+      <div className="photo">
         <img src={photo.thumbnail} alt={name} loading="lazy" />
         {photo.flight && <span className="flight-badge">飛翔</span>}
-      </button>
+        <button
+          type="button"
+          className="zoom"
+          aria-label={`${name}の写真を拡大`}
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpen(true);
+          }}
+        >
+          <Emoji c="🔍" />
+        </button>
+      </div>
       {open && (
-        <div className="lightbox" onClick={() => setOpen(false)}>
+        <div
+          className="lightbox"
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpen(false);
+          }}
+        >
           <img src={largeSrc} alt={name} onError={() => setLargeSrc(photo.thumbnail)} />
           <a href={photo.pageUrl} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>
             {photo.flight
@@ -116,6 +134,21 @@ function Photo({ name, scientificName, flying = false }: { name: string; scienti
         </div>
       )}
     </>
+  );
+}
+
+function PlayStatus({ now }: { now: { name: string; status: string; info?: CallAudio } }) {
+  if (now.status === "loading") return <p className="hint play-status">🔍 {now.name}の音源を探しています…</p>;
+  if (now.status === "none") return <p className="hint play-status">🔇 {now.name}の音源は見つかりませんでした</p>;
+  if (now.status === "error") return <p className="hint play-status">⚠️ {now.name}の鳴き声を再生できませんでした（音量・マナーモードを確認してください）</p>;
+  const i = now.info!;
+  return (
+    <p className="hint play-status">
+      🔊 {now.name}（もう一度タップで停止） ・ 音源: {i.credit ?? "不明"} ／ {i.license ?? "ライセンスはリンク先"}{" "}
+      <a href={i.pageUrl} target="_blank" rel="noreferrer">
+        出典(Commons)
+      </a>
+    </p>
   );
 }
 
@@ -257,6 +290,34 @@ export function App() {
     const ok = allowedBehaviors(place, habitats);
     setBehaviors((prev) => (prev.every((b) => ok.includes(b)) ? prev : prev.filter((b) => ok.includes(b))));
   }, [habitats, place]);
+
+  type NowPlaying = { id: string; name: string; status: "loading" | "playing" | "none" | "error"; info?: CallAudio };
+  const [now, setNow] = useState<NowPlaying | null>(null);
+  const playToken = useRef(0);
+  // 候補をタップで鳴き声を再生（もう一度タップで停止）。iOS対策: 解錠はタップの同期処理内で行う
+  const onPlay = async (sp: Species) => {
+    if (now?.id === sp.species_id && (now.status === "playing" || now.status === "loading")) {
+      playToken.current++;
+      stopAudio();
+      setNow(null);
+      return;
+    }
+    unlockAudio();
+    const token = ++playToken.current;
+    setNow({ id: sp.species_id, name: sp.name_ja, status: "loading" });
+    const info = await fetchCallAudio(sp.scientific_name);
+    if (token !== playToken.current) return; // 別の鳥をタップした
+    if (!info) {
+      setNow({ id: sp.species_id, name: sp.name_ja, status: "none" });
+      return;
+    }
+    try {
+      await playAudio(info.src, () => token === playToken.current && setNow(null));
+      if (token === playToken.current) setNow({ id: sp.species_id, name: sp.name_ja, status: "playing", info });
+    } catch {
+      if (token === playToken.current) setNow({ id: sp.species_id, name: sp.name_ja, status: "error" });
+    }
+  };
 
   const STEP_TITLES = ["周辺の環境", "どこで見たか", "行動", "鳴き声", "大きさ", "羽の色", "時間帯・観察日"];
   const stepDone = [habitats.length > 0, place !== undefined, behaviors.length > 0, voice !== "" || noVoice, sizeLevel !== undefined, colors.length > 0, time !== undefined];
@@ -445,15 +506,25 @@ export function App() {
               <p className="hint">上のカードを横にスライドして、覚えていることを1つ以上入力すると、近い鳥が表示されます。</p>
             ) : (
               <>
-                <p className="hint">※ 点数順の目安です。確率ではありません。</p>
+                {now ? <PlayStatus now={now} /> : <p className="hint">※ 点数順の目安です。確率ではありません。　鳥をタップすると鳴き声を再生します。</p>}
                 <ol className="results">
                   {results.map((c) => (
-                    <li key={c.species.species_id}>
+                    <li
+                      key={c.species.species_id}
+                      className={now?.id === c.species.species_id ? "playing" : undefined}
+                      onClick={(e) => {
+                        // 写真の拡大・捕まえる・リンクなどのボタンは、再生の対象外
+                        if (!(e.target as HTMLElement).closest("button, a")) void onPlay(c.species);
+                      }}
+                    >
                       <div className="card">
                         <Photo name={c.species.name_ja} scientificName={c.species.scientific_name} flying={flying} />
                         <div className="body">
                           <div className="row between">
-                            <strong>{c.species.name_ja}</strong>
+                            <strong>
+                              <Emoji c={now?.id === c.species.species_id && now.status === "playing" ? "🔊" : "🔈"} />
+                              {c.species.name_ja}
+                            </strong>
                             <span className="badge">{closeness(c)}</span>
                           </div>
                           <p className="note clamp">{c.species.note}</p>

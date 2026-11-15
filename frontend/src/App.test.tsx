@@ -5,7 +5,17 @@ import { App } from "./App";
 
 const detectHabitats = vi.fn();
 const usePhoto = vi.fn();
+const fetchCallAudio = vi.fn();
+const playAudio = vi.fn();
+const stopAudio = vi.fn();
+const unlockAudio = vi.fn();
 const useFlightPhoto = vi.fn();
+vi.mock("./callAudio", () => ({
+  fetchCallAudio: (s: string) => fetchCallAudio(s),
+  playAudio: (src: string, end: () => void) => playAudio(src, end),
+  stopAudio: () => stopAudio(),
+  unlockAudio: () => unlockAudio(),
+}));
 vi.mock("./location", () => ({ detectHabitats: () => detectHabitats() }));
 vi.mock("./photo", () => ({ usePhoto: (n: string) => usePhoto(n), useFlightPhoto: (s: string, e: boolean) => useFlightPhoto(s, e) }));
 
@@ -29,6 +39,10 @@ beforeEach(() => {
   detectHabitats.mockReset().mockResolvedValue([]);
   usePhoto.mockReset().mockReturnValue(null);
   useFlightPhoto.mockReset().mockReturnValue(null);
+  fetchCallAudio.mockReset().mockResolvedValue({ src: "https://u/a.mp3", pageUrl: "https://c/File:a", title: "a.ogg", credit: "録音者A", license: "CC BY 4.0" });
+  playAudio.mockReset().mockResolvedValue(undefined);
+  stopAudio.mockReset();
+  unlockAudio.mockReset();
 });
 
 afterEach(() => vi.useRealTimers());
@@ -233,6 +247,79 @@ describe("App: 写真", () => {
     expect(screen.getByRole("link", { name: /出典: Wikipedia/ })).toHaveAttribute("href", "https://w/x");
     await userEvent.click(document.querySelector(".lightbox") as HTMLElement);
     expect(document.querySelector(".lightbox")).toBeNull();
+  });
+});
+
+const firstCard = () => within(screen.getByRole("list")).getAllByRole("listitem")[0];
+
+describe("App: 鳥をタップで鳴き声を再生", () => {
+  it("カードをタップすると、同期的に解錠してから音源を再生し、録音者とライセンスと出典を表示する", async () => {
+    await renderApp();
+    fireEvent.click(firstCard());
+    expect(unlockAudio).toHaveBeenCalledTimes(1); // タップの同期処理内
+    await waitFor(() => expect(screen.getByText(/もう一度タップで停止/)).toBeInTheDocument());
+    expect(playAudio).toHaveBeenCalledWith("https://u/a.mp3", expect.any(Function));
+    expect(screen.getByText(/録音者A ／ CC BY 4.0/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "出典(Commons)" })).toHaveAttribute("href", "https://c/File:a");
+    expect(firstCard()).toHaveClass("playing");
+  });
+  it("探している間は「音源を探しています」を表示する", async () => {
+    let resolve!: (v: unknown) => void;
+    fetchCallAudio.mockReturnValue(new Promise((r) => (resolve = r)));
+    await renderApp();
+    fireEvent.click(firstCard());
+    expect(await screen.findByText(/音源を探しています/)).toBeInTheDocument();
+    await act(async () => resolve(null));
+  });
+  it("もう一度タップすると停止する", async () => {
+    await renderApp();
+    fireEvent.click(firstCard());
+    await screen.findByText(/もう一度タップで停止/);
+    fireEvent.click(firstCard());
+    expect(stopAudio).toHaveBeenCalled();
+    await waitFor(() => expect(screen.queryByText(/もう一度タップで停止/)).toBeNull());
+    expect(screen.getByText(/鳥をタップすると鳴き声を再生します/)).toBeInTheDocument();
+  });
+  it("音源が見つからなければ理由を表示し、再生しない", async () => {
+    fetchCallAudio.mockResolvedValue(null);
+    await renderApp();
+    fireEvent.click(firstCard());
+    expect(await screen.findByText(/音源は見つかりませんでした/)).toBeInTheDocument();
+    expect(playAudio).not.toHaveBeenCalled();
+  });
+  it("再生が拒否されたら、対処を案内する", async () => {
+    playAudio.mockRejectedValue(new Error("NotAllowedError"));
+    await renderApp();
+    fireEvent.click(firstCard());
+    expect(await screen.findByText(/再生できませんでした/)).toBeInTheDocument();
+  });
+  it("再生が終わると表示が元に戻る", async () => {
+    await renderApp();
+    fireEvent.click(firstCard());
+    await screen.findByText(/もう一度タップで停止/);
+    const onEnded = playAudio.mock.calls[0][1] as () => void;
+    act(() => onEnded());
+    expect(screen.queryByText(/もう一度タップで停止/)).toBeNull();
+  });
+  it("別の鳥をタップすると、そちらに切り替わる（古い取得結果は無視する）", async () => {
+    let resolveFirst!: (v: unknown) => void;
+    fetchCallAudio.mockReturnValueOnce(new Promise((r) => (resolveFirst = r)));
+    await renderApp();
+    const cards = within(screen.getByRole("list")).getAllByRole("listitem");
+    fireEvent.click(cards[0]);
+    fireEvent.click(cards[1]);
+    await screen.findByText(/もう一度タップで停止/);
+    await act(async () => resolveFirst({ src: "https://u/old.mp3", pageUrl: "x", title: "old" }));
+    expect(playAudio).toHaveBeenCalledTimes(1);
+    expect(playAudio.mock.calls[0][0]).toBe("https://u/a.mp3");
+  });
+  it("捕まえる・写真の拡大のボタンでは再生しない", async () => {
+    usePhoto.mockReturnValue({ thumbnail: "https://u/330px-a.jpg", pageUrl: "https://w/x" });
+    await renderApp();
+    fireEvent.click(within(firstCard()).getByRole("button", { name: /捕まえる/ }));
+    fireEvent.click(within(firstCard()).getByRole("button", { name: /写真を拡大/ }));
+    expect(unlockAudio).not.toHaveBeenCalled();
+    expect(fetchCallAudio).not.toHaveBeenCalled();
   });
 });
 
