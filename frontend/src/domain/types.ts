@@ -3,6 +3,7 @@ export type Behavior = "swimming" | "perching" | "flying" | "singing" | "foragin
 export type Place = "feeder" | "ground" | "tree" | "wire" | "roof" | "water" | "grass";
 export type TimeSlot = "morning" | "day" | "evening" | "night";
 export type Habitat = "waterside" | "urban" | "woodland" | "open";
+export type Abundance = "very_common" | "common" | "uncommon" | "rare";
 export type Season = "spring" | "summer" | "autumn" | "winter";
 
 export interface Species {
@@ -15,6 +16,8 @@ export interface Species {
   seasons: Season[];
   /** 活発に見られる時間帯（暫定値） */
   times: TimeSlot[];
+  /** 多摩川中流域での出現しやすさ（暫定値。識別確率ではない） */
+  abundance: Abundance;
   /** 生息・観察されやすい環境（暫定値） */
   habitats: Habitat[];
   onomatopoeia: string[];

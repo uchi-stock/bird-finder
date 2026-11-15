@@ -1,7 +1,9 @@
-import type { Candidate, Observation, Season, Species } from "./types";
+import type { Abundance, Candidate, Observation, Season, Species } from "./types";
 
 const WEIGHT = { size: 2, color: 2, behavior: 3, place: 3, season: 2, time: 1, habitat: 2, voice: 4 } as const;
 const CONFLICT_PENALTY = 2;
+/** 地域での出現しやすさによる加点（事前情報）。入力一致の重みより小さくし、少ないことを理由に減点・除外はしない */
+const PRIOR: Record<Abundance, number> = { very_common: 1, common: 0.7, uncommon: 0.3, rare: 0 };
 
 export function monthToSeason(month: number): Season {
   if (month >= 3 && month <= 5) return "spring";
@@ -156,6 +158,13 @@ export function scoreSpecies(obs: Observation, sp: Species): Candidate {
       score += WEIGHT.voice * best;
       matching.push("鳴き声");
     }
+  }
+
+  // 地域での出現しやすさ（入力が1つでもあるときだけ加点する）
+  if (hasAnyInput(obs)) {
+    maxScore += PRIOR.very_common;
+    score += PRIOR[sp.abundance];
+    if (sp.abundance === "very_common" || sp.abundance === "common") matching.push("地域でよく見られる");
   }
 
   return { species: sp, score, maxScore, matching, conflicting, unknown };
