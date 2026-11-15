@@ -23,6 +23,9 @@ jobs:
       url: ${{ steps.deploy.outputs.page-url }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          # dev-standards（symlink共有のsw.js等の実体）を取得する
+          submodules: true
       - id: deploy
         uses: bamiyanapp/dev-standards/.github/actions/deploy-github-pages@v2.124.0
         with:
