@@ -158,3 +158,9 @@ footer { font-size:.75rem; opacity:.7; padding:8px 0 24px; }
 .bird-pin .pin-emoji { display:flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:50%; background:#fff; border:2px solid var(--acc); font-size:18px; box-shadow:0 1px 4px rgba(0,0,0,.35); }
 .bird-pin .pin-count { position:absolute; right:-4px; top:-4px; min-width:18px; height:18px; padding:0 4px; border-radius:9px; background:#e8453c; color:#fff; font-size:11px; line-height:18px; text-align:center; }
 .leaflet-container { font:inherit; }
+
+/* 拡大表示: 読み込み済みの小さい版を先に出し、大きい版が読み込めたら重ねて切り替える */
+.lb-photo { position:relative; max-width:100%; }
+.lightbox .lb-thumb { display:block; max-width:100%; max-height:75vh; border-radius:8px; }
+.lightbox .lb-large { position:absolute; inset:0; width:100%; height:100%; max-height:none; object-fit:contain; opacity:0; transition:opacity .2s; }
+.lightbox .lb-large.on { opacity:1; }
