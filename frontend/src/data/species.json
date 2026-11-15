@@ -1,0 +1,1377 @@
+[
+ {
+  "species_id": "sparrow",
+  "name_ja": "スズメ",
+  "size_level": 2,
+  "colors": [
+   "brown",
+   "black",
+   "white",
+   "gray"
+  ],
+  "behaviors": [
+   "perching",
+   "foraging",
+   "singing",
+   "flying"
+  ],
+  "places": [
+   "ground",
+   "wire",
+   "roof",
+   "tree",
+   "feeder"
+  ],
+  "seasons": [
+   "spring",
+   "summer",
+   "autumn",
+   "winter"
+  ],
+  "onomatopoeia": [
+   "チュンチュン",
+   "チュチュン",
+   "ジュクジュク"
+  ],
+  "note": "市街地で最も身近な小鳥",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
+ },
+ {
+  "species_id": "starling",
+  "name_ja": "ムクドリ",
+  "size_level": 4,
+  "colors": [
+   "brown",
+   "black",
+   "gray",
+   "white",
+   "red"
+  ],
+  "behaviors": [
+   "foraging",
+   "flying",
+   "perching"
+  ],
+  "places": [
+   "ground",
+   "wire",
+   "tree",
+   "roof"
+  ],
+  "seasons": [
+   "spring",
+   "summer",
+   "autumn",
+   "winter"
+  ],
+  "onomatopoeia": [
+   "ギャーギャー",
+   "ジュルジュル",
+   "キュルキュル"
+  ],
+  "note": "群れで行動。くちばしと足がオレンジ",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
+ },
+ {
+  "species_id": "brown_eared_bulbul",
+  "name_ja": "ヒヨドリ",
+  "size_level": 4,
+  "colors": [
+   "gray",
+   "brown"
+  ],
+  "behaviors": [
+   "singing",
+   "flying",
+   "perching",
+   "foraging"
+  ],
+  "places": [
+   "tree",
+   "wire"
+  ],
+  "seasons": [
+   "spring",
+   "summer",
+   "autumn",
+   "winter"
+  ],
+  "onomatopoeia": [
+   "ヒーヨ",
+   "ピーヨ",
+   "ピーッ"
+  ],
+  "note": "波状飛行。大きな声でよく鳴く",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
+ },
+ {
+  "species_id": "rock_dove",
+  "name_ja": "ドバト",
+  "size_level": 5,
+  "colors": [
+   "gray",
+   "white",
+   "black"
+  ],
+  "behaviors": [
+   "foraging",
+   "flying",
+   "perching"
+  ],
+  "places": [
+   "ground",
+   "roof",
+   "wire"
+  ],
+  "seasons": [
+   "spring",
+   "summer",
+   "autumn",
+   "winter"
+  ],
+  "onomatopoeia": [
+   "ポッポー",
+   "クルックー",
+   "クルル"
+  ],
+  "note": "首元が緑や紫に光る",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
+ },
+ {
+  "species_id": "oriental_turtle_dove",
+  "name_ja": "キジバト",
+  "size_level": 5,
+  "colors": [
+   "brown",
+   "gray",
+   "black"
+  ],
+  "behaviors": [
+   "foraging",
+   "perching",
+   "singing"
+  ],
+  "places": [
+   "ground",
+   "tree",
+   "wire"
+  ],
+  "seasons": [
+   "spring",
+   "summer",
+   "autumn",
+   "winter"
+  ],
+  "onomatopoeia": [
+   "ポッポー",
+   "デデッポーポー",
+   "ホーホー"
+  ],
+  "note": "首に縞模様",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
+ },
+ {
+  "species_id": "large_billed_crow",
+  "name_ja": "ハシブトガラス",
+  "size_level": 6,
+  "colors": [
+   "black"
+  ],
+  "behaviors": [
+   "perching",
+   "flying",
+   "foraging",
+   "singing"
+  ],
+  "places": [
+   "tree",
+   "roof",
+   "wire",
+   "ground"
+  ],
+  "seasons": [
+   "spring",
+   "summer",
+   "autumn",
+   "winter"
+  ],
+  "onomatopoeia": [
+   "カーカー",
+   "カァカァ",
+   "ガーガー"
+  ],
+  "note": "くちばしが太く額が出っ張る。澄んだ声",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
+ },
+ {
+  "species_id": "carrion_crow",
+  "name_ja": "ハシボソガラス",
+  "size_level": 6,
+  "colors": [
+   "black"
+  ],
+  "behaviors": [
+   "foraging",
+   "perching",
+   "flying",
+   "singing"
+  ],
+  "places": [
+   "ground",
+   "tree",
+   "wire"
+  ],
+  "seasons": [
+   "spring",
+   "summer",
+   "autumn",
+   "winter"
+  ],
+  "onomatopoeia": [
+   "ガーガー",
+   "ガァガァ",
+   "ガラガラ"
+  ],
+  "note": "地面を歩き回る。濁った声",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
+ },
+ {
+  "species_id": "great_tit",
+  "name_ja": "シジュウカラ",
+  "size_level": 2,
+  "colors": [
+   "white",
+   "black",
+   "gray",
+   "green"
+  ],
+  "behaviors": [
+   "perching",
+   "singing",
+   "foraging"
+  ],
+  "places": [
+   "tree",
+   "feeder"
+  ],
+  "seasons": [
+   "spring",
+   "summer",
+   "autumn",
+   "winter"
+  ],
+  "onomatopoeia": [
+   "ツーピー",
+   "ツツピー",
+   "ジュクジュク"
+  ],
+  "note": "白い頬と黒いネクタイ模様",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
+ },
+ {
+  "species_id": "japanese_white_eye",
+  "name_ja": "メジロ",
+  "size_level": 2,
+  "colors": [
+   "green",
+   "white",
+   "yellow"
+  ],
+  "behaviors": [
+   "perching",
+   "foraging",
+   "singing"
+  ],
+  "places": [
+   "tree",
+   "feeder"
+  ],
+  "seasons": [
+   "spring",
+   "summer",
+   "autumn",
+   "winter"
+  ],
+  "onomatopoeia": [
+   "チーチー",
+   "チュルチュル",
+   "チィチィ"
+  ],
+  "note": "目の周りの白い輪",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
+ },
+ {
+  "species_id": "azure_winged_magpie",
+  "name_ja": "オナガ",
+  "size_level": 5,
+  "colors": [
+   "blue",
+   "gray",
+   "black",
+   "white"
+  ],
+  "behaviors": [
+   "perching",
+   "flying",
+   "singing"
+  ],
+  "places": [
+   "tree",
+   "wire"
+  ],
+  "seasons": [
+   "spring",
+   "summer",
+   "autumn",
+   "winter"
+  ],
+  "onomatopoeia": [
+   "ギューイ",
+   "ギョイギョイ",
+   "ゲーゲー"
+  ],
+  "note": "長い青い尾。群れで行動",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
+ },
+ {
+  "species_id": "barn_swallow",
+  "name_ja": "ツバメ",
+  "size_level": 3,
+  "colors": [
+   "black",
+   "white",
+   "red",
+   "blue"
+  ],
+  "behaviors": [
+   "flying",
+   "perching",
+   "singing"
+  ],
+  "places": [
+   "wire",
+   "roof"
+  ],
+  "seasons": [
+   "spring",
+   "summer"
+  ],
+  "onomatopoeia": [
+   "チュビチュビ",
+   "ツピー",
+   "チュルチュル",
+   "ジュビジュビ"
+  ],
+  "note": "深く切れ込んだ尾。空中で飛びながら採食",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
+ },
+ {
+  "species_id": "blue_rock_thrush",
+  "name_ja": "イソヒヨドリ",
+  "size_level": 4,
+  "colors": [
+   "blue",
+   "red",
+   "brown"
+  ],
+  "behaviors": [
+   "perching",
+   "singing"
+  ],
+  "places": [
+   "roof",
+   "wire"
+  ],
+  "seasons": [
+   "spring",
+   "summer",
+   "autumn",
+   "winter"
+  ],
+  "onomatopoeia": [
+   "ヒョロヒョロ",
+   "ピーチョロ",
+   "ヒーヨ"
+  ],
+  "note": "オスは青とオレンジ。高い所でさえずる",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
+ },
+ {
+  "species_id": "white_wagtail",
+  "name_ja": "ハクセキレイ",
+  "size_level": 3,
+  "colors": [
+   "white",
+   "black",
+   "gray"
+  ],
+  "behaviors": [
+   "foraging",
+   "swimming"
+  ],
+  "places": [
+   "ground",
+   "water"
+  ],
+  "seasons": [
+   "spring",
+   "summer",
+   "autumn",
+   "winter"
+  ],
+  "onomatopoeia": [
+   "チチッ",
+   "チュチュン",
+   "ジュジュ"
+  ],
+  "note": "地面を歩き、尾を上下に振る",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
+ },
+ {
+  "species_id": "japanese_wagtail",
+  "name_ja": "セグロセキレイ",
+  "size_level": 3,
+  "colors": [
+   "black",
+   "white",
+   "gray"
+  ],
+  "behaviors": [
+   "foraging",
+   "swimming"
+  ],
+  "places": [
+   "ground",
+   "water"
+  ],
+  "seasons": [
+   "spring",
+   "summer",
+   "autumn",
+   "winter"
+  ],
+  "onomatopoeia": [
+   "ジジッ",
+   "ジュジュ",
+   "チチッ"
+  ],
+  "note": "背中が黒い。尾を上下に振る",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
+ },
+ {
+  "species_id": "grey_wagtail",
+  "name_ja": "キセキレイ",
+  "size_level": 3,
+  "colors": [
+   "yellow",
+   "gray",
+   "black",
+   "white"
+  ],
+  "behaviors": [
+   "foraging",
+   "swimming"
+  ],
+  "places": [
+   "water",
+   "ground"
+  ],
+  "seasons": [
+   "spring",
+   "summer",
+   "autumn",
+   "winter"
+  ],
+  "onomatopoeia": [
+   "チチン",
+   "チチッ",
+   "ツツ"
+  ],
+  "note": "腹が黄色。水辺の石の上",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
+ },
+ {
+  "species_id": "oriental_greenfinch",
+  "name_ja": "カワラヒワ",
+  "size_level": 2,
+  "colors": [
+   "yellow",
+   "brown",
+   "green"
+  ],
+  "behaviors": [
+   "perching",
+   "foraging",
+   "singing"
+  ],
+  "places": [
+   "tree",
+   "wire",
+   "ground"
+  ],
+  "seasons": [
+   "spring",
+   "summer",
+   "autumn",
+   "winter"
+  ],
+  "onomatopoeia": [
+   "キリキリ",
+   "ビーン",
+   "コロロ"
+  ],
+  "note": "翼の黄色い帯が目立つ",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
+ },
+ {
+  "species_id": "dusky_thrush",
+  "name_ja": "ツグミ",
+  "size_level": 4,
+  "colors": [
+   "brown",
+   "white",
+   "red"
+  ],
+  "behaviors": [
+   "foraging"
+  ],
+  "places": [
+   "ground"
+  ],
+  "seasons": [
+   "autumn",
+   "winter"
+  ],
+  "onomatopoeia": [
+   "クワッ",
+   "キュッキュッ",
+   "ククッ"
+  ],
+  "note": "地面で立ち止まっては歩く",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
+ },
+ {
+  "species_id": "bull_headed_shrike",
+  "name_ja": "モズ",
+  "size_level": 3,
+  "colors": [
+   "brown",
+   "gray",
+   "black",
+   "white",
+   "red"
+  ],
+  "behaviors": [
+   "perching",
+   "singing"
+  ],
+  "places": [
+   "wire",
+   "tree"
+  ],
+  "seasons": [
+   "spring",
+   "summer",
+   "autumn",
+   "winter"
+  ],
+  "onomatopoeia": [
+   "キィーキィー",
+   "キチキチ",
+   "ギチギチ"
+  ],
+  "note": "高い所から獲物を見張る。目に黒い帯",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
+ },
+ {
+  "species_id": "meadow_bunting",
+  "name_ja": "ホオジロ",
+  "size_level": 3,
+  "colors": [
+   "brown",
+   "white",
+   "black",
+   "gray"
+  ],
+  "behaviors": [
+   "singing",
+   "perching",
+   "foraging"
+  ],
+  "places": [
+   "tree",
+   "ground",
+   "grass"
+  ],
+  "seasons": [
+   "spring",
+   "summer",
+   "autumn",
+   "winter"
+  ],
+  "onomatopoeia": [
+   "チッチ",
+   "チョッピーチーチリチー",
+   "ジッジッ"
+  ],
+  "note": "頭に白黒の模様",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
+ },
+ {
+  "species_id": "black_faced_bunting",
+  "name_ja": "アオジ",
+  "size_level": 3,
+  "colors": [
+   "green",
+   "yellow",
+   "brown",
+   "gray"
+  ],
+  "behaviors": [
+   "foraging"
+  ],
+  "places": [
+   "ground",
+   "grass"
+  ],
+  "seasons": [
+   "autumn",
+   "winter"
+  ],
+  "onomatopoeia": [
+   "チッチッ",
+   "チッ",
+   "ツツ"
+  ],
+  "note": "草むらの地面で採食",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
+ },
+ {
+  "species_id": "daurian_redstart",
+  "name_ja": "ジョウビタキ",
+  "size_level": 2,
+  "colors": [
+   "gray",
+   "red",
+   "black",
+   "white"
+  ],
+  "behaviors": [
+   "perching",
+   "foraging"
+  ],
+  "places": [
+   "wire",
+   "tree",
+   "ground"
+  ],
+  "seasons": [
+   "autumn",
+   "winter"
+  ],
+  "onomatopoeia": [
+   "ヒッヒッ",
+   "カッカッ",
+   "ヒッヒッカッカッ"
+  ],
+  "note": "翼の白い斑点。尾を震わせる",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
+ },
+ {
+  "species_id": "japanese_bush_warbler",
+  "name_ja": "ウグイス",
+  "size_level": 3,
+  "colors": [
+   "brown",
+   "gray"
+  ],
+  "behaviors": [
+   "singing"
+  ],
+  "places": [
+   "tree",
+   "grass"
+  ],
+  "seasons": [
+   "spring",
+   "summer",
+   "autumn",
+   "winter"
+  ],
+  "onomatopoeia": [
+   "ホーホケキョ",
+   "ケキョケキョ",
+   "チャッチャッ"
+  ],
+  "note": "声はよく聞くが姿は藪の中でほぼ見えない",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
+ },
+ {
+  "species_id": "oriental_reed_warbler",
+  "name_ja": "オオヨシキリ",
+  "size_level": 3,
+  "colors": [
+   "brown",
+   "white"
+  ],
+  "behaviors": [
+   "singing",
+   "perching"
+  ],
+  "places": [
+   "grass"
+  ],
+  "seasons": [
+   "spring",
+   "summer"
+  ],
+  "onomatopoeia": [
+   "ギョギョシ",
+   "ギョシギョシ",
+   "ケケシ"
+  ],
+  "note": "ヨシ原で大きな声でさえずる",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
+ },
+ {
+  "species_id": "spot_billed_duck",
+  "name_ja": "カルガモ",
+  "size_level": 6,
+  "colors": [
+   "brown",
+   "black",
+   "white",
+   "yellow"
+  ],
+  "behaviors": [
+   "swimming",
+   "foraging",
+   "preening"
+  ],
+  "places": [
+   "water",
+   "ground"
+  ],
+  "seasons": [
+   "spring",
+   "summer",
+   "autumn",
+   "winter"
+  ],
+  "onomatopoeia": [
+   "ガーガー",
+   "グェッグェッ",
+   "グワグワ"
+  ],
+  "note": "くちばしの先が黄色い",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
+ },
+ {
+  "species_id": "mallard",
+  "name_ja": "マガモ",
+  "size_level": 6,
+  "colors": [
+   "green",
+   "brown",
+   "white",
+   "gray"
+  ],
+  "behaviors": [
+   "swimming",
+   "foraging"
+  ],
+  "places": [
+   "water"
+  ],
+  "seasons": [
+   "autumn",
+   "winter"
+  ],
+  "onomatopoeia": [
+   "ガーガー",
+   "グェッ",
+   "グワッ"
+  ],
+  "note": "オスは頭が緑色",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
+ },
+ {
+  "species_id": "eurasian_teal",
+  "name_ja": "コガモ",
+  "size_level": 5,
+  "colors": [
+   "brown",
+   "green",
+   "white",
+   "gray"
+  ],
+  "behaviors": [
+   "swimming",
+   "foraging"
+  ],
+  "places": [
+   "water"
+  ],
+  "seasons": [
+   "autumn",
+   "winter"
+  ],
+  "onomatopoeia": [
+   "ピリッ",
+   "ピリリ",
+   "ピー"
+  ],
+  "note": "小型のカモ",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
+ },
+ {
+  "species_id": "eurasian_wigeon",
+  "name_ja": "ヒドリガモ",
+  "size_level": 6,
+  "colors": [
+   "brown",
+   "gray",
+   "white",
+   "black"
+  ],
+  "behaviors": [
+   "swimming",
+   "foraging"
+  ],
+  "places": [
+   "water",
+   "ground"
+  ],
+  "seasons": [
+   "autumn",
+   "winter"
+  ],
+  "onomatopoeia": [
+   "ピュー",
+   "ピューイ",
+   "ピュイー"
+  ],
+  "note": "オスは頭が赤茶色で額が黄白色",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
+ },
+ {
+  "species_id": "great_cormorant",
+  "name_ja": "カワウ",
+  "size_level": 7,
+  "colors": [
+   "black",
+   "white"
+  ],
+  "behaviors": [
+   "swimming",
+   "preening",
+   "perching",
+   "flying"
+  ],
+  "places": [
+   "water",
+   "tree",
+   "ground"
+  ],
+  "seasons": [
+   "spring",
+   "summer",
+   "autumn",
+   "winter"
+  ],
+  "onomatopoeia": [
+   "ゴロゴロ",
+   "グワッ",
+   "ガッ"
+  ],
+  "note": "潜水して魚を捕る。翼を広げて乾かす",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
+ },
+ {
+  "species_id": "grey_heron",
+  "name_ja": "アオサギ",
+  "size_level": 7,
+  "colors": [
+   "gray",
+   "white",
+   "black"
+  ],
+  "behaviors": [
+   "perching",
+   "foraging",
+   "flying"
+  ],
+  "places": [
+   "water"
+  ],
+  "seasons": [
+   "spring",
+   "summer",
+   "autumn",
+   "winter"
+  ],
+  "onomatopoeia": [
+   "ゴアッ",
+   "グワッ",
+   "ギャッ"
+  ],
+  "note": "長い首。浅瀬で動かず待つ",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
+ },
+ {
+  "species_id": "great_egret",
+  "name_ja": "ダイサギ",
+  "size_level": 7,
+  "colors": [
+   "white"
+  ],
+  "behaviors": [
+   "foraging",
+   "flying"
+  ],
+  "places": [
+   "water"
+  ],
+  "seasons": [
+   "spring",
+   "summer",
+   "autumn",
+   "winter"
+  ],
+  "onomatopoeia": [
+   "ゴァッ",
+   "ガガッ",
+   "グァ"
+  ],
+  "note": "大型の白いサギ",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
+ },
+ {
+  "species_id": "little_egret",
+  "name_ja": "コサギ",
+  "size_level": 6,
+  "colors": [
+   "white",
+   "black",
+   "yellow"
+  ],
+  "behaviors": [
+   "foraging",
+   "swimming"
+  ],
+  "places": [
+   "water"
+  ],
+  "seasons": [
+   "spring",
+   "summer",
+   "autumn",
+   "winter"
+  ],
+  "onomatopoeia": [
+   "ガァ",
+   "グァッ",
+   "ギャー"
+  ],
+  "note": "足の指が黄色い白いサギ",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
+ },
+ {
+  "species_id": "common_coot",
+  "name_ja": "オオバン",
+  "size_level": 5,
+  "colors": [
+   "black",
+   "white"
+  ],
+  "behaviors": [
+   "swimming",
+   "foraging"
+  ],
+  "places": [
+   "water"
+  ],
+  "seasons": [
+   "spring",
+   "summer",
+   "autumn",
+   "winter"
+  ],
+  "onomatopoeia": [
+   "キョッ",
+   "クワッ",
+   "ピョッ"
+  ],
+  "note": "黒い体に白い額",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
+ },
+ {
+  "species_id": "little_grebe",
+  "name_ja": "カイツブリ",
+  "size_level": 4,
+  "colors": [
+   "brown",
+   "gray",
+   "black",
+   "white"
+  ],
+  "behaviors": [
+   "swimming"
+  ],
+  "places": [
+   "water"
+  ],
+  "seasons": [
+   "spring",
+   "summer",
+   "autumn",
+   "winter"
+  ],
+  "onomatopoeia": [
+   "ケレケレ",
+   "ピピピ",
+   "ケケケ"
+  ],
+  "note": "小さく、よく潜る",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
+ },
+ {
+  "species_id": "black_headed_gull",
+  "name_ja": "ユリカモメ",
+  "size_level": 5,
+  "colors": [
+   "white",
+   "gray",
+   "black",
+   "red"
+  ],
+  "behaviors": [
+   "flying",
+   "swimming",
+   "perching"
+  ],
+  "places": [
+   "water"
+  ],
+  "seasons": [
+   "autumn",
+   "winter"
+  ],
+  "onomatopoeia": [
+   "ミャーミャー",
+   "ギャー",
+   "キーキー"
+  ],
+  "note": "赤いくちばしと足",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
+ },
+ {
+  "species_id": "common_sandpiper",
+  "name_ja": "イソシギ",
+  "size_level": 3,
+  "colors": [
+   "brown",
+   "white",
+   "gray"
+  ],
+  "behaviors": [
+   "foraging"
+  ],
+  "places": [
+   "water",
+   "ground"
+  ],
+  "seasons": [
+   "spring",
+   "summer",
+   "autumn",
+   "winter"
+  ],
+  "onomatopoeia": [
+   "チーリーリー",
+   "ピーピー",
+   "ツィリリ"
+  ],
+  "note": "尾を上下に振りながら水辺を歩く",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
+ },
+ {
+  "species_id": "common_kingfisher",
+  "name_ja": "カワセミ",
+  "size_level": 3,
+  "colors": [
+   "blue",
+   "red",
+   "white"
+  ],
+  "behaviors": [
+   "perching",
+   "flying"
+  ],
+  "places": [
+   "water",
+   "tree"
+  ],
+  "seasons": [
+   "spring",
+   "summer",
+   "autumn",
+   "winter"
+  ],
+  "onomatopoeia": [
+   "チー",
+   "ツィー",
+   "チッチー"
+  ],
+  "note": "青く光る背中。水面へ飛び込む",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
+ },
+ {
+  "species_id": "little_ringed_plover",
+  "name_ja": "コチドリ",
+  "size_level": 3,
+  "colors": [
+   "brown",
+   "white",
+   "black"
+  ],
+  "behaviors": [
+   "foraging"
+  ],
+  "places": [
+   "ground",
+   "water"
+  ],
+  "seasons": [
+   "spring",
+   "summer"
+  ],
+  "onomatopoeia": [
+   "ピオ",
+   "ピオピオ",
+   "ピョ"
+  ],
+  "note": "目の周りの黄色い輪。河原の砂礫地",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
+ },
+ {
+  "species_id": "black_kite",
+  "name_ja": "トビ",
+  "size_level": 6,
+  "colors": [
+   "brown"
+  ],
+  "behaviors": [
+   "flying"
+  ],
+  "places": [
+   "tree",
+   "water"
+  ],
+  "seasons": [
+   "spring",
+   "summer",
+   "autumn",
+   "winter"
+  ],
+  "onomatopoeia": [
+   "ピーヒョロロ",
+   "ピーヒョロ",
+   "ピヒョロ"
+  ],
+  "note": "輪を描いて高く舞う",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
+ },
+ {
+  "species_id": "osprey",
+  "name_ja": "ミサゴ",
+  "size_level": 6,
+  "colors": [
+   "brown",
+   "white"
+  ],
+  "behaviors": [
+   "flying",
+   "foraging"
+  ],
+  "places": [
+   "water"
+  ],
+  "seasons": [
+   "spring",
+   "summer",
+   "autumn",
+   "winter"
+  ],
+  "onomatopoeia": [
+   "ピョッ",
+   "ピュイ",
+   "ピョピョ"
+  ],
+  "note": "水面へダイブして魚を捕る",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
+ },
+ {
+  "species_id": "common_kestrel",
+  "name_ja": "チョウゲンボウ",
+  "size_level": 5,
+  "colors": [
+   "brown",
+   "gray",
+   "black",
+   "white"
+  ],
+  "behaviors": [
+   "flying",
+   "perching"
+  ],
+  "places": [
+   "wire"
+  ],
+  "seasons": [
+   "spring",
+   "summer",
+   "autumn",
+   "winter"
+  ],
+  "onomatopoeia": [
+   "キィキィ",
+   "キキキ",
+   "キーキー"
+  ],
+  "note": "空中で停止（ホバリング）する",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
+ },
+ {
+  "species_id": "northern_goshawk",
+  "name_ja": "オオタカ",
+  "size_level": 6,
+  "colors": [
+   "gray",
+   "white",
+   "brown"
+  ],
+  "behaviors": [
+   "perching",
+   "flying"
+  ],
+  "places": [
+   "tree"
+  ],
+  "seasons": [
+   "spring",
+   "summer",
+   "autumn",
+   "winter"
+  ],
+  "onomatopoeia": [
+   "ケッケッ",
+   "ケンケン",
+   "キッキッ"
+  ],
+  "note": "大型の猛禽。森の中を素早く飛ぶ",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
+ },
+ {
+  "species_id": "rose_ringed_parakeet",
+  "name_ja": "ホンセイインコ",
+  "size_level": 5,
+  "colors": [
+   "green",
+   "red"
+  ],
+  "behaviors": [
+   "flying",
+   "perching"
+  ],
+  "places": [
+   "tree"
+  ],
+  "seasons": [
+   "spring",
+   "summer",
+   "autumn",
+   "winter"
+  ],
+  "onomatopoeia": [
+   "ギャーギャー",
+   "キーキー",
+   "ケケ"
+  ],
+  "note": "緑色で長い尾。群れで大きな声",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
+ },
+ {
+  "species_id": "chinese_hwamei",
+  "name_ja": "ガビチョウ",
+  "size_level": 4,
+  "colors": [
+   "brown",
+   "white"
+  ],
+  "behaviors": [
+   "singing",
+   "foraging"
+  ],
+  "places": [
+   "tree",
+   "ground"
+  ],
+  "seasons": [
+   "spring",
+   "summer",
+   "autumn",
+   "winter"
+  ],
+  "onomatopoeia": [
+   "ピーヒョロ",
+   "キョロキョロ",
+   "ピーチュピ"
+  ],
+  "note": "外来種。茂みから大きな声で鳴く。目の周りに白い線",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
+ }
+]

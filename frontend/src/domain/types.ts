@@ -1,0 +1,38 @@
+export type Color = "brown" | "black" | "white" | "gray" | "blue" | "green" | "yellow" | "red";
+export type Behavior = "swimming" | "perching" | "flying" | "singing" | "foraging" | "preening";
+export type Place = "feeder" | "ground" | "tree" | "wire" | "roof" | "water" | "grass";
+export type Season = "spring" | "summer" | "autumn" | "winter";
+
+export interface Species {
+  species_id: string;
+  name_ja: string;
+  size_level: number;
+  colors: Color[];
+  behaviors: Behavior[];
+  places: Place[];
+  seasons: Season[];
+  onomatopoeia: string[];
+  note: string;
+  source: string;
+  confidence: string;
+}
+
+/** 未入力は undefined / 空配列で表す。「不明」と「不一致」は区別する */
+export interface Observation {
+  sizeLevel?: number;
+  colors: Color[];
+  behaviors: Behavior[];
+  place?: Place;
+  month?: number; // 1-12
+  onomatopoeia: string;
+}
+
+export interface Candidate {
+  species: Species;
+  /** 内部の順位付け用。確率ではない */
+  score: number;
+  maxScore: number;
+  matching: string[];
+  conflicting: string[];
+  unknown: string[];
+}

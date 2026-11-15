@@ -1,0 +1,9 @@
+{
+  "name": "bird-finder-root",
+  "private": true,
+  "description": "commitlint用のルート依存。アプリ本体はfrontend/",
+  "devDependencies": {
+    "@commitlint/cli": "^21.0.0",
+    "@commitlint/config-conventional": "^21.0.0"
+  }
+}

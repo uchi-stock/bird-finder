@@ -1,0 +1,25 @@
+:root { color-scheme: light dark; --bg:#fafaf7; --fg:#222; --card:#fff; --line:#d8d8d0; --acc:#2f7d4f; --accfg:#fff; }
+@media (prefers-color-scheme: dark) { :root { --bg:#161815; --fg:#eee; --card:#222420; --line:#3a3d38; --acc:#4caf74; --accfg:#0b1a10; } }
+* { box-sizing: border-box; }
+body { margin:0; background:var(--bg); color:var(--fg); font-family: system-ui, -apple-system, "Hiragino Sans", sans-serif; line-height:1.5; }
+.app { max-width: 640px; margin: 0 auto; padding: 16px; }
+h1 { font-size: 1.4rem; margin: 0 0 4px; }
+h2 { font-size: 1rem; margin: 0 0 8px; }
+section { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; margin:12px 0; }
+.lead, .hint, .note { color: color-mix(in srgb, var(--fg) 65%, transparent); font-size:.85rem; margin:4px 0; }
+input[type=text], input[type=date] { width:100%; font-size:16px; padding:10px; border:1px solid var(--line); border-radius:8px; background:var(--bg); color:var(--fg); }
+.chips, .sizes { display:flex; flex-wrap:wrap; gap:8px; }
+.chip { font-size:15px; padding:10px 14px; border-radius:999px; border:1px solid var(--line); background:var(--bg); color:var(--fg); display:inline-flex; align-items:center; gap:6px; min-height:44px; }
+.sizes .chip { min-width:44px; justify-content:center; font-weight:bold; }
+.chip.on { background:var(--acc); color:var(--accfg); border-color:var(--acc); }
+.dot { width:14px; height:14px; border-radius:50%; border:1px solid #888; display:inline-block; }
+.row { display:flex; align-items:center; gap:8px; }
+.between { justify-content:space-between; }
+.link { background:none; border:none; color:var(--acc); font-size:.9rem; padding:8px; }
+.results { list-style:none; padding:0; margin:8px 0 0; display:grid; gap:8px; }
+.results li { border:1px solid var(--line); border-radius:10px; padding:10px; }
+.badge { font-size:.75rem; background:var(--acc); color:var(--accfg); padding:2px 8px; border-radius:999px; }
+.reasons { display:flex; flex-direction:column; gap:2px; margin:6px 0 0; font-size:.85rem; }
+.ok { color:#2a8a4a; } .ng { color:#c0392b; } .un { opacity:.6; }
+.more { width:100%; margin-top:8px; padding:12px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--fg); font-size:15px; }
+footer { font-size:.75rem; opacity:.7; padding:8px 0 24px; }
