@@ -108,9 +108,11 @@ interface PhotoProps {
   onZoomChange?: (zoomed: boolean) => void;
   /** 拡大表示に添える内容（再生中の表示など） */
   caption?: ReactNode;
+  /** 写真が無いとき、枠に名前を出す（検索結果で見分けられるように） */
+  showNameWhenEmpty?: boolean;
 }
 
-function Photo({ name, scientificName, flying = false, zoomed, onZoomChange, caption }: PhotoProps) {
+function Photo({ name, scientificName, flying = false, zoomed, onZoomChange, caption, showNameWhenEmpty = false }: PhotoProps) {
   const standing = usePhoto(name);
   // 飛んでいる状況なら飛翔の画像を探す。見つからなければ通常の画像（多くは止まっている・立っている姿）
   const flight = useFlightPhoto(scientificName ?? "", flying && Boolean(scientificName));
@@ -136,6 +138,7 @@ function Photo({ name, scientificName, flying = false, zoomed, onZoomChange, cap
         if (!(e.target as HTMLElement).closest("button, a")) setOpen(false);
       }}
     >
+      <div className="lightbox-inner">
       {photo ? (
         // 読み込み済みの小さい版を、開いた瞬間に拡大して出す。大きい版は、読み込み完了後に上へ重ねて切り替える
         <div className="lb-photo">
@@ -161,12 +164,16 @@ function Photo({ name, scientificName, flying = false, zoomed, onZoomChange, cap
             : `出典: Wikipedia「${name}」（画像の著作者・ライセンスはリンク先を参照）`}
         </a>
       )}
+      </div>
     </div>
   );
   if (!photo) {
     return (
       <>
-        <div className="photo empty">写真なし</div>
+        <div className="photo empty">
+          <span>写真なし</span>
+          {showNameWhenEmpty && <strong className="empty-name">{name}</strong>}
+        </div>
         {lightbox}
       </>
     );
@@ -606,42 +613,38 @@ export function App() {
                         if (!stopping) setZoomId(c.species.species_id);
                       }}
                     >
-                      <div className="card">
+                      <div className="tile">
                         <Photo
                           name={c.species.name_ja}
                           scientificName={c.species.scientific_name}
                           flying={flying}
+                          showNameWhenEmpty
                           zoomed={zoomId === c.species.species_id}
                           onZoomChange={(z) => setZoomId(z ? c.species.species_id : null)}
                           caption={
                             <>
+                              <span className="badge">{closeness(c)}</span>
+                              <p className="note">{c.species.note}</p>
+                              <p className="note">鳴き声: {c.species.onomatopoeia.join(" / ") || "聞こえない"}</p>
+                              <p className="reasons">
+                                {c.matching.length > 0 && <span className="ok">一致: {c.matching.join("・")}</span>}
+                                {c.conflicting.length > 0 && <span className="ng">不一致: {c.conflicting.join("・")}</span>}
+                                {c.unknown.length > 0 && <span className="un">未入力: {c.unknown.join("・")}</span>}
+                              </p>
                               {now?.id === c.species.species_id && <PlayStatus now={now} />}
                               <CatchButton speciesId={c.species.species_id} collection={collection} onCatch={onCatch} />
                             </>
                           }
                         />
-                        <div className="body">
-                          <div className="row between">
-                            <strong>
-                              <Emoji c={now?.id === c.species.species_id && now.status === "playing" ? "🔊" : "🔈"} />
-                              {c.species.name_ja}
-                            </strong>
-                            <span className="badges">
-                              {collection[c.species.species_id] && (
-                                <span className="caught" role="img" aria-label="捕獲済み">
-                                  ✅
-                                </span>
-                              )}
-                              <span className="badge">{closeness(c)}</span>
+                        {/* 検索結果は、画像と近さ（段階の表示。確率ではない）だけ。詳細は拡大表示へ */}
+                        <span className="badges">
+                          {collection[c.species.species_id] && (
+                            <span className="caught" role="img" aria-label="捕獲済み">
+                              ✅
                             </span>
-                          </div>
-                          <p className="note clamp">{c.species.note}</p>
-                          <p className="note clamp">鳴き声: {c.species.onomatopoeia.join(" / ") || "聞こえない"}</p>
-                          <p className="reasons">
-                            {c.matching.length > 0 && <span className="ok">一致: {c.matching.join("・")}</span>}
-                            {c.conflicting.length > 0 && <span className="ng">不一致: {c.conflicting.join("・")}</span>}
-                          </p>
-                        </div>
+                          )}
+                          <span className="badge">{closeness(c)}</span>
+                        </span>
                       </div>
                     </li>
                   ))}
