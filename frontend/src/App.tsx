@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import speciesJson from "./data/species.json";
-import { hasAnyInput, identify } from "./domain/scoring";
+import { hasAnyInput, identify, pickTop } from "./domain/scoring";
 import { caughtCount, recordCatch, type Collection } from "./domain/collection";
 import { loadCollection, saveCollection } from "./storage";
 import { HABITATS } from "./domain/habitat";
@@ -171,7 +171,6 @@ export function App() {
   const [locBusy, setLocBusy] = useState(false);
   const [time, setTime] = useState<TimeSlot | undefined>();
   const [voice, setVoice] = useState("");
-  const [showAll, setShowAll] = useState(false);
 
   const obs: Observation = useMemo(
     () => ({
@@ -186,10 +185,9 @@ export function App() {
     }),
     [sizeLevel, colors, behaviors, place, date, useDate, time, habitats, voice],
   );
-  const results = useMemo(() => identify(obs, SPECIES), [obs]);
+  const results = useMemo(() => pickTop(identify(obs, SPECIES)), [obs]);
   // 日付だけでは「何か入力した」とみなさない（初期値が入っているため）
   const inputForResults = hasAnyInput({ ...obs, month: undefined });
-  const shown = showAll ? results : results.slice(0, 8);
 
   const locate = async () => {
     setLocBusy(true);
@@ -214,7 +212,6 @@ export function App() {
     setHabitats([]);
     setLocMsg("");
     setVoice("");
-    setShowAll(false);
   };
 
   return (
@@ -342,7 +339,7 @@ export function App() {
           <>
             <p className="hint">※ 点数順の目安です。確率ではありません。</p>
             <ol className="results">
-              {shown.map((c) => (
+              {results.map((c) => (
                 <li key={c.species.species_id}>
                   <div className="card">
                     <Photo name={c.species.name_ja} />
@@ -364,10 +361,8 @@ export function App() {
                 </li>
               ))}
             </ol>
-            {!showAll && results.length > 8 && (
-              <button className="more" onClick={() => setShowAll(true)}>
-                全{results.length}種を表示
-              </button>
+            {results.length === 0 && (
+              <p className="hint">近い鳥が見つかりませんでした。入力を減らすか、別の特徴に変えてみてください。</p>
             )}
           </>
         )}
