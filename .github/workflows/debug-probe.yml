@@ -1,0 +1,30 @@
+name: debug-probe
+on:
+  push:
+    branches: ['claude/**']
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Commons audio search
+        continue-on-error: true
+        run: |
+          cat > /tmp/show.py <<'PY'
+          import sys, json
+          d = json.load(sys.stdin)
+          if 'error' in d: print('  ERROR', d['error']); sys.exit()
+          p = sorted(d.get('query', {}).get('pages', {}).values(), key=lambda x: x.get('index', 99))
+          print('  n=%d' % len(p))
+          for x in p[:6]:
+              ii = (x.get('videoinfo') or x.get('imageinfo') or [{}])[0]
+              em = ii.get('extmetadata', {})
+              der = [(a.get('type'), a.get('transcodekey')) for a in ii.get('derivatives', [])]
+              print('  ', x['title'][:60], '|', ii.get('mime'), '|', round(ii.get('duration', 0) or 0, 1), 's |', em.get('LicenseShortName', {}).get('value'), '|', der)
+              print('      url:', (ii.get('url') or '')[:110])
+          PY
+          api() { curl -s -m 25 -G "https://commons.wikimedia.org/w/api.php" -A "bird-finder-probe/1.0" --data-urlencode "action=query" --data-urlencode "format=json" --data-urlencode "origin=*" --data-urlencode "generator=search" --data-urlencode "gsrnamespace=6" --data-urlencode "gsrlimit=8" --data-urlencode "prop=videoinfo" --data-urlencode "viprop=url|mime|derivatives|extmetadata|duration" --data-urlencode "gsrsearch=$1" ; }
+          for sci in "Passer montanus" "Horornis diphone" "Hypsipetes amaurotis" "Motacilla alba" "Corvus macrorhynchos" "Alcedo atthis"; do
+            echo "== $sci"
+            api "filetype:audio \"$sci\"" | python3 /tmp/show.py
+            sleep 2
+          done
