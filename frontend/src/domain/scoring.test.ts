@@ -162,6 +162,38 @@ describe("鳴き声が聞こえなかった／コウモリ", () => {
   });
 });
 
+describe("羽の色の2段階（主な色・部分的な色）", () => {
+  const score = (obs: Observation, name: string) => identify(obs, species).find((c) => c.species.name_ja === name)!;
+  it("黒・白を選んでも、茶が主なスズメより、白黒が主なハクセキレイが上位", () => {
+    const obs: Observation = { ...empty, colors: ["black", "white"] };
+    expect(score(obs, "ハクセキレイ").score).toBeGreaterThan(score(obs, "スズメ").score);
+  });
+  it("スズメは黒・白が部分的な色なので「羽の色（一部）」と表示される", () => {
+    const c = score({ ...empty, colors: ["black", "white"] }, "スズメ");
+    expect(c.matching).toContain("羽の色（一部）");
+    expect(c.conflicting).not.toContain("羽の色");
+  });
+  it("茶を選べばスズメは主な色で一致し、「羽の色」と表示される", () => {
+    const c = score({ ...empty, colors: ["brown"] }, "スズメ");
+    expect(c.matching).toContain("羽の色");
+  });
+  it("部分的な色のみの一致は、主な色の一致より点が低い", () => {
+    const main = score({ ...empty, colors: ["brown"] }, "スズメ").score;
+    const minor = score({ ...empty, colors: ["black"] }, "スズメ").score;
+    expect(minor).toBeLessThan(main);
+    expect(minor).toBeGreaterThan(0);
+  });
+  it("どちらの色にも無ければ従来どおり矛盾", () => {
+    expect(score({ ...empty, colors: ["blue"] }, "スズメ").conflicting).toContain("羽の色");
+  });
+  it("全種が主な色を持ち、部分的な色と重ならない", () => {
+    for (const s of species) {
+      expect(s.colors.length).toBeGreaterThan(0);
+      expect(s.colors_minor.filter((c) => s.colors.includes(c))).toEqual([]);
+    }
+  });
+});
+
 describe("補助関数", () => {
   it("月→季節", () => {
     expect([1, 4, 7, 11].map(monthToSeason)).toEqual(["winter", "spring", "summer", "autumn"]);
