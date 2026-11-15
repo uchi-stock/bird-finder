@@ -47,7 +47,8 @@
    "woodland",
    "open"
   ],
-  "abundance": "very_common"
+  "abundance": "very_common",
+  "silent": false
  },
  {
   "species_id": "starling",
@@ -95,7 +96,8 @@
    "woodland",
    "open"
   ],
-  "abundance": "very_common"
+  "abundance": "very_common",
+  "silent": false
  },
  {
   "species_id": "brown_eared_bulbul",
@@ -139,7 +141,8 @@
    "urban",
    "woodland"
   ],
-  "abundance": "very_common"
+  "abundance": "very_common",
+  "silent": false
  },
  {
   "species_id": "rock_dove",
@@ -183,7 +186,8 @@
   "habitats": [
    "urban"
   ],
-  "abundance": "very_common"
+  "abundance": "very_common",
+  "silent": false
  },
  {
   "species_id": "oriental_turtle_dove",
@@ -228,7 +232,8 @@
    "woodland",
    "open"
   ],
-  "abundance": "common"
+  "abundance": "common",
+  "silent": false
  },
  {
   "species_id": "large_billed_crow",
@@ -273,7 +278,8 @@
    "urban",
    "woodland"
   ],
-  "abundance": "very_common"
+  "abundance": "very_common",
+  "silent": false
  },
  {
   "species_id": "carrion_crow",
@@ -318,7 +324,8 @@
    "open",
    "waterside"
   ],
-  "abundance": "very_common"
+  "abundance": "very_common",
+  "silent": false
  },
  {
   "species_id": "great_tit",
@@ -361,7 +368,8 @@
    "urban",
    "woodland"
   ],
-  "abundance": "common"
+  "abundance": "common",
+  "silent": false
  },
  {
   "species_id": "japanese_white_eye",
@@ -404,7 +412,8 @@
    "urban",
    "woodland"
   ],
-  "abundance": "common"
+  "abundance": "common",
+  "silent": false
  },
  {
   "species_id": "azure_winged_magpie",
@@ -448,7 +457,8 @@
    "urban",
    "woodland"
   ],
-  "abundance": "common"
+  "abundance": "common",
+  "silent": false
  },
  {
   "species_id": "barn_swallow",
@@ -491,7 +501,8 @@
   "habitats": [
    "urban"
   ],
-  "abundance": "common"
+  "abundance": "common",
+  "silent": false
  },
  {
   "species_id": "blue_rock_thrush",
@@ -532,7 +543,8 @@
   "habitats": [
    "urban"
   ],
-  "abundance": "common"
+  "abundance": "common",
+  "silent": false
  },
  {
   "species_id": "white_wagtail",
@@ -574,7 +586,8 @@
    "waterside",
    "open"
   ],
-  "abundance": "very_common"
+  "abundance": "very_common",
+  "silent": false
  },
  {
   "species_id": "japanese_wagtail",
@@ -616,7 +629,8 @@
    "waterside",
    "open"
   ],
-  "abundance": "common"
+  "abundance": "common",
+  "silent": false
  },
  {
   "species_id": "grey_wagtail",
@@ -659,7 +673,8 @@
    "waterside",
    "open"
   ],
-  "abundance": "uncommon"
+  "abundance": "uncommon",
+  "silent": false
  },
  {
   "species_id": "oriental_greenfinch",
@@ -704,7 +719,8 @@
    "woodland",
    "open"
   ],
-  "abundance": "very_common"
+  "abundance": "very_common",
+  "silent": false
  },
  {
   "species_id": "dusky_thrush",
@@ -742,7 +758,8 @@
    "open",
    "urban"
   ],
-  "abundance": "common"
+  "abundance": "common",
+  "silent": false
  },
  {
   "species_id": "bull_headed_shrike",
@@ -786,7 +803,8 @@
    "urban",
    "woodland"
   ],
-  "abundance": "common"
+  "abundance": "common",
+  "silent": false
  },
  {
   "species_id": "meadow_bunting",
@@ -830,7 +848,8 @@
    "woodland",
    "open"
   ],
-  "abundance": "common"
+  "abundance": "common",
+  "silent": false
  },
  {
   "species_id": "black_faced_bunting",
@@ -869,7 +888,8 @@
   "habitats": [
    "open"
   ],
-  "abundance": "uncommon"
+  "abundance": "uncommon",
+  "silent": false
  },
  {
   "species_id": "daurian_redstart",
@@ -912,7 +932,8 @@
    "woodland",
    "open"
   ],
-  "abundance": "common"
+  "abundance": "common",
+  "silent": false
  },
  {
   "species_id": "japanese_bush_warbler",
@@ -951,7 +972,8 @@
    "woodland",
    "open"
   ],
-  "abundance": "common"
+  "abundance": "common",
+  "silent": false
  },
  {
   "species_id": "oriental_reed_warbler",
@@ -987,7 +1009,8 @@
   "habitats": [
    "open"
   ],
-  "abundance": "uncommon"
+  "abundance": "uncommon",
+  "silent": false
  },
  {
   "species_id": "spot_billed_duck",
@@ -1030,7 +1053,8 @@
    "waterside",
    "open"
   ],
-  "abundance": "very_common"
+  "abundance": "very_common",
+  "silent": false
  },
  {
   "species_id": "mallard",
@@ -1068,7 +1092,8 @@
   "habitats": [
    "waterside"
   ],
-  "abundance": "common"
+  "abundance": "common",
+  "silent": false
  },
  {
   "species_id": "eurasian_teal",
@@ -1106,7 +1131,8 @@
   "habitats": [
    "waterside"
   ],
-  "abundance": "common"
+  "abundance": "common",
+  "silent": false
  },
  {
   "species_id": "eurasian_wigeon",
@@ -1146,7 +1172,8 @@
    "waterside",
    "open"
   ],
-  "abundance": "uncommon"
+  "abundance": "uncommon",
+  "silent": false
  },
  {
   "species_id": "great_cormorant",
@@ -1190,7 +1217,8 @@
   "habitats": [
    "waterside"
   ],
-  "abundance": "very_common"
+  "abundance": "very_common",
+  "silent": true
  },
  {
   "species_id": "grey_heron",
@@ -1231,7 +1259,8 @@
   "habitats": [
    "waterside"
   ],
-  "abundance": "common"
+  "abundance": "common",
+  "silent": false
  },
  {
   "species_id": "great_egret",
@@ -1269,7 +1298,8 @@
   "habitats": [
    "waterside"
   ],
-  "abundance": "common"
+  "abundance": "common",
+  "silent": true
  },
  {
   "species_id": "little_egret",
@@ -1308,7 +1338,8 @@
   "habitats": [
    "waterside"
   ],
-  "abundance": "common"
+  "abundance": "common",
+  "silent": false
  },
  {
   "species_id": "common_coot",
@@ -1347,7 +1378,8 @@
   "habitats": [
    "waterside"
   ],
-  "abundance": "common"
+  "abundance": "common",
+  "silent": false
  },
  {
   "species_id": "little_grebe",
@@ -1387,7 +1419,8 @@
   "habitats": [
    "waterside"
   ],
-  "abundance": "common"
+  "abundance": "common",
+  "silent": false
  },
  {
   "species_id": "black_headed_gull",
@@ -1427,7 +1460,8 @@
   "habitats": [
    "waterside"
   ],
-  "abundance": "common"
+  "abundance": "common",
+  "silent": false
  },
  {
   "species_id": "common_sandpiper",
@@ -1468,7 +1502,8 @@
    "waterside",
    "open"
   ],
-  "abundance": "common"
+  "abundance": "common",
+  "silent": false
  },
  {
   "species_id": "common_kingfisher",
@@ -1511,7 +1546,8 @@
    "waterside",
    "woodland"
   ],
-  "abundance": "common"
+  "abundance": "common",
+  "silent": false
  },
  {
   "species_id": "little_ringed_plover",
@@ -1550,7 +1586,8 @@
    "waterside",
    "open"
   ],
-  "abundance": "uncommon"
+  "abundance": "uncommon",
+  "silent": false
  },
  {
   "species_id": "black_kite",
@@ -1589,7 +1626,8 @@
    "urban",
    "woodland"
   ],
-  "abundance": "common"
+  "abundance": "common",
+  "silent": false
  },
  {
   "species_id": "osprey",
@@ -1627,7 +1665,8 @@
   "habitats": [
    "waterside"
   ],
-  "abundance": "uncommon"
+  "abundance": "uncommon",
+  "silent": false
  },
  {
   "species_id": "common_kestrel",
@@ -1667,7 +1706,8 @@
   "habitats": [
    "urban"
   ],
-  "abundance": "uncommon"
+  "abundance": "uncommon",
+  "silent": false
  },
  {
   "species_id": "northern_goshawk",
@@ -1707,7 +1747,8 @@
   "habitats": [
    "woodland"
   ],
-  "abundance": "rare"
+  "abundance": "rare",
+  "silent": false
  },
  {
   "species_id": "rose_ringed_parakeet",
@@ -1747,7 +1788,8 @@
    "urban",
    "woodland"
   ],
-  "abundance": "uncommon"
+  "abundance": "uncommon",
+  "silent": false
  },
  {
   "species_id": "chinese_hwamei",
@@ -1787,6 +1829,45 @@
    "woodland",
    "open"
   ],
-  "abundance": "uncommon"
+  "abundance": "uncommon",
+  "silent": false
+ },
+ {
+  "species_id": "pipistrelle_bat",
+  "name_ja": "アブラコウモリ",
+  "size_level": 1,
+  "colors": [
+   "brown",
+   "black",
+   "gray"
+  ],
+  "behaviors": [
+   "flying",
+   "foraging"
+  ],
+  "places": [
+   "sky",
+   "roof"
+  ],
+  "seasons": [
+   "spring",
+   "summer",
+   "autumn"
+  ],
+  "times": [
+   "evening",
+   "night"
+  ],
+  "abundance": "common",
+  "habitats": [
+   "urban",
+   "waterside",
+   "open"
+  ],
+  "onomatopoeia": [],
+  "silent": true,
+  "note": "鳥ではなくコウモリ。夕方から夜に、空を素早く不規則に飛ぶ小さな影。鳴き声は超音波で人には聞こえない",
+  "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
+  "confidence": "unverified"
  }
 ]
