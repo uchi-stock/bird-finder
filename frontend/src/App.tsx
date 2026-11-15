@@ -119,8 +119,12 @@ function Photo({ name, scientificName, flying = false, zoomed, onZoomChange, cap
   const open = zoomed ?? innerOpen;
   const setOpen = (v: boolean) => (onZoomChange ? onZoomChange(v) : setInnerOpen(v));
   const [largeSrc, setLargeSrc] = useState("");
+  const [largeLoaded, setLargeLoaded] = useState(false);
   useEffect(() => {
-    if (photo) setLargeSrc(photo.flight ? photo.thumbnail : largeImageUrl(photo.thumbnail));
+    if (photo) {
+      setLargeSrc(photo.flight ? photo.thumbnail : largeImageUrl(photo.thumbnail));
+      setLargeLoaded(false);
+    }
   }, [photo]);
   // 拡大表示（鳥の詳細）。写真が無い鳥でも開く（捕まえる・再生中の表示を載せるため）
   const lightbox = open && (
@@ -132,7 +136,22 @@ function Photo({ name, scientificName, flying = false, zoomed, onZoomChange, cap
         if (!(e.target as HTMLElement).closest("button, a")) setOpen(false);
       }}
     >
-      {photo ? <img src={largeSrc} alt={name} onError={() => setLargeSrc(photo.thumbnail)} /> : <div className="photo-empty-large">写真なし</div>}
+      {photo ? (
+        // 読み込み済みの小さい版を、開いた瞬間に拡大して出す。大きい版は、読み込み完了後に上へ重ねて切り替える
+        <div className="lb-photo">
+          <img className="lb-thumb" src={photo.thumbnail} alt={name} />
+          <img
+            className={largeLoaded ? "lb-large on" : "lb-large"}
+            src={largeSrc}
+            alt=""
+            aria-hidden="true"
+            onLoad={() => setLargeLoaded(true)}
+            onError={() => setLargeSrc(photo.thumbnail)}
+          />
+        </div>
+      ) : (
+        <div className="photo-empty-large">写真なし</div>
+      )}
       <strong className="lightbox-name">{name}</strong>
       {caption}
       {photo && (
