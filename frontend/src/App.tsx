@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import speciesJson from "./data/species.json";
 import { hasAnyInput, identify } from "./domain/scoring";
+import { usePhoto } from "./photo";
 import type { Behavior, Candidate, Color, Observation, Place, Species } from "./domain/types";
 
 const SPECIES = speciesJson as Species[];
@@ -57,6 +58,27 @@ function closeness(c: Candidate): string {
   if (r >= 0.75) return "かなり近い";
   if (r >= 0.45) return "近い";
   return "候補のひとつ";
+}
+
+function Photo({ name }: { name: string }) {
+  const photo = usePhoto(name);
+  const [open, setOpen] = useState(false);
+  if (!photo) return <div className="photo empty">写真なし</div>;
+  return (
+    <>
+      <button className="photo" onClick={() => setOpen(true)} aria-label={`${name}の写真を拡大`}>
+        <img src={photo.thumbnail} alt={name} loading="lazy" />
+      </button>
+      {open && (
+        <div className="lightbox" onClick={() => setOpen(false)}>
+          <img src={photo.thumbnail.replace(/\/\d+px-/, "/800px-")} alt={name} />
+          <a href={photo.pageUrl} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>
+            出典: Wikipedia「{name}」（画像の著作者・ライセンスはリンク先を参照）
+          </a>
+        </div>
+      )}
+    </>
+  );
 }
 
 export function App() {
@@ -185,17 +207,22 @@ export function App() {
             <ol className="results">
               {shown.map((c) => (
                 <li key={c.species.species_id}>
-                  <div className="row between">
-                    <strong>{c.species.name_ja}</strong>
-                    <span className="badge">{closeness(c)}</span>
-                  </div>
-                  <p className="note">{c.species.note}</p>
+                  <div className="card">
+                    <Photo name={c.species.name_ja} />
+                    <div className="body">
+                      <div className="row between">
+                        <strong>{c.species.name_ja}</strong>
+                        <span className="badge">{closeness(c)}</span>
+                      </div>
+                      <p className="note">{c.species.note}</p>
                   <p className="reasons">
                     {c.matching.length > 0 && <span className="ok">一致: {c.matching.join("・")}</span>}
                     {c.conflicting.length > 0 && <span className="ng">不一致: {c.conflicting.join("・")}</span>}
                     {c.unknown.length > 0 && <span className="un">未入力: {c.unknown.join("・")}</span>}
                   </p>
                   <p className="note">鳴き声の例: {c.species.onomatopoeia.join(" / ")}</p>
+                    </div>
+                  </div>
                 </li>
               ))}
             </ol>
