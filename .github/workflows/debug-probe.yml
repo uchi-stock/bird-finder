@@ -20,11 +20,12 @@ jobs:
               em = ii.get('extmetadata', {})
               der = [(a.get('type'), a.get('transcodekey')) for a in ii.get('derivatives', [])]
               print('  ', x['title'][:60], '|', ii.get('mime'), '|', round(ii.get('duration', 0) or 0, 1), 's |', em.get('LicenseShortName', {}).get('value'), '|', der)
-              print('      url:', (ii.get('url') or '')[:110])
+              print('      src:', [ (a.get('src') or '')[-60:] for a in ii.get('derivatives', [])])
           PY
           api() { curl -s -m 25 -G "https://commons.wikimedia.org/w/api.php" -A "bird-finder-probe/1.0" --data-urlencode "action=query" --data-urlencode "format=json" --data-urlencode "origin=*" --data-urlencode "generator=search" --data-urlencode "gsrnamespace=6" --data-urlencode "gsrlimit=8" --data-urlencode "prop=videoinfo" --data-urlencode "viprop=url|mime|derivatives|extmetadata|duration" --data-urlencode "gsrsearch=$1" ; }
           for sci in "Passer montanus" "Horornis diphone" "Hypsipetes amaurotis" "Motacilla alba" "Corvus macrorhynchos" "Alcedo atthis"; do
             echo "== $sci"
-            api "filetype:audio \"$sci\"" | python3 /tmp/show.py
+            echo " V1 incategory exact"; api "filetype:audio incategory:\"$sci\"" | python3 /tmp/show.py
+            echo " V2 incategory Sounds/Audio files of"; api "filetype:audio (incategory:\"Audio files of $sci\" OR incategory:\"Sounds of $sci\" OR incategory:\"Audio files of ${sci}\")" | python3 /tmp/show.py
             sleep 2
           done
