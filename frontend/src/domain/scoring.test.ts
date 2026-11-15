@@ -4,7 +4,7 @@ import { hasAnyInput, identify, monthToSeason, voiceSimilarity } from "./scoring
 import type { Observation, Species } from "./types";
 
 const species = speciesJson as Species[];
-const empty: Observation = { colors: [], behaviors: [], onomatopoeia: "" };
+const empty: Observation = { colors: [], behaviors: [], habitats: [], onomatopoeia: "" };
 const top = (obs: Observation, n: number) => identify(obs, species).slice(0, n).map((c) => c.species.name_ja);
 
 describe("典型的な観察入力で期待する候補が上位3件に入る", () => {
@@ -75,6 +75,17 @@ describe("時間帯", () => {
   it("朝にアオサギは時間帯が一致する", () => {
     const heron = identify({ ...empty, time: "morning" }, species).find((c) => c.species.name_ja === "アオサギ")!;
     expect(heron.matching).toContain("時間帯");
+  });
+});
+
+describe("周辺環境", () => {
+  it("水辺ならカワセミが上位、一致しない環境は減点されない", () => {
+    const r = identify({ ...empty, habitats: ["waterside"] }, species);
+    expect(r.slice(0, 15).map((c) => c.species.name_ja)).toContain("カワセミ");
+    expect(r.every((c) => c.score >= 0)).toBe(true);
+  });
+  it("未入力なら周辺環境は加点も減点もしない", () => {
+    expect(identify(empty, species)[0].unknown).toContain("周辺環境");
   });
 });
 

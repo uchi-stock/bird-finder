@@ -40,6 +40,11 @@
    "morning",
    "day",
    "evening"
+  ],
+  "habitats": [
+   "urban",
+   "woodland",
+   "open"
   ]
  },
  {
@@ -81,6 +86,11 @@
   "times": [
    "morning",
    "evening"
+  ],
+  "habitats": [
+   "urban",
+   "woodland",
+   "open"
   ]
  },
  {
@@ -119,6 +129,10 @@
    "morning",
    "day",
    "evening"
+  ],
+  "habitats": [
+   "urban",
+   "woodland"
   ]
  },
  {
@@ -158,6 +172,9 @@
    "morning",
    "day",
    "evening"
+  ],
+  "habitats": [
+   "urban"
   ]
  },
  {
@@ -197,6 +214,11 @@
    "morning",
    "day",
    "evening"
+  ],
+  "habitats": [
+   "urban",
+   "woodland",
+   "open"
   ]
  },
  {
@@ -236,6 +258,10 @@
    "morning",
    "day",
    "evening"
+  ],
+  "habitats": [
+   "urban",
+   "woodland"
   ]
  },
  {
@@ -274,6 +300,11 @@
    "morning",
    "day",
    "evening"
+  ],
+  "habitats": [
+   "urban",
+   "open",
+   "waterside"
   ]
  },
  {
@@ -312,6 +343,10 @@
   "times": [
    "morning",
    "day"
+  ],
+  "habitats": [
+   "urban",
+   "woodland"
   ]
  },
  {
@@ -350,6 +385,10 @@
    "morning",
    "day",
    "evening"
+  ],
+  "habitats": [
+   "urban",
+   "woodland"
   ]
  },
  {
@@ -388,6 +427,10 @@
   "times": [
    "morning",
    "day"
+  ],
+  "habitats": [
+   "urban",
+   "woodland"
   ]
  },
  {
@@ -426,6 +469,9 @@
    "morning",
    "day",
    "evening"
+  ],
+  "habitats": [
+   "urban"
   ]
  },
  {
@@ -463,6 +509,9 @@
    "morning",
    "day",
    "evening"
+  ],
+  "habitats": [
+   "urban"
   ]
  },
  {
@@ -500,6 +549,10 @@
    "morning",
    "day",
    "evening"
+  ],
+  "habitats": [
+   "waterside",
+   "open"
   ]
  },
  {
@@ -537,6 +590,10 @@
    "morning",
    "day",
    "evening"
+  ],
+  "habitats": [
+   "waterside",
+   "open"
   ]
  },
  {
@@ -575,6 +632,10 @@
    "morning",
    "day",
    "evening"
+  ],
+  "habitats": [
+   "waterside",
+   "open"
   ]
  },
  {
@@ -614,6 +675,11 @@
    "morning",
    "day",
    "evening"
+  ],
+  "habitats": [
+   "urban",
+   "woodland",
+   "open"
   ]
  },
  {
@@ -647,6 +713,10 @@
    "morning",
    "day",
    "evening"
+  ],
+  "habitats": [
+   "open",
+   "urban"
   ]
  },
  {
@@ -686,6 +756,10 @@
    "morning",
    "day",
    "evening"
+  ],
+  "habitats": [
+   "urban",
+   "woodland"
   ]
  },
  {
@@ -725,6 +799,10 @@
   "times": [
    "morning",
    "day"
+  ],
+  "habitats": [
+   "woodland",
+   "open"
   ]
  },
  {
@@ -760,6 +838,9 @@
    "morning",
    "day",
    "evening"
+  ],
+  "habitats": [
+   "open"
   ]
  },
  {
@@ -797,6 +878,11 @@
    "morning",
    "day",
    "evening"
+  ],
+  "habitats": [
+   "urban",
+   "woodland",
+   "open"
   ]
  },
  {
@@ -831,6 +917,10 @@
   "times": [
    "morning",
    "day"
+  ],
+  "habitats": [
+   "woodland",
+   "open"
   ]
  },
  {
@@ -863,6 +953,9 @@
   "times": [
    "morning",
    "day"
+  ],
+  "habitats": [
+   "open"
   ]
  },
  {
@@ -901,6 +994,10 @@
   "times": [
    "morning",
    "evening"
+  ],
+  "habitats": [
+   "waterside",
+   "open"
   ]
  },
  {
@@ -935,6 +1032,9 @@
   "times": [
    "morning",
    "evening"
+  ],
+  "habitats": [
+   "waterside"
   ]
  },
  {
@@ -969,6 +1069,9 @@
   "times": [
    "morning",
    "evening"
+  ],
+  "habitats": [
+   "waterside"
   ]
  },
  {
@@ -1004,6 +1107,10 @@
   "times": [
    "morning",
    "evening"
+  ],
+  "habitats": [
+   "waterside",
+   "open"
   ]
  },
  {
@@ -1043,6 +1150,9 @@
    "morning",
    "day",
    "evening"
+  ],
+  "habitats": [
+   "waterside"
   ]
  },
  {
@@ -1079,6 +1189,9 @@
   "times": [
    "morning",
    "evening"
+  ],
+  "habitats": [
+   "waterside"
   ]
  },
  {
@@ -1112,6 +1225,9 @@
   "times": [
    "morning",
    "evening"
+  ],
+  "habitats": [
+   "waterside"
   ]
  },
  {
@@ -1147,6 +1263,9 @@
   "times": [
    "morning",
    "evening"
+  ],
+  "habitats": [
+   "waterside"
   ]
  },
  {
@@ -1182,6 +1301,9 @@
    "morning",
    "day",
    "evening"
+  ],
+  "habitats": [
+   "waterside"
   ]
  },
  {
@@ -1218,6 +1340,9 @@
    "morning",
    "day",
    "evening"
+  ],
+  "habitats": [
+   "waterside"
   ]
  },
  {
@@ -1253,6 +1378,9 @@
   "times": [
    "morning",
    "day"
+  ],
+  "habitats": [
+   "waterside"
   ]
  },
  {
@@ -1289,6 +1417,10 @@
    "morning",
    "day",
    "evening"
+  ],
+  "habitats": [
+   "waterside",
+   "open"
   ]
  },
  {
@@ -1326,6 +1458,10 @@
    "morning",
    "day",
    "evening"
+  ],
+  "habitats": [
+   "waterside",
+   "woodland"
   ]
  },
  {
@@ -1360,6 +1496,10 @@
    "morning",
    "day",
    "evening"
+  ],
+  "habitats": [
+   "waterside",
+   "open"
   ]
  },
  {
@@ -1392,6 +1532,11 @@
   "confidence": "unverified",
   "times": [
    "day"
+  ],
+  "habitats": [
+   "waterside",
+   "urban",
+   "woodland"
   ]
  },
  {
@@ -1425,6 +1570,9 @@
   "confidence": "unverified",
   "times": [
    "day"
+  ],
+  "habitats": [
+   "waterside"
   ]
  },
  {
@@ -1460,6 +1608,9 @@
   "confidence": "unverified",
   "times": [
    "day"
+  ],
+  "habitats": [
+   "urban"
   ]
  },
  {
@@ -1495,6 +1646,9 @@
   "times": [
    "morning",
    "day"
+  ],
+  "habitats": [
+   "woodland"
   ]
  },
  {
@@ -1529,6 +1683,10 @@
   "times": [
    "morning",
    "evening"
+  ],
+  "habitats": [
+   "urban",
+   "woodland"
   ]
  },
  {
@@ -1564,6 +1722,10 @@
   "times": [
    "morning",
    "day"
+  ],
+  "habitats": [
+   "woodland",
+   "open"
   ]
  }
 ]
