@@ -2,6 +2,8 @@ import type { Abundance, Candidate, Observation, Season, Species } from "./types
 
 const WEIGHT = { size: 2, color: 2, behavior: 3, place: 3, season: 2, time: 1, habitat: 2, voice: 4 } as const;
 const CONFLICT_PENALTY = 2;
+/** 部分的な色だけが一致した場合の重み（主な色は1） */
+const MINOR_COLOR = 0.3;
 /** 地域での出現しやすさによる加点（事前情報）。入力一致の重みより小さくし、少ないことを理由に減点・除外はしない */
 const PRIOR: Record<Abundance, number> = { very_common: 1, common: 0.7, uncommon: 0.3, rare: 0 };
 
@@ -69,14 +71,15 @@ export function scoreSpecies(obs: Observation, sp: Species): Candidate {
     }
   }
 
-  // 色（選択数に比例させず、一致割合に正規化）
+  // 色（選択数に比例させず平均。主な色は1、部分的な色は少しだけ加点する）
   if (obs.colors.length === 0) unknown.push("羽の色");
   else {
     maxScore += WEIGHT.color;
-    const hit = obs.colors.filter((c) => sp.colors.includes(c)).length;
-    if (hit > 0) {
-      score += WEIGHT.color * (hit / obs.colors.length);
-      matching.push("羽の色");
+    const part: number[] = obs.colors.map((c) => (sp.colors.includes(c) ? 1 : sp.colors_minor.includes(c) ? MINOR_COLOR : 0));
+    const ratio = part.reduce((a, b) => a + b, 0) / obs.colors.length;
+    if (ratio > 0) {
+      score += WEIGHT.color * ratio;
+      matching.push(part.some((p) => p === 1) ? "羽の色" : "羽の色（一部）");
     } else {
       score -= CONFLICT_PENALTY;
       conflicting.push("羽の色");

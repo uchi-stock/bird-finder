@@ -10,7 +10,10 @@ export interface Species {
   species_id: string;
   name_ja: string;
   size_level: number;
+  /** 主な色（体の大部分を占める色） */
   colors: Color[];
+  /** 部分的な色（体の一部にだけ見られる色） */
+  colors_minor: Color[];
   behaviors: Behavior[];
   places: Place[];
   seasons: Season[];

@@ -4,10 +4,7 @@
   "name_ja": "スズメ",
   "size_level": 2,
   "colors": [
-   "brown",
-   "black",
-   "white",
-   "gray"
+   "brown"
   ],
   "behaviors": [
    "perching",
@@ -48,7 +45,12 @@
    "open"
   ],
   "abundance": "very_common",
-  "silent": false
+  "silent": false,
+  "colors_minor": [
+   "black",
+   "white",
+   "gray"
+  ]
  },
  {
   "species_id": "starling",
@@ -56,10 +58,7 @@
   "size_level": 4,
   "colors": [
    "brown",
-   "black",
-   "gray",
-   "white",
-   "red"
+   "black"
   ],
   "behaviors": [
    "foraging",
@@ -97,15 +96,19 @@
    "open"
   ],
   "abundance": "very_common",
-  "silent": false
+  "silent": false,
+  "colors_minor": [
+   "gray",
+   "white",
+   "red"
+  ]
  },
  {
   "species_id": "brown_eared_bulbul",
   "name_ja": "ヒヨドリ",
   "size_level": 4,
   "colors": [
-   "gray",
-   "brown"
+   "gray"
   ],
   "behaviors": [
    "singing",
@@ -142,16 +145,18 @@
    "woodland"
   ],
   "abundance": "very_common",
-  "silent": false
+  "silent": false,
+  "colors_minor": [
+   "brown",
+   "white"
+  ]
  },
  {
   "species_id": "rock_dove",
   "name_ja": "ドバト",
   "size_level": 5,
   "colors": [
-   "gray",
-   "white",
-   "black"
+   "gray"
   ],
   "behaviors": [
    "foraging",
@@ -187,7 +192,11 @@
    "urban"
   ],
   "abundance": "very_common",
-  "silent": false
+  "silent": false,
+  "colors_minor": [
+   "white",
+   "black"
+  ]
  },
  {
   "species_id": "oriental_turtle_dove",
@@ -195,8 +204,7 @@
   "size_level": 5,
   "colors": [
    "brown",
-   "gray",
-   "black"
+   "gray"
   ],
   "behaviors": [
    "foraging",
@@ -233,7 +241,10 @@
    "open"
   ],
   "abundance": "common",
-  "silent": false
+  "silent": false,
+  "colors_minor": [
+   "black"
+  ]
  },
  {
   "species_id": "large_billed_crow",
@@ -279,7 +290,8 @@
    "woodland"
   ],
   "abundance": "very_common",
-  "silent": false
+  "silent": false,
+  "colors_minor": []
  },
  {
   "species_id": "carrion_crow",
@@ -325,17 +337,16 @@
    "waterside"
   ],
   "abundance": "very_common",
-  "silent": false
+  "silent": false,
+  "colors_minor": []
  },
  {
   "species_id": "great_tit",
   "name_ja": "シジュウカラ",
   "size_level": 2,
   "colors": [
-   "white",
-   "black",
    "gray",
-   "green"
+   "white"
   ],
   "behaviors": [
    "perching",
@@ -369,16 +380,18 @@
    "woodland"
   ],
   "abundance": "common",
-  "silent": false
+  "silent": false,
+  "colors_minor": [
+   "black",
+   "green"
+  ]
  },
  {
   "species_id": "japanese_white_eye",
   "name_ja": "メジロ",
   "size_level": 2,
   "colors": [
-   "green",
-   "white",
-   "yellow"
+   "green"
   ],
   "behaviors": [
    "perching",
@@ -413,7 +426,11 @@
    "woodland"
   ],
   "abundance": "common",
-  "silent": false
+  "silent": false,
+  "colors_minor": [
+   "white",
+   "yellow"
+  ]
  },
  {
   "species_id": "azure_winged_magpie",
@@ -421,9 +438,7 @@
   "size_level": 5,
   "colors": [
    "blue",
-   "gray",
-   "black",
-   "white"
+   "gray"
   ],
   "behaviors": [
    "perching",
@@ -458,7 +473,11 @@
    "woodland"
   ],
   "abundance": "common",
-  "silent": false
+  "silent": false,
+  "colors_minor": [
+   "black",
+   "white"
+  ]
  },
  {
   "species_id": "barn_swallow",
@@ -466,8 +485,6 @@
   "size_level": 3,
   "colors": [
    "black",
-   "white",
-   "red",
    "blue"
   ],
   "behaviors": [
@@ -502,16 +519,18 @@
    "urban"
   ],
   "abundance": "common",
-  "silent": false
+  "silent": false,
+  "colors_minor": [
+   "white",
+   "red"
+  ]
  },
  {
   "species_id": "blue_rock_thrush",
   "name_ja": "イソヒヨドリ",
   "size_level": 4,
   "colors": [
-   "blue",
-   "red",
-   "brown"
+   "blue"
   ],
   "behaviors": [
    "perching",
@@ -544,7 +563,11 @@
    "urban"
   ],
   "abundance": "common",
-  "silent": false
+  "silent": false,
+  "colors_minor": [
+   "red",
+   "brown"
+  ]
  },
  {
   "species_id": "white_wagtail",
@@ -552,8 +575,7 @@
   "size_level": 3,
   "colors": [
    "white",
-   "black",
-   "gray"
+   "black"
   ],
   "behaviors": [
    "foraging",
@@ -587,7 +609,10 @@
    "open"
   ],
   "abundance": "very_common",
-  "silent": false
+  "silent": false,
+  "colors_minor": [
+   "gray"
+  ]
  },
  {
   "species_id": "japanese_wagtail",
@@ -595,8 +620,7 @@
   "size_level": 3,
   "colors": [
    "black",
-   "white",
-   "gray"
+   "white"
   ],
   "behaviors": [
    "foraging",
@@ -630,17 +654,18 @@
    "open"
   ],
   "abundance": "common",
-  "silent": false
+  "silent": false,
+  "colors_minor": [
+   "gray"
+  ]
  },
  {
   "species_id": "grey_wagtail",
   "name_ja": "キセキレイ",
   "size_level": 3,
   "colors": [
-   "yellow",
    "gray",
-   "black",
-   "white"
+   "yellow"
   ],
   "behaviors": [
    "foraging",
@@ -674,16 +699,18 @@
    "open"
   ],
   "abundance": "uncommon",
-  "silent": false
+  "silent": false,
+  "colors_minor": [
+   "black",
+   "white"
+  ]
  },
  {
   "species_id": "oriental_greenfinch",
   "name_ja": "カワラヒワ",
   "size_level": 2,
   "colors": [
-   "yellow",
-   "brown",
-   "green"
+   "brown"
   ],
   "behaviors": [
    "perching",
@@ -720,16 +747,18 @@
    "open"
   ],
   "abundance": "very_common",
-  "silent": false
+  "silent": false,
+  "colors_minor": [
+   "yellow",
+   "green"
+  ]
  },
  {
   "species_id": "dusky_thrush",
   "name_ja": "ツグミ",
   "size_level": 4,
   "colors": [
-   "brown",
-   "white",
-   "red"
+   "brown"
   ],
   "behaviors": [
    "foraging"
@@ -759,18 +788,18 @@
    "urban"
   ],
   "abundance": "common",
-  "silent": false
+  "silent": false,
+  "colors_minor": [
+   "white",
+   "red"
+  ]
  },
  {
   "species_id": "bull_headed_shrike",
   "name_ja": "モズ",
   "size_level": 3,
   "colors": [
-   "brown",
-   "gray",
-   "black",
-   "white",
-   "red"
+   "brown"
   ],
   "behaviors": [
    "perching",
@@ -804,17 +833,20 @@
    "woodland"
   ],
   "abundance": "common",
-  "silent": false
+  "silent": false,
+  "colors_minor": [
+   "gray",
+   "black",
+   "white",
+   "red"
+  ]
  },
  {
   "species_id": "meadow_bunting",
   "name_ja": "ホオジロ",
   "size_level": 3,
   "colors": [
-   "brown",
-   "white",
-   "black",
-   "gray"
+   "brown"
   ],
   "behaviors": [
    "singing",
@@ -849,7 +881,12 @@
    "open"
   ],
   "abundance": "common",
-  "silent": false
+  "silent": false,
+  "colors_minor": [
+   "white",
+   "black",
+   "gray"
+  ]
  },
  {
   "species_id": "black_faced_bunting",
@@ -857,9 +894,7 @@
   "size_level": 3,
   "colors": [
    "green",
-   "yellow",
-   "brown",
-   "gray"
+   "yellow"
   ],
   "behaviors": [
    "foraging"
@@ -889,7 +924,11 @@
    "open"
   ],
   "abundance": "uncommon",
-  "silent": false
+  "silent": false,
+  "colors_minor": [
+   "brown",
+   "gray"
+  ]
  },
  {
   "species_id": "daurian_redstart",
@@ -897,9 +936,7 @@
   "size_level": 2,
   "colors": [
    "gray",
-   "red",
-   "black",
-   "white"
+   "red"
   ],
   "behaviors": [
    "perching",
@@ -933,15 +970,18 @@
    "open"
   ],
   "abundance": "common",
-  "silent": false
+  "silent": false,
+  "colors_minor": [
+   "black",
+   "white"
+  ]
  },
  {
   "species_id": "japanese_bush_warbler",
   "name_ja": "ウグイス",
   "size_level": 3,
   "colors": [
-   "brown",
-   "gray"
+   "brown"
   ],
   "behaviors": [
    "singing"
@@ -973,15 +1013,17 @@
    "open"
   ],
   "abundance": "common",
-  "silent": false
+  "silent": false,
+  "colors_minor": [
+   "gray"
+  ]
  },
  {
   "species_id": "oriental_reed_warbler",
   "name_ja": "オオヨシキリ",
   "size_level": 3,
   "colors": [
-   "brown",
-   "white"
+   "brown"
   ],
   "behaviors": [
    "singing",
@@ -1010,17 +1052,17 @@
    "open"
   ],
   "abundance": "uncommon",
-  "silent": false
+  "silent": false,
+  "colors_minor": [
+   "white"
+  ]
  },
  {
   "species_id": "spot_billed_duck",
   "name_ja": "カルガモ",
   "size_level": 6,
   "colors": [
-   "brown",
-   "black",
-   "white",
-   "yellow"
+   "brown"
   ],
   "behaviors": [
    "swimming",
@@ -1054,7 +1096,12 @@
    "open"
   ],
   "abundance": "very_common",
-  "silent": false
+  "silent": false,
+  "colors_minor": [
+   "black",
+   "white",
+   "yellow"
+  ]
  },
  {
   "species_id": "mallard",
@@ -1063,7 +1110,6 @@
   "colors": [
    "green",
    "brown",
-   "white",
    "gray"
   ],
   "behaviors": [
@@ -1093,7 +1139,10 @@
    "waterside"
   ],
   "abundance": "common",
-  "silent": false
+  "silent": false,
+  "colors_minor": [
+   "white"
+  ]
  },
  {
   "species_id": "eurasian_teal",
@@ -1101,8 +1150,6 @@
   "size_level": 5,
   "colors": [
    "brown",
-   "green",
-   "white",
    "gray"
   ],
   "behaviors": [
@@ -1132,7 +1179,11 @@
    "waterside"
   ],
   "abundance": "common",
-  "silent": false
+  "silent": false,
+  "colors_minor": [
+   "green",
+   "white"
+  ]
  },
  {
   "species_id": "eurasian_wigeon",
@@ -1140,9 +1191,7 @@
   "size_level": 6,
   "colors": [
    "brown",
-   "gray",
-   "white",
-   "black"
+   "gray"
   ],
   "behaviors": [
    "swimming",
@@ -1173,15 +1222,18 @@
    "open"
   ],
   "abundance": "uncommon",
-  "silent": false
+  "silent": false,
+  "colors_minor": [
+   "white",
+   "black"
+  ]
  },
  {
   "species_id": "great_cormorant",
   "name_ja": "カワウ",
   "size_level": 7,
   "colors": [
-   "black",
-   "white"
+   "black"
   ],
   "behaviors": [
    "swimming",
@@ -1218,16 +1270,17 @@
    "waterside"
   ],
   "abundance": "very_common",
-  "silent": true
+  "silent": true,
+  "colors_minor": [
+   "white"
+  ]
  },
  {
   "species_id": "grey_heron",
   "name_ja": "アオサギ",
   "size_level": 7,
   "colors": [
-   "gray",
-   "white",
-   "black"
+   "gray"
   ],
   "behaviors": [
    "perching",
@@ -1260,7 +1313,11 @@
    "waterside"
   ],
   "abundance": "common",
-  "silent": false
+  "silent": false,
+  "colors_minor": [
+   "white",
+   "black"
+  ]
  },
  {
   "species_id": "great_egret",
@@ -1299,16 +1356,15 @@
    "waterside"
   ],
   "abundance": "common",
-  "silent": true
+  "silent": true,
+  "colors_minor": []
  },
  {
   "species_id": "little_egret",
   "name_ja": "コサギ",
   "size_level": 6,
   "colors": [
-   "white",
-   "black",
-   "yellow"
+   "white"
   ],
   "behaviors": [
    "foraging",
@@ -1339,15 +1395,18 @@
    "waterside"
   ],
   "abundance": "common",
-  "silent": false
+  "silent": false,
+  "colors_minor": [
+   "black",
+   "yellow"
+  ]
  },
  {
   "species_id": "common_coot",
   "name_ja": "オオバン",
   "size_level": 5,
   "colors": [
-   "black",
-   "white"
+   "black"
   ],
   "behaviors": [
    "swimming",
@@ -1379,17 +1438,17 @@
    "waterside"
   ],
   "abundance": "common",
-  "silent": false
+  "silent": false,
+  "colors_minor": [
+   "white"
+  ]
  },
  {
   "species_id": "little_grebe",
   "name_ja": "カイツブリ",
   "size_level": 4,
   "colors": [
-   "brown",
-   "gray",
-   "black",
-   "white"
+   "brown"
   ],
   "behaviors": [
    "swimming"
@@ -1420,17 +1479,19 @@
    "waterside"
   ],
   "abundance": "common",
-  "silent": false
+  "silent": false,
+  "colors_minor": [
+   "gray",
+   "black",
+   "white"
+  ]
  },
  {
   "species_id": "black_headed_gull",
   "name_ja": "ユリカモメ",
   "size_level": 5,
   "colors": [
-   "white",
-   "gray",
-   "black",
-   "red"
+   "white"
   ],
   "behaviors": [
    "flying",
@@ -1461,16 +1522,19 @@
    "waterside"
   ],
   "abundance": "common",
-  "silent": false
+  "silent": false,
+  "colors_minor": [
+   "gray",
+   "black",
+   "red"
+  ]
  },
  {
   "species_id": "common_sandpiper",
   "name_ja": "イソシギ",
   "size_level": 3,
   "colors": [
-   "brown",
-   "white",
-   "gray"
+   "brown"
   ],
   "behaviors": [
    "foraging"
@@ -1503,16 +1567,18 @@
    "open"
   ],
   "abundance": "common",
-  "silent": false
+  "silent": false,
+  "colors_minor": [
+   "white",
+   "gray"
+  ]
  },
  {
   "species_id": "common_kingfisher",
   "name_ja": "カワセミ",
   "size_level": 3,
   "colors": [
-   "blue",
-   "red",
-   "white"
+   "blue"
   ],
   "behaviors": [
    "perching",
@@ -1547,16 +1613,18 @@
    "woodland"
   ],
   "abundance": "common",
-  "silent": false
+  "silent": false,
+  "colors_minor": [
+   "red",
+   "white"
+  ]
  },
  {
   "species_id": "little_ringed_plover",
   "name_ja": "コチドリ",
   "size_level": 3,
   "colors": [
-   "brown",
-   "white",
-   "black"
+   "brown"
   ],
   "behaviors": [
    "foraging"
@@ -1587,7 +1655,11 @@
    "open"
   ],
   "abundance": "uncommon",
-  "silent": false
+  "silent": false,
+  "colors_minor": [
+   "white",
+   "black"
+  ]
  },
  {
   "species_id": "black_kite",
@@ -1627,7 +1699,8 @@
    "woodland"
   ],
   "abundance": "common",
-  "silent": false
+  "silent": false,
+  "colors_minor": []
  },
  {
   "species_id": "osprey",
@@ -1666,17 +1739,15 @@
    "waterside"
   ],
   "abundance": "uncommon",
-  "silent": false
+  "silent": false,
+  "colors_minor": []
  },
  {
   "species_id": "common_kestrel",
   "name_ja": "チョウゲンボウ",
   "size_level": 5,
   "colors": [
-   "brown",
-   "gray",
-   "black",
-   "white"
+   "brown"
   ],
   "behaviors": [
    "flying",
@@ -1707,16 +1778,19 @@
    "urban"
   ],
   "abundance": "uncommon",
-  "silent": false
+  "silent": false,
+  "colors_minor": [
+   "gray",
+   "black",
+   "white"
+  ]
  },
  {
   "species_id": "northern_goshawk",
   "name_ja": "オオタカ",
   "size_level": 6,
   "colors": [
-   "gray",
-   "white",
-   "brown"
+   "gray"
   ],
   "behaviors": [
    "perching",
@@ -1748,15 +1822,18 @@
    "woodland"
   ],
   "abundance": "rare",
-  "silent": false
+  "silent": false,
+  "colors_minor": [
+   "white",
+   "brown"
+  ]
  },
  {
   "species_id": "rose_ringed_parakeet",
   "name_ja": "ホンセイインコ",
   "size_level": 5,
   "colors": [
-   "green",
-   "red"
+   "green"
   ],
   "behaviors": [
    "flying",
@@ -1789,15 +1866,17 @@
    "woodland"
   ],
   "abundance": "uncommon",
-  "silent": false
+  "silent": false,
+  "colors_minor": [
+   "red"
+  ]
  },
  {
   "species_id": "chinese_hwamei",
   "name_ja": "ガビチョウ",
   "size_level": 4,
   "colors": [
-   "brown",
-   "white"
+   "brown"
   ],
   "behaviors": [
    "singing",
@@ -1830,16 +1909,17 @@
    "open"
   ],
   "abundance": "uncommon",
-  "silent": false
+  "silent": false,
+  "colors_minor": [
+   "white"
+  ]
  },
  {
   "species_id": "pipistrelle_bat",
   "name_ja": "アブラコウモリ",
   "size_level": 1,
   "colors": [
-   "brown",
-   "black",
-   "gray"
+   "brown"
   ],
   "behaviors": [
    "flying",
@@ -1868,6 +1948,10 @@
   "silent": true,
   "note": "鳥ではなくコウモリ。夕方から夜に、空を素早く不規則に飛ぶ小さな影。鳴き声は超音波で人には聞こえない",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "colors_minor": [
+   "black",
+   "gray"
+  ]
  }
 ]
