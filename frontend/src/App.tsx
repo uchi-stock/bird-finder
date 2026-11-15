@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import speciesJson from "./data/species.json";
 import { hasAnyInput, identify } from "./domain/scoring";
 import { usePhoto } from "./photo";
-import type { Behavior, Candidate, Color, Observation, Place, Species } from "./domain/types";
+import type { Behavior, Candidate, Color, Observation, Place, Species, TimeSlot } from "./domain/types";
 
 const SPECIES = speciesJson as Species[];
 
@@ -41,6 +41,13 @@ const PLACES: { v: Place; label: string }[] = [
   { v: "roof", label: "建物や屋根の上" },
   { v: "water", label: "水辺・水面" },
   { v: "grass", label: "草むら・ヨシ原" },
+];
+
+const TIMES: { v: TimeSlot; label: string }[] = [
+  { v: "morning", label: "朝（〜9時ごろ）" },
+  { v: "day", label: "日中" },
+  { v: "evening", label: "夕方" },
+  { v: "night", label: "夜" },
 ];
 
 function toggle<T>(list: T[], v: T): T[] {
@@ -88,6 +95,7 @@ export function App() {
   const [place, setPlace] = useState<Place | undefined>();
   const [date, setDate] = useState(todayStr());
   const [useDate, setUseDate] = useState(true);
+  const [time, setTime] = useState<TimeSlot | undefined>();
   const [voice, setVoice] = useState("");
   const [showAll, setShowAll] = useState(false);
 
@@ -98,9 +106,10 @@ export function App() {
       behaviors,
       place,
       month: useDate && date ? Number(date.split("-")[1]) : undefined,
+      time,
       onomatopoeia: voice,
     }),
-    [sizeLevel, colors, behaviors, place, date, useDate, voice],
+    [sizeLevel, colors, behaviors, place, date, useDate, time, voice],
   );
   const results = useMemo(() => identify(obs, SPECIES), [obs]);
   // 日付だけでは「何か入力した」とみなさない（初期値が入っているため）
@@ -112,6 +121,7 @@ export function App() {
     setColors([]);
     setBehaviors([]);
     setPlace(undefined);
+    setTime(undefined);
     setVoice("");
     setShowAll(false);
   };
@@ -180,6 +190,17 @@ export function App() {
           {PLACES.map((p) => (
             <button key={p.v} className={place === p.v ? "chip on" : "chip"} onClick={() => setPlace(place === p.v ? undefined : p.v)}>
               {p.label}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section>
+        <h2>時間帯</h2>
+        <div className="chips">
+          {TIMES.map((t) => (
+            <button key={t.v} className={time === t.v ? "chip on" : "chip"} onClick={() => setTime(time === t.v ? undefined : t.v)}>
+              {t.label}
             </button>
           ))}
         </div>

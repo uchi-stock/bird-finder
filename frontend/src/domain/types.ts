@@ -1,6 +1,7 @@
 export type Color = "brown" | "black" | "white" | "gray" | "blue" | "green" | "yellow" | "red";
 export type Behavior = "swimming" | "perching" | "flying" | "singing" | "foraging" | "preening";
 export type Place = "feeder" | "ground" | "tree" | "wire" | "roof" | "water" | "grass";
+export type TimeSlot = "morning" | "day" | "evening" | "night";
 export type Season = "spring" | "summer" | "autumn" | "winter";
 
 export interface Species {
@@ -11,6 +12,8 @@ export interface Species {
   behaviors: Behavior[];
   places: Place[];
   seasons: Season[];
+  /** 活発に見られる時間帯（暫定値） */
+  times: TimeSlot[];
   onomatopoeia: string[];
   note: string;
   source: string;
@@ -24,6 +27,7 @@ export interface Observation {
   behaviors: Behavior[];
   place?: Place;
   month?: number; // 1-12
+  time?: TimeSlot;
   onomatopoeia: string;
 }
 

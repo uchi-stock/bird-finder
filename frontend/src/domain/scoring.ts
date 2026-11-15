@@ -1,6 +1,6 @@
 import type { Candidate, Observation, Season, Species } from "./types";
 
-const WEIGHT = { size: 2, color: 2, behavior: 3, place: 3, season: 2, voice: 4 } as const;
+const WEIGHT = { size: 2, color: 2, behavior: 3, place: 3, season: 2, time: 1, voice: 4 } as const;
 const CONFLICT_PENALTY = 2;
 
 export function monthToSeason(month: number): Season {
@@ -123,6 +123,19 @@ export function scoreSpecies(obs: Observation, sp: Species): Candidate {
     }
   }
 
+  // 時間帯（不一致は軽い減点のみ。除外しない）
+  if (obs.time === undefined) unknown.push("時間帯");
+  else {
+    maxScore += WEIGHT.time;
+    if (sp.times.includes(obs.time)) {
+      score += WEIGHT.time;
+      matching.push("時間帯");
+    } else {
+      score -= CONFLICT_PENALTY / 4;
+      conflicting.push("時間帯");
+    }
+  }
+
   // 鳴き声（オノマトペ）。一致しなくても減点しない（聞き方の個人差が大きいため）
   if (!normalizeVoice(obs.onomatopoeia)) unknown.push("鳴き声");
   else {
@@ -151,6 +164,7 @@ export function hasAnyInput(obs: Observation): boolean {
     obs.behaviors.length > 0 ||
     obs.place !== undefined ||
     obs.month !== undefined ||
+    obs.time !== undefined ||
     normalizeVoice(obs.onomatopoeia) !== ""
   );
 }
