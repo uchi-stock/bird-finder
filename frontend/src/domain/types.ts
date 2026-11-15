@@ -42,6 +42,8 @@ export interface Candidate {
   species: Species;
   /** 内部の順位付け用。確率ではない */
   score: number;
+  /** 入力項目だけで見た当てはまり具合（0〜1。事前情報は含まない）。表示するかの判断に使う */
+  fit: number;
   maxScore: number;
   matching: string[];
   conflicting: string[];

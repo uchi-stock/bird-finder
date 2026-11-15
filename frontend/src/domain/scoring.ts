@@ -160,6 +160,9 @@ export function scoreSpecies(obs: Observation, sp: Species): Candidate {
     }
   }
 
+  const inputMax = maxScore;
+  const inputScore = score;
+
   // 地域での出現しやすさ（入力が1つでもあるときだけ加点する）
   if (hasAnyInput(obs)) {
     maxScore += PRIOR.very_common;
@@ -167,7 +170,8 @@ export function scoreSpecies(obs: Observation, sp: Species): Candidate {
     if (sp.abundance === "very_common" || sp.abundance === "common") matching.push("地域でよく見られる");
   }
 
-  return { species: sp, score, maxScore, matching, conflicting, unknown };
+  const fit = inputMax > 0 ? Math.max(0, inputScore / inputMax) : 0;
+  return { species: sp, score, fit, maxScore, matching, conflicting, unknown };
 }
 
 /** 何か1つでも入力があれば、全種をスコア順に返す（候補から除外はしない） */
@@ -188,4 +192,13 @@ export function hasAnyInput(obs: Observation): boolean {
     obs.habitats.length > 0 ||
     normalizeVoice(obs.onomatopoeia) !== ""
   );
+}
+
+/** 表示する最大件数と、表示する最低ライン（入力項目の当てはまり具合） */
+export const MAX_SHOWN = 3;
+export const MIN_FIT = 0.5;
+
+/** 当てはまりが弱い鳥は表示せず、上位MAX_SHOWN件まで返す（0〜3件）。除外は表示上のみで、スコア計算には影響しない */
+export function pickTop(sorted: Candidate[]): Candidate[] {
+  return sorted.filter((c) => c.fit >= MIN_FIT && c.matching.some((m) => m !== "地域でよく見られる")).slice(0, MAX_SHOWN);
 }

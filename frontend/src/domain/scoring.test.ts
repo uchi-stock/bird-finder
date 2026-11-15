@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import speciesJson from "../data/species.json";
-import { hasAnyInput, identify, monthToSeason, voiceSimilarity } from "./scoring";
+import { MAX_SHOWN, hasAnyInput, identify, monthToSeason, pickTop, voiceSimilarity } from "./scoring";
 import type { Observation, Species } from "./types";
 
 const species = speciesJson as Species[];
@@ -109,6 +109,30 @@ describe("地域での出現しやすさ（事前情報）", () => {
   it("事前情報は入力一致より小さい（一致した稀な鳥が、一致しないよく見る鳥に勝つ）", () => {
     const r = identify({ ...empty, sizeLevel: 7 }, [sparrow, { ...rareTwin, size_level: 7 }]);
     expect(r[0].species.species_id).toBe("twin");
+  });
+});
+
+describe("表示する候補の絞り込み（pickTop）", () => {
+  const show = (obs: Observation) => pickTop(identify(obs, species)).map((c) => c.species.name_ja);
+  it("最大3件まで", () => {
+    expect(show({ ...empty, sizeLevel: 2 }).length).toBeLessThanOrEqual(MAX_SHOWN);
+    expect(show({ ...empty, sizeLevel: 2 }).length).toBe(MAX_SHOWN);
+  });
+  it("当てはまる鳥が1種だけなら1件だけ出す（ホーホケキョ → ウグイス）", () => {
+    expect(show({ ...empty, onomatopoeia: "ホーホケキョ" })).toEqual(["ウグイス"]);
+  });
+  it("どの鳥にも当てはまらなければ0件", () => {
+    expect(show({ ...empty, onomatopoeia: "ゾゾゾゾ" })).toEqual([]);
+  });
+  it("未入力なら0件", () => {
+    expect(show(empty)).toEqual([]);
+  });
+  it("事前情報（よく見る鳥）だけでは表示されない", () => {
+    const r = pickTop(identify({ ...empty, onomatopoeia: "ゾゾゾゾ" }, species));
+    expect(r).toEqual([]);
+  });
+  it("典型入力では期待する鳥が3件に入る（アオサギ）", () => {
+    expect(show({ ...empty, sizeLevel: 7, colors: ["gray"], place: "water" })).toContain("アオサギ");
   });
 });
 
