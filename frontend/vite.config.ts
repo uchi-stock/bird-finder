@@ -12,4 +12,14 @@ export default defineConfig({
   define: {
     ...getAppVersionDefine(new URL("./package.json", import.meta.url)),
   },
+  test: {
+    environment: "jsdom",
+    setupFiles: ["./src/setupTests.ts"],
+    coverage: {
+      provider: "v8",
+      include: ["src/**/*.{ts,tsx}"],
+      // symlink共有（dev-standards側で管理）・エントリ・型宣言・テスト基盤は対象外
+      exclude: ["src/**/*.test.{ts,tsx}", "src/setupTests.ts", "src/main.tsx", "src/vite-env.d.ts", "src/shared/**"],
+    },
+  },
 });
