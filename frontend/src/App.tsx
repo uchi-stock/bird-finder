@@ -112,7 +112,36 @@ function Photo({ name, scientificName, flying = false, zoomed, onZoomChange, cap
   useEffect(() => {
     if (photo) setLargeSrc(photo.flight ? photo.thumbnail : largeImageUrl(photo.thumbnail));
   }, [photo]);
-  if (!photo) return <div className="photo empty">写真なし</div>;
+  // 拡大表示（鳥の詳細）。写真が無い鳥でも開く（捕まえる・再生中の表示を載せるため）
+  const lightbox = open && (
+    <div
+      className="lightbox"
+      onClick={(e) => {
+        e.stopPropagation();
+        // 拡大表示内のボタン・リンクでは閉じない。背景をタップすると閉じる
+        if (!(e.target as HTMLElement).closest("button, a")) setOpen(false);
+      }}
+    >
+      {photo ? <img src={largeSrc} alt={name} onError={() => setLargeSrc(photo.thumbnail)} /> : <div className="photo-empty-large">写真なし</div>}
+      <strong className="lightbox-name">{name}</strong>
+      {caption}
+      {photo && (
+        <a href={photo.pageUrl} target="_blank" rel="noreferrer">
+          {photo.flight
+            ? `出典: Wikimedia Commons（撮影: ${photo.credit ?? "不明"} ／ ${photo.license ?? "ライセンスはリンク先を参照"}）`
+            : `出典: Wikipedia「${name}」（画像の著作者・ライセンスはリンク先を参照）`}
+        </a>
+      )}
+    </div>
+  );
+  if (!photo) {
+    return (
+      <>
+        <div className="photo empty">写真なし</div>
+        {lightbox}
+      </>
+    );
+  }
   return (
     <>
       <div className="photo">
@@ -130,24 +159,7 @@ function Photo({ name, scientificName, flying = false, zoomed, onZoomChange, cap
           <Emoji c="🔍" />
         </button>
       </div>
-      {open && (
-        <div
-          className="lightbox"
-          onClick={(e) => {
-            e.stopPropagation();
-            setOpen(false);
-          }}
-        >
-          <img src={largeSrc} alt={name} onError={() => setLargeSrc(photo.thumbnail)} />
-          <strong className="lightbox-name">{name}</strong>
-          {caption}
-          <a href={photo.pageUrl} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>
-            {photo.flight
-              ? `出典: Wikimedia Commons（撮影: ${photo.credit ?? "不明"} ／ ${photo.license ?? "ライセンスはリンク先を参照"}）`
-              : `出典: Wikipedia「${name}」（画像の著作者・ライセンスはリンク先を参照）`}
-          </a>
-        </div>
-      )}
+      {lightbox}
     </>
   );
 }
@@ -545,7 +557,12 @@ export function App() {
                           flying={flying}
                           zoomed={zoomId === c.species.species_id}
                           onZoomChange={(z) => setZoomId(z ? c.species.species_id : null)}
-                          caption={now?.id === c.species.species_id ? <PlayStatus now={now} /> : null}
+                          caption={
+                            <>
+                              {now?.id === c.species.species_id && <PlayStatus now={now} />}
+                              <CatchButton speciesId={c.species.species_id} collection={collection} onCatch={onCatch} />
+                            </>
+                          }
                         />
                         <div className="body">
                           <div className="row between">
@@ -553,7 +570,14 @@ export function App() {
                               <Emoji c={now?.id === c.species.species_id && now.status === "playing" ? "🔊" : "🔈"} />
                               {c.species.name_ja}
                             </strong>
-                            <span className="badge">{closeness(c)}</span>
+                            <span className="badges">
+                              {collection[c.species.species_id] && (
+                                <span className="caught" role="img" aria-label="捕獲済み">
+                                  ✅
+                                </span>
+                              )}
+                              <span className="badge">{closeness(c)}</span>
+                            </span>
                           </div>
                           <p className="note clamp">{c.species.note}</p>
                           <p className="note clamp">鳴き声: {c.species.onomatopoeia.join(" / ") || "聞こえない"}</p>
@@ -561,7 +585,6 @@ export function App() {
                             {c.matching.length > 0 && <span className="ok">一致: {c.matching.join("・")}</span>}
                             {c.conflicting.length > 0 && <span className="ng">不一致: {c.conflicting.join("・")}</span>}
                           </p>
-                          <CatchButton speciesId={c.species.species_id} collection={collection} onCatch={onCatch} />
                         </div>
                       </div>
                     </li>
