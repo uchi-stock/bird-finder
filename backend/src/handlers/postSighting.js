@@ -8,7 +8,6 @@ const { tileOf } = require("../tile");
 const { validateSighting } = require("../validate");
 
 const MAX_BODY_BYTES = 2048;
-const DAY_S = 24 * 60 * 60;
 
 /** アクセス元（IP）は、デプロイごとに変わる秘密の値を混ぜたハッシュにして、上限の数え上げにだけ使う（元に戻せない・最大2日で削除） */
 function sourceId(event, pepper) {
@@ -19,7 +18,6 @@ function sourceId(event, pepper) {
 function createHandler({ ddb, env = process.env, now = () => new Date(), randomId = () => crypto.randomBytes(6).toString("hex") }) {
   const origin = env.ALLOWED_ORIGIN;
   const limit = Number(env.DAILY_LIMIT ?? 30);
-  const ttlDays = Number(env.TTL_DAYS ?? 90);
 
   return async function handler(event) {
     try {
@@ -55,7 +53,6 @@ function createHandler({ ddb, env = process.env, now = () => new Date(), randomI
             date: { S: date },
             lat: { N: String(lat) },
             lon: { N: String(lon) },
-            expiresAt: { N: String(Math.floor(now().getTime() / 1000) + ttlDays * DAY_S) },
           },
         })
       );
