@@ -1,0 +1,168 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { commonsAudioUrl, fetchCallAudio, pickAudio, playAudio, resetAudioForTest, stopAudio, unlockAudio, type CommonsResponse } from "./callAudio";
+
+const page = (title: string, index: number, info: Record<string, unknown> = {}) => ({
+  index,
+  title,
+  videoinfo: [{ url: "https://u/orig.ogg", mime: "application/ogg", descriptionurl: `https://c/${title}`, derivatives: [{ type: 'audio/mpeg', src: "https://u/t/orig.ogg.mp3" }], extmetadata: {}, ...info }],
+});
+const resp = (...pages: ReturnType<typeof page>[]): CommonsResponse => ({ query: { pages: Object.fromEntries(pages.map((p, i) => [String(i), p])) } });
+const json = (body: unknown, ok = true) => Promise.resolve({ ok, json: () => Promise.resolve(body) } as Response);
+
+describe("pickAudio", () => {
+  it("OggにはCommonsのMP3版（iPhoneで再生できる）を使う", () => {
+    expect(pickAudio(resp(page("File:Hypsipetes amaurotis 1.ogg", 1)), "Hypsipetes amaurotis", true)?.src).toBe("https://u/t/orig.ogg.mp3");
+  });
+  it("元ファイルがMP3ならそのまま使う", () => {
+    const p = page("File:Passer montanus XC1.mp3", 1, { mime: "audio/mpeg", url: "https://u/a.mp3", derivatives: [{ type: 'audio/ogg; codecs="vorbis"', src: "https://u/a.ogg" }] });
+    expect(pickAudio(resp(p), "Passer montanus", true)?.src).toBe("https://u/a.mp3");
+  });
+  it("MP3が無く、元もMP3でなければ採用しない（再生できない可能性があるため）", () => {
+    const p = page("File:Passer montanus.wav", 1, { mime: "audio/wav", derivatives: [{ type: 'audio/ogg; codecs="vorbis"', src: "https://u/a.ogg" }] });
+    expect(pickAudio(resp(p), "Passer montanus", true)).toBeNull();
+  });
+  it("録音者（HTMLを除去）・ライセンス・出典ページ・ファイル名を返す", () => {
+    const p = page("File:Passer montanus XC2.ogg", 1, { extmetadata: { Artist: { value: '<a href="x">山田 太郎</a>' }, LicenseShortName: { value: "CC BY-SA 4.0" } } });
+    const a = pickAudio(resp(p), "Passer montanus", true)!;
+    expect(a.credit).toBe("山田 太郎");
+    expect(a.license).toBe("CC BY-SA 4.0");
+    expect(a.pageUrl).toBe("https://c/File:Passer montanus XC2.ogg");
+    expect(a.title).toBe("Passer montanus XC2.ogg");
+  });
+  it("録音者が空なら未設定", () => {
+    expect(pickAudio(resp(page("File:Passer montanus.ogg", 1, { extmetadata: { Artist: { value: "<b></b>" } } })), "Passer montanus", true)?.credit).toBeUndefined();
+  });
+  it("厳密モードでは、ファイル名に学名を含まない音源（別の鳥の可能性）を使わない", () => {
+    const r = resp(page("File:Monticola solitarius 2025.ogg", 1), page("File:Passer-montanus-2025.ogg", 2, { derivatives: [{ type: "audio/mpeg", src: "https://u/p.mp3" }] }));
+    expect(pickAudio(r, "Hypsipetes amaurotis", true)).toBeNull();
+    expect(pickAudio(r, "Passer montanus", true)?.src).toBe("https://u/p.mp3"); // ハイフン区切りも照合する
+  });
+  it("カテゴリ検索（非厳密）では、ファイル名に学名が無くても採用する（例: ウグイスの録音）", () => {
+    expect(pickAudio(resp(page("File:Uguisu5740 cu.ogg", 1)), "Horornis diphone", false)).not.toBeNull();
+  });
+  it("検索順位の高い順に選び、説明ページURLが無ければCommonsのトップを使う", () => {
+    const r = resp(page("File:Passer montanus b.ogg", 2), page("File:Passer montanus a.ogg", 1, { descriptionurl: undefined }));
+    expect(pickAudio(r, "Passer montanus", true)?.title).toBe("Passer montanus a.ogg");
+    expect(pickAudio(r, "Passer montanus", true)?.pageUrl).toBe("https://commons.wikimedia.org/");
+  });
+  it("結果が空・videoinfoが無ければnull", () => {
+    expect(pickAudio({}, "Passer montanus", false)).toBeNull();
+    expect(pickAudio({ query: { pages: { a: { index: 1, title: "File:x.ogg" } } } }, "Passer montanus", false)).toBeNull();
+  });
+});
+
+describe("commonsAudioUrl", () => {
+  it("カテゴリ検索と全文検索のURLを作る", () => {
+    const c = new URL(commonsAudioUrl("Passer montanus", "category"));
+    expect(c.searchParams.get("gsrsearch")).toBe('filetype:audio incategory:"Passer montanus"');
+    expect(c.searchParams.get("viprop")).toContain("derivatives");
+    expect(c.searchParams.get("origin")).toBe("*");
+    expect(new URL(commonsAudioUrl("Passer montanus", "text")).searchParams.get("gsrsearch")).toBe('filetype:audio "Passer montanus"');
+  });
+});
+
+describe("fetchCallAudio", () => {
+  afterEach(() => vi.unstubAllGlobals());
+  it("カテゴリで見つかれば、全文検索はしない", async () => {
+    const f = vi.fn(() => json(resp(page("File:Uguisu.ogg", 1))));
+    vi.stubGlobal("fetch", f);
+    expect((await fetchCallAudio("Horornis diphone"))?.src).toBe("https://u/t/orig.ogg.mp3");
+    expect(f).toHaveBeenCalledTimes(1);
+  });
+  it("カテゴリに無ければ、全文検索（学名を含むファイル名に限る）で探す", async () => {
+    const f = vi.fn().mockImplementationOnce(() => json({})).mockImplementationOnce(() => json(resp(page("File:Motacilla alba x.ogg", 1))));
+    vi.stubGlobal("fetch", f);
+    expect((await fetchCallAudio("Motacilla alba"))?.title).toBe("Motacilla alba x.ogg");
+    expect(f).toHaveBeenCalledTimes(2);
+  });
+  it("どちらでも見つからなければnull", async () => {
+    vi.stubGlobal("fetch", vi.fn(() => json({})));
+    expect(await fetchCallAudio("Nothing here")).toBeNull();
+  });
+  it("HTTPエラー・通信失敗はnull", async () => {
+    vi.stubGlobal("fetch", vi.fn(() => json({}, false)));
+    expect(await fetchCallAudio("Err http")).toBeNull();
+    vi.stubGlobal("fetch", vi.fn(() => Promise.reject(new Error("offline"))));
+    expect(await fetchCallAudio("Err net")).toBeNull();
+  });
+  it("同じ学名は1回しか取得しない（キャッシュ）", async () => {
+    const f = vi.fn(() => json(resp(page("File:Corvus corone.ogg", 1))));
+    vi.stubGlobal("fetch", f);
+    await fetchCallAudio("Corvus corone");
+    await fetchCallAudio("Corvus corone");
+    expect(f).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("共有<audio>（iOS Safari対策）", () => {
+  const instances: FakeAudio[] = [];
+  class FakeAudio {
+    src = "";
+    onended: (() => void) | null = null;
+    paused = true;
+    play = vi.fn(() => {
+      this.paused = false;
+      return Promise.resolve();
+    });
+    pause = vi.fn(() => {
+      this.paused = true;
+    });
+    constructor() {
+      instances.push(this);
+    }
+  }
+  beforeEach(() => {
+    instances.length = 0;
+    resetAudioForTest();
+    vi.stubGlobal("Audio", FakeAudio);
+  });
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("解錠は無音データで再生する。要素は1つを使い回す", async () => {
+    unlockAudio();
+    expect(instances).toHaveLength(1);
+    expect(instances[0].src).toContain("data:audio/wav");
+    expect(instances[0].play).toHaveBeenCalled();
+    await playAudio("https://u/a.mp3", () => {});
+    expect(instances).toHaveLength(1);
+    expect(instances[0].src).toBe("https://u/a.mp3");
+  });
+  it("再生が終わると、渡したコールバックが呼ばれる", async () => {
+    const onEnded = vi.fn();
+    await playAudio("https://u/a.mp3", onEnded);
+    instances[0].onended?.();
+    expect(onEnded).toHaveBeenCalled();
+  });
+  it("停止すると止まり、終了コールバックは外れる", async () => {
+    await playAudio("https://u/a.mp3", vi.fn());
+    stopAudio();
+    expect(instances[0].pause).toHaveBeenCalled();
+    expect(instances[0].onended).toBeNull();
+  });
+  it("再生前に停止しても例外にならない", () => {
+    expect(() => stopAudio()).not.toThrow();
+  });
+  it("解錠の再生が拒否されても例外にならない", () => {
+    class Rejecting extends FakeAudio {
+      play = vi.fn(() => Promise.reject(new Error("blocked")));
+    }
+    vi.stubGlobal("Audio", Rejecting);
+    resetAudioForTest();
+    expect(() => unlockAudio()).not.toThrow();
+  });
+  it("Audioが使えない環境でも解錠で例外にならない", () => {
+    vi.stubGlobal("Audio", () => {
+      throw new Error("unsupported");
+    });
+    resetAudioForTest();
+    expect(() => unlockAudio()).not.toThrow();
+  });
+  it("再生が拒否されたら、呼び出し側に例外として伝える", async () => {
+    class Rejecting extends FakeAudio {
+      play = vi.fn(() => Promise.reject(new Error("NotAllowedError")));
+    }
+    vi.stubGlobal("Audio", Rejecting);
+    resetAudioForTest();
+    await expect(playAudio("https://u/a.mp3", () => {})).rejects.toThrow("NotAllowedError");
+  });
+});
