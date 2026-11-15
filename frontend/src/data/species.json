@@ -35,7 +35,12 @@
   ],
   "note": "市街地で最も身近な小鳥",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "times": [
+   "morning",
+   "day",
+   "evening"
+  ]
  },
  {
   "species_id": "starling",
@@ -72,7 +77,11 @@
   ],
   "note": "群れで行動。くちばしと足がオレンジ",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "times": [
+   "morning",
+   "evening"
+  ]
  },
  {
   "species_id": "brown_eared_bulbul",
@@ -105,7 +114,12 @@
   ],
   "note": "波状飛行。大きな声でよく鳴く",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "times": [
+   "morning",
+   "day",
+   "evening"
+  ]
  },
  {
   "species_id": "rock_dove",
@@ -139,7 +153,12 @@
   ],
   "note": "首元が緑や紫に光る",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "times": [
+   "morning",
+   "day",
+   "evening"
+  ]
  },
  {
   "species_id": "oriental_turtle_dove",
@@ -173,7 +192,12 @@
   ],
   "note": "首に縞模様",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "times": [
+   "morning",
+   "day",
+   "evening"
+  ]
  },
  {
   "species_id": "large_billed_crow",
@@ -207,7 +231,12 @@
   ],
   "note": "くちばしが太く額が出っ張る。澄んだ声",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "times": [
+   "morning",
+   "day",
+   "evening"
+  ]
  },
  {
   "species_id": "carrion_crow",
@@ -240,7 +269,12 @@
   ],
   "note": "地面を歩き回る。濁った声",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "times": [
+   "morning",
+   "day",
+   "evening"
+  ]
  },
  {
   "species_id": "great_tit",
@@ -274,7 +308,11 @@
   ],
   "note": "白い頬と黒いネクタイ模様",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "times": [
+   "morning",
+   "day"
+  ]
  },
  {
   "species_id": "japanese_white_eye",
@@ -307,7 +345,12 @@
   ],
   "note": "目の周りの白い輪",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "times": [
+   "morning",
+   "day",
+   "evening"
+  ]
  },
  {
   "species_id": "azure_winged_magpie",
@@ -341,7 +384,11 @@
   ],
   "note": "長い青い尾。群れで行動",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "times": [
+   "morning",
+   "day"
+  ]
  },
  {
   "species_id": "barn_swallow",
@@ -374,7 +421,12 @@
   ],
   "note": "深く切れ込んだ尾。空中で飛びながら採食",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "times": [
+   "morning",
+   "day",
+   "evening"
+  ]
  },
  {
   "species_id": "blue_rock_thrush",
@@ -406,7 +458,12 @@
   ],
   "note": "オスは青とオレンジ。高い所でさえずる",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "times": [
+   "morning",
+   "day",
+   "evening"
+  ]
  },
  {
   "species_id": "white_wagtail",
@@ -438,7 +495,12 @@
   ],
   "note": "地面を歩き、尾を上下に振る",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "times": [
+   "morning",
+   "day",
+   "evening"
+  ]
  },
  {
   "species_id": "japanese_wagtail",
@@ -470,7 +532,12 @@
   ],
   "note": "背中が黒い。尾を上下に振る",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "times": [
+   "morning",
+   "day",
+   "evening"
+  ]
  },
  {
   "species_id": "grey_wagtail",
@@ -503,7 +570,12 @@
   ],
   "note": "腹が黄色。水辺の石の上",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "times": [
+   "morning",
+   "day",
+   "evening"
+  ]
  },
  {
   "species_id": "oriental_greenfinch",
@@ -537,7 +609,12 @@
   ],
   "note": "翼の黄色い帯が目立つ",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "times": [
+   "morning",
+   "day",
+   "evening"
+  ]
  },
  {
   "species_id": "dusky_thrush",
@@ -565,7 +642,12 @@
   ],
   "note": "地面で立ち止まっては歩く",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "times": [
+   "morning",
+   "day",
+   "evening"
+  ]
  },
  {
   "species_id": "bull_headed_shrike",
@@ -599,7 +681,12 @@
   ],
   "note": "高い所から獲物を見張る。目に黒い帯",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "times": [
+   "morning",
+   "day",
+   "evening"
+  ]
  },
  {
   "species_id": "meadow_bunting",
@@ -634,7 +721,11 @@
   ],
   "note": "頭に白黒の模様",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "times": [
+   "morning",
+   "day"
+  ]
  },
  {
   "species_id": "black_faced_bunting",
@@ -664,7 +755,12 @@
   ],
   "note": "草むらの地面で採食",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "times": [
+   "morning",
+   "day",
+   "evening"
+  ]
  },
  {
   "species_id": "daurian_redstart",
@@ -696,7 +792,12 @@
   ],
   "note": "翼の白い斑点。尾を震わせる",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "times": [
+   "morning",
+   "day",
+   "evening"
+  ]
  },
  {
   "species_id": "japanese_bush_warbler",
@@ -726,7 +827,11 @@
   ],
   "note": "声はよく聞くが姿は藪の中でほぼ見えない",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "times": [
+   "morning",
+   "day"
+  ]
  },
  {
   "species_id": "oriental_reed_warbler",
@@ -754,7 +859,11 @@
   ],
   "note": "ヨシ原で大きな声でさえずる",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "times": [
+   "morning",
+   "day"
+  ]
  },
  {
   "species_id": "spot_billed_duck",
@@ -788,7 +897,11 @@
   ],
   "note": "くちばしの先が黄色い",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "times": [
+   "morning",
+   "evening"
+  ]
  },
  {
   "species_id": "mallard",
@@ -818,7 +931,11 @@
   ],
   "note": "オスは頭が緑色",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "times": [
+   "morning",
+   "evening"
+  ]
  },
  {
   "species_id": "eurasian_teal",
@@ -848,7 +965,11 @@
   ],
   "note": "小型のカモ",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "times": [
+   "morning",
+   "evening"
+  ]
  },
  {
   "species_id": "eurasian_wigeon",
@@ -879,7 +1000,11 @@
   ],
   "note": "オスは頭が赤茶色で額が黄白色",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "times": [
+   "morning",
+   "evening"
+  ]
  },
  {
   "species_id": "great_cormorant",
@@ -913,7 +1038,12 @@
   ],
   "note": "潜水して魚を捕る。翼を広げて乾かす",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "times": [
+   "morning",
+   "day",
+   "evening"
+  ]
  },
  {
   "species_id": "grey_heron",
@@ -945,7 +1075,11 @@
   ],
   "note": "長い首。浅瀬で動かず待つ",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "times": [
+   "morning",
+   "evening"
+  ]
  },
  {
   "species_id": "great_egret",
@@ -974,7 +1108,11 @@
   ],
   "note": "大型の白いサギ",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "times": [
+   "morning",
+   "evening"
+  ]
  },
  {
   "species_id": "little_egret",
@@ -1005,7 +1143,11 @@
   ],
   "note": "足の指が黄色い白いサギ",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "times": [
+   "morning",
+   "evening"
+  ]
  },
  {
   "species_id": "common_coot",
@@ -1035,7 +1177,12 @@
   ],
   "note": "黒い体に白い額",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "times": [
+   "morning",
+   "day",
+   "evening"
+  ]
  },
  {
   "species_id": "little_grebe",
@@ -1066,7 +1213,12 @@
   ],
   "note": "小さく、よく潜る",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "times": [
+   "morning",
+   "day",
+   "evening"
+  ]
  },
  {
   "species_id": "black_headed_gull",
@@ -1097,7 +1249,11 @@
   ],
   "note": "赤いくちばしと足",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "times": [
+   "morning",
+   "day"
+  ]
  },
  {
   "species_id": "common_sandpiper",
@@ -1128,7 +1284,12 @@
   ],
   "note": "尾を上下に振りながら水辺を歩く",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "times": [
+   "morning",
+   "day",
+   "evening"
+  ]
  },
  {
   "species_id": "common_kingfisher",
@@ -1160,7 +1321,12 @@
   ],
   "note": "青く光る背中。水面へ飛び込む",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "times": [
+   "morning",
+   "day",
+   "evening"
+  ]
  },
  {
   "species_id": "little_ringed_plover",
@@ -1189,7 +1355,12 @@
   ],
   "note": "目の周りの黄色い輪。河原の砂礫地",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "times": [
+   "morning",
+   "day",
+   "evening"
+  ]
  },
  {
   "species_id": "black_kite",
@@ -1218,7 +1389,10 @@
   ],
   "note": "輪を描いて高く舞う",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "times": [
+   "day"
+  ]
  },
  {
   "species_id": "osprey",
@@ -1248,7 +1422,10 @@
   ],
   "note": "水面へダイブして魚を捕る",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "times": [
+   "day"
+  ]
  },
  {
   "species_id": "common_kestrel",
@@ -1280,7 +1457,10 @@
   ],
   "note": "空中で停止（ホバリング）する",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "times": [
+   "day"
+  ]
  },
  {
   "species_id": "northern_goshawk",
@@ -1311,7 +1491,11 @@
   ],
   "note": "大型の猛禽。森の中を素早く飛ぶ",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "times": [
+   "morning",
+   "day"
+  ]
  },
  {
   "species_id": "rose_ringed_parakeet",
@@ -1341,7 +1525,11 @@
   ],
   "note": "緑色で長い尾。群れで大きな声",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "times": [
+   "morning",
+   "evening"
+  ]
  },
  {
   "species_id": "chinese_hwamei",
@@ -1372,6 +1560,10 @@
   ],
   "note": "外来種。茂みから大きな声で鳴く。目の周りに白い線",
   "source": "一般的な図鑑知識に基づく暫定値（地域の調査資料での確認は未実施）",
-  "confidence": "unverified"
+  "confidence": "unverified",
+  "times": [
+   "morning",
+   "day"
+  ]
  }
 ]

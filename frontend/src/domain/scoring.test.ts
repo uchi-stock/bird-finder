@@ -58,6 +58,26 @@ describe("未入力・矛盾の扱い", () => {
   });
 });
 
+describe("時間帯", () => {
+  it("未入力なら時間帯は加点も減点もしない", () => {
+    const c = identify(empty, species).find((c) => c.species.name_ja === "トビ")!;
+    expect(c.unknown).toContain("時間帯");
+    expect(c.score).toBe(0);
+  });
+  it("昼行性のトビは夕方だと軽く減点されるが除外されない", () => {
+    const r = identify({ ...empty, time: "evening" }, species);
+    const kite = r.find((c) => c.species.name_ja === "トビ")!;
+    expect(kite.conflicting).toContain("時間帯");
+    expect(kite.score).toBeLessThan(0);
+    expect(kite.score).toBeGreaterThan(-1);
+    expect(r).toHaveLength(species.length);
+  });
+  it("朝にアオサギは時間帯が一致する", () => {
+    const heron = identify({ ...empty, time: "morning" }, species).find((c) => c.species.name_ja === "アオサギ")!;
+    expect(heron.matching).toContain("時間帯");
+  });
+});
+
 describe("補助関数", () => {
   it("月→季節", () => {
     expect([1, 4, 7, 11].map(monthToSeason)).toEqual(["winter", "spring", "summer", "autumn"]);
