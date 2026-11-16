@@ -59,7 +59,6 @@ export function useObservation() {
     if (autoLocated.current) return;
     autoLocated.current = true;
     void locate(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const selectPlace = (p: Place | undefined) => {

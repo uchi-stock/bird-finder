@@ -36,7 +36,7 @@ export function StepCards({ o }: { o: ObservationState }) {
               ))}
             </div>
             <span className="step-title">
-              {stepIdx + 1}/{STEP_TITLES.length} {STEP_TITLES[stepIdx]}　← スライド →
+              {stepIdx + 1}/{STEP_TITLES.length} {STEP_TITLES[stepIdx]}{"\u3000"}← スライド →
             </span>
           </div>
           <div className="steps" ref={stepsRef} onScroll={onStepsScroll}>
