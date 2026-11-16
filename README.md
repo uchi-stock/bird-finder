@@ -95,3 +95,4 @@ standard-tech-stackの「選定の考え方」に沿って要否を判断した�
 - 上限（`backend/serverless.yml`）: APIは毎秒10件・瞬間20件、1人（アクセス元）あたりの投稿は1日30件。Lambdaの同時実行数の予約は、アカウントの枠が小さく使えない（予約するとデプロイが失敗する）ため、APIの流量制限で抑える
 - 監視: CloudWatchアラーム3つ（Lambdaのエラー・APIの5xx。5分で5件以上）。通知先は作らず、週1回の[`ops-backend-health.yml`](.github/workflows/ops-backend-health.yml)が状態を確認し、異常なら失敗してGitHubの通知で届く（手動でも実行できる）
 - 不正な投稿の削除: [`ops-delete-sightings.yml`](.github/workflows/ops-delete-sightings.yml)をGitHubのActions画面から実行する。区画と日付が必須で、最初は件数の確認だけを行う（`confirm`を`true`にすると削除する）
+- みんなの観察（共有）: 捕まえるとき、拡大表示の「みんなに共有する」を選んだ場合だけ、種・日付・ぼかした位置（約1km格子＋約±300mのずらし）を送る。初期はオフ。自宅（図鑑タブで登録）の周辺約2kmは共有しない。共有はあとから取り消せず、記録は期限なく保存される。地図タブの「みんなの観察」で、表示範囲の共有された記録を見られる（取得できる縮尺まで自動で寄る）

@@ -12,6 +12,7 @@ import { ResultList } from "./components/ResultList";
 import { useCallPlayer } from "./hooks/useCallPlayer";
 import { useCollection } from "./hooks/useCollection";
 import { useObservation } from "./hooks/useObservation";
+import { useSharedSightings } from "./hooks/useSharedSightings";
 import { useOnline } from "./hooks/useOnline";
 import { SPECIES, speciesLabel } from "./options";
 import formatBuildTime from "./shared/formatBuildTime.js";
@@ -22,7 +23,8 @@ const MapView = lazy(() => import("./components/MapView"));
 // タブの切り替えと、状態（条件・再生・図鑑）の結線だけを持つ
 export function App() {
   const [tab, setTab] = useState<"search" | "dex" | "map">("search");
-  const { collection, sightings, mapPoints, onCatch } = useCollection();
+  const { collection, sightings, mapPoints, onCatch, shareSighting } = useCollection();
+  const shared = useSharedSightings();
   const o = useObservation();
   const { now, onPlay, isActive } = useCallPlayer();
   const online = useOnline();
@@ -63,12 +65,12 @@ export function App() {
         <Dex collection={collection} />
       ) : tab === "map" ? (
         <Suspense fallback={<p className="hint">地図を読み込み中…</p>}>
-          <MapView points={mapPoints} speciesLabel={speciesLabel} withoutLocation={countWithoutLocation(sightings)} locate={getCoords} />
+          <MapView points={mapPoints} speciesLabel={speciesLabel} withoutLocation={countWithoutLocation(sightings)} locate={getCoords} shared={shared} />
         </Suspense>
       ) : (
         <>
           <StepCards o={o} />
-          <ResultList results={o.results} inputForResults={o.inputForResults} flying={o.flying} reset={o.reset} now={now} onPlay={onPlay} isActive={isActive} collection={collection} onCatch={onCatch} />
+          <ResultList results={o.results} inputForResults={o.inputForResults} flying={o.flying} reset={o.reset} now={now} onPlay={onPlay} isActive={isActive} collection={collection} onCatch={onCatch} onShare={shareSighting} />
         </>
       )}
     </main>

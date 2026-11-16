@@ -62,4 +62,45 @@ describe("MapView", () => {
     fireEvent.click(screen.getByRole("button", { name: "現在地へ" }));
     expect(await screen.findByText("現在地を取得できませんでした")).toBeInTheDocument();
   });
+
+  describe("みんなの観察（#46）", () => {
+    const sharedOf = (over = {}) => ({ points: [] as MapPoint[], message: "", loading: false, load: vi.fn(), ...over });
+    it("共有の機能が無ければ、切り替えを出さない", () => {
+      render(<MapView points={[]} speciesLabel={label} withoutLocation={0} locate={locate} />);
+      expect(screen.queryByRole("button", { name: "みんなの観察" })).toBeNull();
+    });
+    it("切り替えを出し、初期は自分の記録。みんなの観察を選ぶと、表示範囲で取得を依頼する", () => {
+      const shared = sharedOf();
+      render(<MapView points={[pt()]} speciesLabel={label} withoutLocation={0} locate={locate} shared={shared} />);
+      expect(screen.getByRole("button", { name: "自分の記録" })).toHaveAttribute("aria-pressed", "true");
+      expect(shared.load).not.toHaveBeenCalled();
+      fireEvent.click(screen.getByRole("button", { name: "みんなの観察" }));
+      expect(shared.load).toHaveBeenCalled();
+      // jsdomでは地図の大きさが0のため、範囲の中身ではなく、4辺の数値が渡ることを確かめる
+      const b = shared.load.mock.calls[0][0];
+      expect(Object.keys(b).sort()).toEqual(["east", "north", "south", "west"]);
+      expect(Object.values(b).every((v) => typeof v === "number" && Number.isFinite(v))).toBe(true);
+    });
+    it("みんなの観察を選ぶと、共有されたピンを出し、自分の記録のピンは隠す。戻すと逆になる", () => {
+      const shared = sharedOf({ points: [pt({ key: "s1", speciesId: "bat", count: 4 })] });
+      const { container } = render(<MapView points={[pt()]} speciesLabel={label} withoutLocation={0} locate={locate} shared={shared} />);
+      expect(container.querySelectorAll(".bird-pin:not(.shared)")).toHaveLength(1);
+      fireEvent.click(screen.getByRole("button", { name: "みんなの観察" }));
+      expect(container.querySelectorAll(".bird-pin:not(.shared)")).toHaveLength(0);
+      expect(container.querySelectorAll(".bird-pin.shared")).toHaveLength(1);
+      expect(container.querySelector(".pin-count")).toHaveTextContent("4");
+      fireEvent.click(screen.getByRole("button", { name: "自分の記録" }));
+      expect(container.querySelectorAll(".bird-pin.shared")).toHaveLength(0);
+      expect(container.querySelectorAll(".bird-pin:not(.shared)")).toHaveLength(1);
+    });
+    it("取得中・失敗・空の案内を出す。自分の記録に切り替えると出さない", () => {
+      const { rerender } = render(<MapView points={[]} speciesLabel={label} withoutLocation={0} locate={locate} shared={sharedOf({ loading: true })} />);
+      fireEvent.click(screen.getByRole("button", { name: "みんなの観察" }));
+      expect(screen.getByRole("status")).toHaveTextContent("みんなの観察を取得しています");
+      rerender(<MapView points={[]} speciesLabel={label} withoutLocation={0} locate={locate} shared={sharedOf({ message: "オフラインのため、みんなの観察を取得できません" })} />);
+      expect(screen.getByRole("status")).toHaveTextContent("オフラインのため");
+      fireEvent.click(screen.getByRole("button", { name: "自分の記録" }));
+      expect(screen.getByRole("status")).toHaveTextContent("見つけた場所つきの記録がありません");
+    });
+  });
 });
