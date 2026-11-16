@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import speciesJson from "../data/species.json";
-import { MAX_SHOWN, hasAnyInput, identify, monthToSeason, pickTop, voiceSimilarity } from "./scoring";
+import { MAX_SHOWN, hasAnyInput, identify, monthToSeason, normalizeVoice, pickTop, repeatUnit, scoreSpecies, voiceSimilarity } from "./scoring";
 import type { Observation, Species } from "./types";
 
 const species = speciesJson as Species[];
@@ -227,5 +227,44 @@ describe("補助関数", () => {
   it("オノマトペ類似度", () => {
     expect(voiceSimilarity("チチチ", "チチッ")).toBeGreaterThan(0.4);
     expect(voiceSimilarity("カーカー", "ホーホケキョ")).toBe(0);
+  });
+});
+
+describe("声の比較の改善（#78）", () => {
+  it("小さい仮名・半濁音と濁音の書き方の違いを同じとみなす", () => {
+    expect(normalizeVoice("グェッ")).toBe(normalizeVoice("ぐえっ"));
+    expect(normalizeVoice("ちゅぴちゅぴ")).toBe(normalizeVoice("チュビチュビ"));
+  });
+  it("繰り返しの単位を取り出す（2文字以上）", () => {
+    expect(repeatUnit("ピリピリ")).toBe("ピリ");
+    expect(repeatUnit("チチチ")).toBe("チチチ");
+    expect(repeatUnit("ホホケキヨ")).toBe("ホホケキヨ");
+  });
+  it("繰り返しの回数が違っても一致とみなす", () => {
+    expect(voiceSimilarity("ぴりっ ぴりっ", "ピリッ")).toBe(1);
+    expect(voiceSimilarity("ちゅんちゅんちゅん", "チュンチュン")).toBe(1);
+  });
+  it("複数の聞こえ方を書いたときは、区切りごとにも比べる（全体の一致より少し弱く扱う）", () => {
+    const part = voiceSimilarity("きーきー ぎゃー", "ギャーギャー");
+    expect(part).toBeGreaterThan(0.8);
+    expect(part).toBeLessThan(1);
+    expect(voiceSimilarity("ひっひっ かっかっ", "ヒッヒッカッカッ")).toBe(1);
+  });
+});
+
+describe("声だけの入力の改善（#78）", () => {
+  const base = { colors: [], habitats: [], onomatopoeia: "" } as const;
+  const find = (id: string) => (speciesJson as Species[]).find((s) => s.species_id === id)!;
+  it("見えない（声だけ）のときは、自動で入る「鳴く」を採点しない", () => {
+    const duck = find("mallard"); // 行動のデータに「鳴く」を持たない
+    const c = scoreSpecies({ ...base, colors: [], habitats: [], place: "unseen", behaviors: ["singing"], onomatopoeia: "ぐえっ" }, duck);
+    expect(c.unknown).toContain("行動");
+    expect(c.matching).toContain("鳴き声");
+    expect(c.fit).toBeGreaterThanOrEqual(0.5);
+  });
+  it("普段ほとんど声を出さない種は、声が聞こえたときに声の一致で加点しない", () => {
+    const cormorant = find("great_cormorant");
+    const c = scoreSpecies({ ...base, colors: [], habitats: [], behaviors: [], onomatopoeia: "グワッ" }, cormorant);
+    expect(c.matching).not.toContain("鳴き声");
   });
 });

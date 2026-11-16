@@ -9,9 +9,10 @@ const scenarios = scenariosJson as Scenario[];
 
 // 精度の下限。重みやデータを変えて精度が下がったら、ここで気づく。
 // 上がったら、実測値に合わせて下限を引き上げる（docs/accuracy.mdも更新する）。
-// 実測値（2026-11-16）: 全体 top1 54.5% / top3 77.3%、声だけ top1 41.5% / top3 70.7%、姿だけ top1 66.0% / top3 83.0%
-const MIN_TOP1 = 0.51;
-const MIN_TOP3 = 0.75;
+// 実測値（2026-11-16、判定の改善 #78 の後）: 全体 top1 73.9% / top3 92.0%、声だけ top1 75.6% / top3 95.1%、姿だけ top1 72.3% / top3 89.4%
+// （改善前: 全体 top1 54.5% / top3 77.3%）
+const MIN_TOP1 = 0.71;
+const MIN_TOP3 = 0.9;
 
 describe("evaluate", () => {
   it("正解が1番目・候補内・候補外のどれかを数える", () => {
