@@ -1,9 +1,24 @@
 name: Curate photos (背景が単純な写真の選び直し)
 
-# 鳥の写真を、背景が単純なものへ自動で選び直す。スマホのGitHub画面（Actions）から手動で実行する。
-# 結果は、Job Summaryの表（今の画像と選んだ画像の並び）で確認できる。
-# apply を true にすると、選んだ結果（frontend/src/data/photos.json）をPRとして出す。まず false で結果を確認する
+# 鳥の写真を、背景が単純なものへ自動で選び直す。人の操作は要らない。
+# - 月1回の定期実行と、鳥種データ（species.json）・この仕組み自体の変更時に動く（手動実行もできる）
+# - 結果が変わったときだけ、PRとして出す。CIが通れば自動でマージされる
+# - 安定させるため、選び直し済みの写真は、明らかに良い候補があるときだけ入れ替える（frontend/scripts/photoScore.jsのdecide）
+# - 壊れた結果を出さないため、Commonsの検索に失敗した鳥が多いときは何も書かずに失敗する。photos.jsonの中身は、単体テスト（photosData.test.ts）で検査される
+# - 結果は、実行のJob Summaryの表（今の画像と選んだ画像）で、あとから確認できる。気になれば、そのPRを戻せる
+# 手動実行では、applyをfalseにすると、PRを出さずに、表の確認だけができる
 on:
+  schedule:
+    - cron: "41 18 1 * *"
+  push:
+    branches:
+      - main
+    paths:
+      - "frontend/src/data/species.json"
+      # 仕組み自体を変えたとき（初回の導入を含む）にも、結果を作り直す
+      - ".github/workflows/curate-photos.yml"
+      - "frontend/scripts/photoScore.js"
+      - "frontend/scripts/curatePhotos.js"
   workflow_dispatch:
     inputs:
       species_ids:
@@ -14,7 +29,11 @@ on:
         description: "true にすると、結果をPRとして出す。false は確認のみ"
         required: false
         type: boolean
-        default: false
+        default: true
+
+concurrency:
+  group: curate-photos
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -49,14 +68,15 @@ jobs:
             frontend/src/data/photos.json
             curate-report.md
       - name: 結果をPRとして出す
-        if: inputs.apply
+        # 定期・鳥種データの変更時は常にPRを出す。手動実行は、applyの指定に従う
+        if: github.event_name != 'workflow_dispatch' || inputs.apply
         uses: ./dev-standards/.github/actions/commit-via-pr
         with:
           paths: frontend/src/data/photos.json
           commit-subject: "feat: 背景が単純な写真へ選び直す"
           commit-body: "背景の細かさで候補を比べ、今の画像より明らかに良いものだけを差し替えた（frontend/scripts/curatePhotos.js）。"
           pr-title: "feat: 背景が単純な写真へ選び直す"
-          pr-body: "写真の選び直しの結果。実行のJob Summaryの表（今の画像と選んだ画像）で確認できる。"
+          pr-body: "写真の選び直しの結果（自動）。今の画像と選んだ画像の表は、実行のJob Summaryで確認できる: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           branch-prefix: chore/curate-photos
           base-branch: main
           push-token: ${{ secrets.BOT_TOKEN }}

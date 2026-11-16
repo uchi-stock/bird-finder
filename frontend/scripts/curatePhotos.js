@@ -7,7 +7,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { backgroundRatio, filterCandidates, pickBest } from "./photoScore.js";
+import { backgroundRatio, decide, filterCandidates, tooManyFailures } from "./photoScore.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const SPECIES_FILE = path.resolve(here, "../src/data/species.json");
@@ -70,12 +70,22 @@ async function main() {
   const photos = fs.existsSync(PHOTOS_FILE) ? JSON.parse(fs.readFileSync(PHOTOS_FILE, "utf8")) : {};
   const rows = [];
 
+  let failed = 0;
   for (const s of targets) {
     const summary = await get(`https://ja.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(s.name_ja)}`);
     const baseUrl = summary?.thumbnail?.source;
-    const baseline = baseUrl ? await measure(sharp, baseUrl) : null;
+    const wikipediaMeasure = baseUrl ? await measure(sharp, baseUrl) : null;
+    const existing = photos[s.name_ja];
+    const existingMeasure = existing ? await measure(sharp, existing.thumbnail) : null;
 
     const search = await get(commonsUrl(s.scientific_name));
+    if (!search) {
+      // 検索に失敗した鳥は、何も変えない（今の写真を残す）
+      failed++;
+      rows.push({ s, baseUrl, existing, action: "failed", baseline: null, best: null, count: 0 });
+      console.log(`${s.name_ja}: Commonsの検索に失敗（今のまま）`);
+      continue;
+    }
     const pages = Object.values(search?.query?.pages ?? {}).sort((a, b) => (a.index ?? 99) - (b.index ?? 99));
     const candidates = filterCandidates(pages).slice(0, MAX_CANDIDATES);
     const measured = [];
@@ -83,27 +93,35 @@ async function main() {
       const m = await measure(sharp, c.thumbnail);
       if (m) measured.push({ ...c, ...m });
     }
-    const best = pickBest(measured, baseline);
-    if (best) photos[s.name_ja] = { thumbnail: best.thumbnail, pageUrl: best.pageUrl, credit: best.credit, license: best.license };
-    else delete photos[s.name_ja];
+    const d = decide({ existing, existingMeasure, wikipediaMeasure, candidates: measured });
+    if (d.action === "replace") photos[s.name_ja] = { thumbnail: d.best.thumbnail, pageUrl: d.best.pageUrl, credit: d.best.credit, license: d.best.license };
+    else if (d.action === "drop") delete photos[s.name_ja];
     const f = (v) => (v == null || !Number.isFinite(v) ? "—" : v.toFixed(2));
-    rows.push({ s, baseUrl, baseline, best, count: measured.length });
-    console.log(`${s.name_ja}: 候補${measured.length}件 / 今 ${f(baseline?.ratio)} → ${best ? `差し替え ${f(best.ratio)}` : "今のまま"}`);
+    rows.push({ s, baseUrl, existing, ...d, best: d.best ?? null, count: measured.length });
+    console.log(`${s.name_ja}: 候補${measured.length}件 / 基準 ${f(d.baseline?.ratio)} → ${d.action}${d.best ? ` ${f(d.best.ratio)}` : ""}`);
   }
 
-  fs.writeFileSync(PHOTOS_FILE, JSON.stringify(photos, null, 1) + "\n");
   const f = (v) => (v == null || !Number.isFinite(v) ? "—" : v.toFixed(2));
   const img = (u) => (u ? `<img src="${u}" width="110">` : "—");
+  const label = { replace: "差し替え", keep: "選び直し済みのまま", drop: "選び直しを外した（Wikipediaの画像へ戻る）", none: "今のまま", failed: "検索に失敗（今のまま）" };
+  const changed = rows.filter((r) => r.action === "replace" || r.action === "drop").length;
   const lines = [
     "### 写真の選び直し（背景が単純な写真）",
     "",
-    `対象 ${rows.length} 種 / 差し替え ${rows.filter((r) => r.best).length} 種。比は小さいほど、背景が単純で被写体が目立つ。`,
+    `対象 ${rows.length} 種 / 変更 ${changed} 種 / 検索に失敗 ${failed} 種。比は小さいほど、背景が単純で被写体が目立つ。`,
     "",
-    "| 鳥 | 今の画像 | 選んだ画像 | 比（今→選択） | 候補数 |",
-    "|---|---|---|---|---|",
-    ...rows.map((r) => `| ${r.s.name_ja} | ${img(r.baseUrl)} | ${r.best ? img(r.best.thumbnail) : "今のまま"} | ${f(r.baseline?.ratio)} → ${f(r.best?.ratio)} | ${r.count} |`),
+    "| 鳥 | 今の画像 | 選んだ画像 | 基準→選択の比 | 結果 | 候補数 |",
+    "|---|---|---|---|---|---|",
+    ...rows.map((r) => `| ${r.s.name_ja} | ${img(r.existing?.thumbnail ?? r.baseUrl)} | ${r.best ? img(r.best.thumbnail) : "—"} | ${f(r.baseline?.ratio)} → ${f(r.best?.ratio)} | ${label[r.action]} | ${r.count} |`),
   ];
   fs.writeFileSync(REPORT, lines.join("\n") + "\n");
+
+  // 検索に失敗した鳥が多いときは、障害とみなして、写真を書き換えない（写真を失わないため）
+  if (tooManyFailures(failed)) {
+    console.error(`Commonsの検索に失敗した鳥が${failed}種あったため、photos.jsonは書き換えませんでした`);
+    process.exit(1);
+  }
+  fs.writeFileSync(PHOTOS_FILE, JSON.stringify(photos, null, 1) + "\n");
 }
 
 main().catch((e) => {
