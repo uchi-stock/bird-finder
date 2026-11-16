@@ -1,0 +1,59 @@
+name: Delete sightings (AWS, 運用)
+
+# 不正な投稿を、区画・日付（・種）を指定して消す。スマホのGitHub画面から実行できる。
+# 最初は confirm を false のまま実行し、対象の件数を確認する。問題なければ confirm を true にして、もう一度実行する。
+# 区画と日付は必須で、全件削除はできない
+on:
+  workflow_dispatch:
+    inputs:
+      tile:
+        description: "区画（例: 713:2790）。地図の投稿を取得するAPIと同じ形式"
+        required: true
+        type: string
+      date:
+        description: "日付（例: 2026-11-16）"
+        required: true
+        type: string
+      species_id:
+        description: "種のID（任意。例: sparrow）。空なら、その区画・日付のすべて"
+        required: false
+        type: string
+      confirm:
+        description: "true にすると削除する。false は件数の確認のみ"
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-deploy
+  cancel-in-progress: false
+
+jobs:
+  delete:
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ap-northeast-1
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - name: 依存パッケージをインストールする
+        working-directory: backend
+        run: npm ci
+      - name: 対象を確認し、confirm が true のときだけ削除する
+        working-directory: backend
+        env:
+          TABLE: bird-finder-api-prod-sightings
+          TILE: ${{ inputs.tile }}
+          DATE: ${{ inputs.date }}
+          SPECIES_ID: ${{ inputs.species_id }}
+          CONFIRM: ${{ inputs.confirm }}
+        run: node scripts/deleteSightings.js 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"

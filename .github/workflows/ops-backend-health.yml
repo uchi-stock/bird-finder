@@ -1,0 +1,38 @@
+name: Backend health (AWS)
+
+# 共有バックエンドの状態を確認する。アラームが鳴っていればこのworkflowを失敗させ、GitHubの通知でスマホに届くようにする。
+# 週1回の定期実行のほか、GitHubのActions画面から手動でも実行できる
+on:
+  schedule:
+    - cron: "17 21 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ap-northeast-1
+    steps:
+      - name: アラームの状態を確認する
+        run: |
+          {
+            echo "### 共有バックエンドの状態"
+            echo ""
+            echo "| アラーム | 状態 |"
+            echo "|---|---|"
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+          aws cloudwatch describe-alarms --alarm-name-prefix bird-finder-api-prod- --query 'MetricAlarms[].[AlarmName,StateValue]' --output text > alarms.txt
+          while read -r name state; do echo "| $name | $state |"; done < alarms.txt | tee -a "$GITHUB_STEP_SUMMARY"
+          if [ ! -s alarms.txt ]; then echo "::error::アラームが1件も見つかりません（デプロイされていない可能性があります）"; exit 1; fi
+          if grep -q "ALARM$" alarms.txt; then echo "::error::鳴っているアラームがあります"; exit 1; fi
+
+      - name: 保存件数を確認する
+        run: |
+          count=$(aws dynamodb describe-table --table-name bird-finder-api-prod-sightings --query 'Table.ItemCount' --output text)
+          echo "" | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "保存されている投稿: 約 ${count} 件（DynamoDBの概算。約6時間ごとに更新される）" | tee -a "$GITHUB_STEP_SUMMARY"
