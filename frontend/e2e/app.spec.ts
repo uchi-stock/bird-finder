@@ -137,7 +137,11 @@ for (const size of SIZES) {
       await page.getByRole("button", { name: /両方/ }).click();
       expect(await dots()).toBe(7);
       expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBe(0);
+    });
+  });
+}
 
+for (const size of SIZES) {
   test.describe(`全種の一覧 ${size.name}`, () => {
     test.use({ viewport: { width: size.width, height: size.height } });
     test("図鑑タブの全種の一覧に、全44種が並び、各行の頭に画像が出る。画像は画面に入った行だけ取得する", async ({ page }, testInfo) => {
