@@ -24,7 +24,9 @@ export function useObservation() {
 
   // 入口（鳴き声から／姿から／両方）。既定は両方。出さないカードの項目は、入力済みでも判定に使わない（値は消さずに保持する）
   const [mode, setMode] = useState<EntryMode>("both");
-  const visibleSteps = ENTRY_STEPS[mode];
+  // 見えない（声だけ）なら、姿に関する大きさ（4）・羽の色（5）は回答不要なので、カード自体を出さない
+  const seen = appearanceKnown(place);
+  const visibleSteps = ENTRY_STEPS[mode].filter((step) => seen || (step !== 4 && step !== 5));
   const showBehavior = visibleSteps.includes(2);
   const showVoice = visibleSteps.includes(3);
   const showSize = visibleSteps.includes(4);
@@ -91,8 +93,7 @@ export function useObservation() {
     setBehaviors((prev) => (prev.every((b) => ok.includes(b)) ? prev : prev.filter((b) => ok.includes(b))));
   }, [habitats, place]);
 
-  // 見えない（声だけ）なら、大きさ・羽の色は不明として扱う（入力済みの値は消す）
-  const seen = appearanceKnown(place);
+  // 見えない（声だけ）にしたら、入力済みの大きさ・羽の色は消す（カードを出さず、判定にも使わない）
   useEffect(() => {
     if (!seen) {
       setSizeLevel(undefined);
@@ -100,7 +101,7 @@ export function useObservation() {
     }
   }, [seen]);
 
-  const stepDone = [habitats.length > 0, place !== undefined, behaviors.length > 0, voice !== "" || noVoice, !seen || sizeLevel !== undefined, !seen || colors.length > 0, time !== undefined];
+  const stepDone = [habitats.length > 0, place !== undefined, behaviors.length > 0, voice !== "" || noVoice, sizeLevel !== undefined, colors.length > 0, time !== undefined];
   // 飛んでいる状況（行動に「飛ぶ」、または場所が空）なら飛翔の画像を表示する
   const flying = (showBehavior && behaviors.includes("flying")) || place === "sky";
 
