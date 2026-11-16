@@ -10,11 +10,13 @@ import { Emoji } from "./Emoji";
 export function StepCards({ o }: { o: ObservationState }) {
   const {
     sizeLevel, setSizeLevel, colors, setColors, behaviors, setBehaviors, place, selectPlace,
-    date, setDate, useDate, setUseDate, habitats, setHabitats, time, setTime, voice, setVoice, noVoice, setNoVoice,
-    locMsg, locBusy, locate, seen, mode, setMode, visibleSteps, stepDone,
+    habitats, setHabitats, time, setTime, voice, setVoice, noVoice, setNoVoice,
+    locMsg, locBusy, locate, mode, setMode, visibleSteps, stepDone,
   } = o;
   const stepsRef = useRef<HTMLDivElement>(null);
-  const [stepIdx, setStepIdx] = useState(0);
+  const [rawIdx, setStepIdx] = useState(0);
+  // 出すカードが減ったとき（見えないを選んだ等）も、現在位置が枚数を超えないようにする
+  const stepIdx = Math.min(rawIdx, visibleSteps.length - 1);
   const onStepsScroll = () => {
     const el = stepsRef.current;
     if (!el) return;
@@ -120,8 +122,7 @@ export function StepCards({ o }: { o: ObservationState }) {
 
             <section className="step" hidden={!show(4)}>
               <h2>大きさ</h2>
-              {!seen && <p className="hint">姿が見えないので、不明として扱います。</p>}
-              <div className="sizes" hidden={!seen}>
+              <div className="sizes">
                 {SIZES.map((s) => (
                   <button key={s.level} className={sizeLevel === s.level ? "chip on" : "chip"} aria-pressed={sizeLevel === s.level} onClick={() => setSizeLevel(sizeLevel === s.level ? undefined : s.level)}>
                     <Emoji c={s.emoji} />
@@ -129,15 +130,14 @@ export function StepCards({ o }: { o: ObservationState }) {
                   </button>
                 ))}
               </div>
-              <p className="hint" hidden={!seen}>
+              <p className="hint">
                 {sizeLevel ? `${SIZES[sizeLevel - 1].ref}くらい（${SIZES[sizeLevel - 1].cm}）` : "1（最小）〜7（最大）。もう一度タップで解除"}
               </p>
             </section>
 
             <section className="step" hidden={!show(5)}>
               <h2>羽の色（複数可）</h2>
-              {!seen && <p className="hint">姿が見えないので、不明として扱います。</p>}
-              <div className="chips" hidden={!seen}>
+              <div className="chips">
                 {COLORS.map((c) => (
                   <button key={c.v} className={colors.includes(c.v) ? "chip on" : "chip"} aria-pressed={colors.includes(c.v)} onClick={() => setColors(toggle(colors, c.v))}>
                     <span className="dot" style={{ background: c.css }} />
@@ -157,12 +157,6 @@ export function StepCards({ o }: { o: ObservationState }) {
                   </button>
                 ))}
               </div>
-              <h2 className="sub">観察日</h2>
-              <label className="row">
-                <input type="checkbox" checked={useDate} onChange={(e) => setUseDate(e.target.checked)} />
-                季節を判定に使う
-              </label>
-              <input type="date" value={date} disabled={!useDate} onChange={(e) => setDate(e.target.value)} />
             </section>
           </div>
     </>

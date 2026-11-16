@@ -4,7 +4,7 @@ import { hasAnyInput, identify, pickTop } from "../domain/scoring";
 import { timeSlotFromHour } from "../domain/time";
 import type { Behavior, Color, Habitat, Observation, Place, TimeSlot } from "../domain/types";
 import { detectHabitats } from "../location";
-import { SPECIES, todayStr } from "../options";
+import { SPECIES } from "../options";
 import { isOnlineNow } from "./useOnline";
 
 /** 条件の入力一式と、前の回答による絞り込み（選べなくなった選択の自動解除）、候補の計算 */
@@ -13,8 +13,6 @@ export function useObservation() {
   const [colors, setColors] = useState<Color[]>([]);
   const [behaviors, setBehaviors] = useState<Behavior[]>([]);
   const [place, setPlace] = useState<Place | undefined>();
-  const [date, setDate] = useState(todayStr());
-  const [useDate, setUseDate] = useState(true);
   const [habitats, setHabitats] = useState<Habitat[]>([]);
   const [locMsg, setLocMsg] = useState("");
   const [locBusy, setLocBusy] = useState(false);
@@ -24,25 +22,29 @@ export function useObservation() {
 
   // 入口（鳴き声から／姿から／両方）。既定は両方。出さないカードの項目は、入力済みでも判定に使わない（値は消さずに保持する）
   const [mode, setMode] = useState<EntryMode>("both");
-  const visibleSteps = ENTRY_STEPS[mode];
+  // 見えない（声だけ）なら、姿に関する大きさ（4）・羽の色（5）は回答不要なので、カード自体を出さない
+  const seen = appearanceKnown(place);
+  const visibleSteps = ENTRY_STEPS[mode].filter((step) => seen || (step !== 4 && step !== 5));
   const showBehavior = visibleSteps.includes(2);
   const showVoice = visibleSteps.includes(3);
   const showSize = visibleSteps.includes(4);
   const showColor = visibleSteps.includes(5);
 
+  const month = new Date().getMonth() + 1;
   const obs: Observation = useMemo(
     () => ({
       sizeLevel: showSize ? sizeLevel : undefined,
       colors: showColor ? colors : [],
       behaviors: showBehavior ? behaviors : [],
       place,
-      month: useDate && date ? Number(date.split("-")[1]) : undefined,
+      // 検索は、いま見えている・聞こえている状況をもとにする。季節は、常に今の月から判定に使う
+      month,
       time,
       habitats,
       onomatopoeia: showVoice ? voice : "",
       noVoice: showVoice ? noVoice : false,
     }),
-    [sizeLevel, colors, behaviors, place, date, useDate, time, habitats, voice, noVoice, showSize, showColor, showBehavior, showVoice],
+    [sizeLevel, colors, behaviors, place, month, time, habitats, voice, noVoice, showSize, showColor, showBehavior, showVoice],
   );
   const results = useMemo(() => pickTop(identify(obs, SPECIES)), [obs]);
   // 日付だけでは「何か入力した」とみなさない（初期値が入っているため）
@@ -91,8 +93,7 @@ export function useObservation() {
     setBehaviors((prev) => (prev.every((b) => ok.includes(b)) ? prev : prev.filter((b) => ok.includes(b))));
   }, [habitats, place]);
 
-  // 見えない（声だけ）なら、大きさ・羽の色は不明として扱う（入力済みの値は消す）
-  const seen = appearanceKnown(place);
+  // 見えない（声だけ）にしたら、入力済みの大きさ・羽の色は消す（カードを出さず、判定にも使わない）
   useEffect(() => {
     if (!seen) {
       setSizeLevel(undefined);
@@ -100,7 +101,7 @@ export function useObservation() {
     }
   }, [seen]);
 
-  const stepDone = [habitats.length > 0, place !== undefined, behaviors.length > 0, voice !== "" || noVoice, !seen || sizeLevel !== undefined, !seen || colors.length > 0, time !== undefined];
+  const stepDone = [habitats.length > 0, place !== undefined, behaviors.length > 0, voice !== "" || noVoice, sizeLevel !== undefined, colors.length > 0, time !== undefined];
   // 飛んでいる状況（行動に「飛ぶ」、または場所が空）なら飛翔の画像を表示する
   const flying = (showBehavior && behaviors.includes("flying")) || place === "sky";
 
@@ -116,7 +117,7 @@ export function useObservation() {
 
   return {
     sizeLevel, setSizeLevel, colors, setColors, behaviors, setBehaviors, place, selectPlace,
-    date, setDate, useDate, setUseDate, habitats, setHabitats, time, setTime, voice, setVoice, noVoice, setNoVoice,
+    habitats, setHabitats, time, setTime, voice, setVoice, noVoice, setNoVoice,
     locMsg, locBusy, locate, seen, mode, setMode, visibleSteps, results, inputForResults, stepDone, flying, reset,
   };
 }

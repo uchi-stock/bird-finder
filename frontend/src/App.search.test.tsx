@@ -221,20 +221,36 @@ describe("App: 現在地から周辺環境", () => {
   });
 });
 
-describe("App: 見えない（声だけ）のとき、大きさ・羽の色は不明（#88）", () => {
-  it("選ぶと、入力済みの大きさ・羽の色が消え、問いの代わりに案内が出る。別の場所へ変えると戻る", async () => {
+describe("App: 見えない（声だけ）のとき、大きさ・羽の色は回答不要（#88・#99）", () => {
+  const dots = () => screen.getAllByRole("button", { name: /^\d\. / }).map((b) => b.getAttribute("aria-label"));
+  it("選ぶと、大きさ・羽の色のカードを出さず（5枚になる）、入力済みの値は消える。別の場所へ変えると戻る", async () => {
     await renderApp();
     await userEvent.click(chip("大きさ", "2"));
     await userEvent.click(chip("羽の色", "茶"));
     expect(chip("大きさ", "2")).toHaveAttribute("aria-pressed", "true");
+    expect(dots()).toHaveLength(7);
     await userEvent.click(chip("どこで見たか", "見えない（声だけ）"));
-    expect(screen.getAllByText("姿が見えないので、不明として扱います。")).toHaveLength(2);
-    expect(section("大きさ").querySelector(".sizes")).toHaveAttribute("hidden");
-    expect(section("羽の色").querySelector(".chips")).toHaveAttribute("hidden");
+    expect(dots()).toEqual(["1. 周辺の環境", "2. どこで見たか", "3. 行動", "4. 鳴き声", "5. 時間帯"]);
+    expect(screen.queryByRole("heading", { name: /^大きさ/ })).toBeNull();
+    expect(screen.queryByRole("heading", { name: /^羽の色/ })).toBeNull();
+    expect(screen.queryByText(/不明として扱います/)).toBeNull(); // 案内も不要（カード自体が無い）
     await userEvent.click(chip("どこで見たか", "見えない（声だけ）")); // もう一度押して解除
-    expect(screen.queryByText("姿が見えないので、不明として扱います。")).toBeNull();
+    expect(dots()).toHaveLength(7);
     expect(chip("大きさ", "2")).toHaveAttribute("aria-pressed", "false");
     expect(chip("羽の色", "茶")).toHaveAttribute("aria-pressed", "false");
+  });
+  it("入口が「鳴き声から」のときも、見えないを選んでカードの枚数が合う", async () => {
+    await renderApp();
+    await userEvent.click(screen.getByRole("button", { name: /鳴き声から/ }));
+    await userEvent.click(chip("どこで見たか", "見えない（声だけ）"));
+    expect(dots()).toEqual(["1. 周辺の環境", "2. どこで見たか", "3. 鳴き声", "4. 時間帯"]);
+  });
+  it("現在位置の表示は、カードの枚数を超えない", async () => {
+    await renderApp();
+    await userEvent.click(screen.getByRole("button", { name: "7. 時間帯" })); // 7枚目へ
+    await userEvent.click(screen.getByRole("button", { name: "2. どこで見たか" }));
+    await userEvent.click(chip("どこで見たか", "見えない（声だけ）"));
+    expect(screen.getByText(/\d\/5 /)).toBeInTheDocument();
   });
 });
 
@@ -253,6 +269,16 @@ describe("App: 補足の案内はモーダルにまとめる", () => {
   });
 });
 
+describe("App: 検索は常に今をもとにする（#100）", () => {
+  it("「季節を判定に使う」のチェックと観察日の入力は無い", async () => {
+    await renderApp();
+    expect(screen.queryByLabelText(/季節を判定に使う/)).toBeNull();
+    expect(screen.queryByText("観察日")).toBeNull();
+    expect(document.querySelector('input[type="date"]')).toBeNull();
+    expect(screen.getByRole("heading", { name: "時間帯" })).toBeInTheDocument();
+  });
+});
+
 describe("App: 入口（鳴き声から／姿から／両方）（#60）", () => {
   const dots = () => screen.getAllByRole("button", { name: /^\d\. / }).map((b) => b.getAttribute("aria-label"));
   const mode = (name: string) => screen.getByRole("button", { name: new RegExp(name) });
@@ -267,7 +293,7 @@ describe("App: 入口（鳴き声から／姿から／両方）（#60）", () =>
     await renderApp();
     await userEvent.click(mode("鳴き声から"));
     expect(mode("鳴き声から")).toHaveAttribute("aria-pressed", "true");
-    expect(dots()).toEqual(["1. 周辺の環境", "2. どこで見たか", "3. 鳴き声", "4. 時間帯・観察日"]);
+    expect(dots()).toEqual(["1. 周辺の環境", "2. どこで見たか", "3. 鳴き声", "4. 時間帯"]);
     expect(screen.queryByRole("heading", { name: /^行動/ })).toBeNull();
     expect(screen.queryByRole("heading", { name: /^大きさ/ })).toBeNull();
     expect(screen.queryByRole("heading", { name: /^羽の色/ })).toBeNull();
@@ -276,7 +302,7 @@ describe("App: 入口（鳴き声から／姿から／両方）（#60）", () =>
   it("姿から: 鳴き声のカードを出さない", async () => {
     await renderApp();
     await userEvent.click(mode("姿から"));
-    expect(dots()).toEqual(["1. 周辺の環境", "2. どこで見たか", "3. 行動", "4. 大きさ", "5. 羽の色", "6. 時間帯・観察日"]);
+    expect(dots()).toEqual(["1. 周辺の環境", "2. どこで見たか", "3. 行動", "4. 大きさ", "5. 羽の色", "6. 時間帯"]);
     expect(screen.queryByRole("heading", { name: /鳴き声（オノマトペ）/ })).toBeNull();
   });
   it("出さないカードの入力済みの値は、判定に使わず、値は消さない。「両方」へ戻すと効く", async () => {

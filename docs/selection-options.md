@@ -12,6 +12,7 @@
 - 「見えない（声だけ）」を選ぶと、行動は「鳴く・歌う」だけになり、自動で選ばれる
 - 「泳ぐ」「水の中に立つ・歩く」は、水辺・水面のとき（場所が未選択なら水辺の環境）だけ出る
 - 「見えない」は場所の手がかりにならないため、場所のスコアは加点も減点もしない
+- 「見えない」のときは、大きさ・羽の色は回答不要なので、そのカードを出さない（入力済みの値も消す）
 
 ## 1. 周辺の環境 → どこで見たか
 
@@ -146,11 +147,11 @@ flowchart LR
   S3["4. 鳴き声"]
   S4["5. 大きさ"]
   S5["6. 羽の色"]
-  S6["7. 時間帯・観察日"]
+  S6["7. 時間帯"]
   S0 --> S1 --> S2 --> S3 --> S4 --> S5 --> S6
 ```
 
-![選択肢の図（rendered）](https://raw.githubusercontent.com/uchi-stock/bird-finder/docs-diagrams/latest/selection-options-3.png)
+![選択肢の図（rendered）](https://raw.githubusercontent.com/uchi-stock/bird-finder/docs-diagrams/latest/selection-options-3.png?1da8a258203ce41929821ab1932786317fe220f7)
 
 </details>
 
@@ -169,7 +170,7 @@ flowchart LR
     M_voice_0["周辺の環境"]
     M_voice_1["どこで見たか"]
     M_voice_2["鳴き声"]
-    M_voice_3["時間帯・観察日"]
+    M_voice_3["時間帯"]
     M_voice_0 --> M_voice_1 --> M_voice_2 --> M_voice_3
   end
   subgraph MODE_sight["👀 姿から"]
@@ -179,7 +180,7 @@ flowchart LR
     M_sight_2["行動"]
     M_sight_3["大きさ"]
     M_sight_4["羽の色"]
-    M_sight_5["時間帯・観察日"]
+    M_sight_5["時間帯"]
     M_sight_0 --> M_sight_1 --> M_sight_2 --> M_sight_3 --> M_sight_4 --> M_sight_5
   end
   subgraph MODE_both["🎵👀 両方"]
@@ -190,11 +191,11 @@ flowchart LR
     M_both_3["鳴き声"]
     M_both_4["大きさ"]
     M_both_5["羽の色"]
-    M_both_6["時間帯・観察日"]
+    M_both_6["時間帯"]
     M_both_0 --> M_both_1 --> M_both_2 --> M_both_3 --> M_both_4 --> M_both_5 --> M_both_6
   end
 ```
 
-![選択肢の図（rendered）](https://raw.githubusercontent.com/uchi-stock/bird-finder/docs-diagrams/latest/selection-options-4.png?8f54c97b8e8b188553cb8dc15c1f0d2ad537b533)
+![選択肢の図（rendered）](https://raw.githubusercontent.com/uchi-stock/bird-finder/docs-diagrams/latest/selection-options-4.png?1da8a258203ce41929821ab1932786317fe220f7)
 
 </details>
