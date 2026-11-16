@@ -59,7 +59,66 @@ functions:
           path: /sightings
 
 resources:
+  # Serverlessが作るHTTP APIのステージに、既定の流量制限を加える（毎秒10件・瞬間20件。個人利用の規模に十分で、暴走時の請求を抑える）。
+  # Lambdaの同時実行数の予約（reservedConcurrency）は使わない。このアカウントはLambda全体の同時実行の枠が小さく、
+  # 予約すると「未予約の枠の最小値（10）」を下回ってデプロイが失敗する（#74の初回デプロイで確認）
+  extensions:
+    HttpApiStage:
+      Properties:
+        DefaultRouteSettings:
+          ThrottlingRateLimit: 10
+          ThrottlingBurstLimit: 20
   Resources:
+    # 監視。通知先は作らない（GitHub Actionsの定期確認 ops-backend-health.yml が状態を見て、異常なら失敗させる）。
+    # Lambdaのエラー数（5分で5件以上）
+    PostSightingErrorsAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: ${self:service}-${sls:stage}-postSighting-errors
+        Namespace: AWS/Lambda
+        MetricName: Errors
+        Dimensions:
+          - Name: FunctionName
+            Value: ${self:service}-${sls:stage}-postSighting
+        Statistic: Sum
+        Period: 300
+        EvaluationPeriods: 1
+        Threshold: 5
+        ComparisonOperator: GreaterThanOrEqualToThreshold
+        TreatMissingData: notBreaching
+    GetSightingsErrorsAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: ${self:service}-${sls:stage}-getSightings-errors
+        Namespace: AWS/Lambda
+        MetricName: Errors
+        Dimensions:
+          - Name: FunctionName
+            Value: ${self:service}-${sls:stage}-getSightings
+        Statistic: Sum
+        Period: 300
+        EvaluationPeriods: 1
+        Threshold: 5
+        ComparisonOperator: GreaterThanOrEqualToThreshold
+        TreatMissingData: notBreaching
+    # APIの5xx（5分で5件以上）
+    Api5xxAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: ${self:service}-${sls:stage}-api-5xx
+        Namespace: AWS/ApiGateway
+        MetricName: 5xx
+        Dimensions:
+          - Name: ApiId
+            Value: !Ref HttpApi
+          - Name: Stage
+            Value: $default
+        Statistic: Sum
+        Period: 300
+        EvaluationPeriods: 1
+        Threshold: 5
+        ComparisonOperator: GreaterThanOrEqualToThreshold
+        TreatMissingData: notBreaching
     # 見つけた鳥。区画（約5km四方）ごとに、新しい日付から取得する。期限なく保存する（TTLは無効）
     SightingsTable:
       Type: AWS::DynamoDB::Table

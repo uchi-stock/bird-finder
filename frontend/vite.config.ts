@@ -21,13 +21,15 @@ export default defineConfig({
   // docs/のMarkdownをテストから読めるようにする（選択肢ツリーの図の一致確認）
   server: { fs: { allow: [".."] } },
   test: {
+    // E2E（Playwright）はvitestの対象外。npm run test:e2eで実行する
+    include: ["src/**/*.test.{ts,tsx}", "*.test.js"],
     environment: "jsdom",
     setupFiles: ["./src/setupTests.ts"],
     coverage: {
       provider: "v8",
       include: ["src/**/*.{ts,tsx}"],
       // symlink共有（dev-standards側で管理）・エントリ・型宣言・テスト基盤は対象外
-      exclude: ["src/**/*.test.{ts,tsx}", "src/setupTests.ts", "src/main.tsx", "src/vite-env.d.ts", "src/shared/**"],
+      exclude: ["src/**/*.test.{ts,tsx}", "src/setupTests.ts", "src/testApp.tsx", "src/main.tsx", "src/vite-env.d.ts", "src/shared/**"],
     },
   },
 });

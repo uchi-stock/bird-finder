@@ -1,5 +1,5 @@
-import { ALL_BEHAVIORS, ALL_PLACES, HABITAT_PLACES, allowedBehaviors, impliedBehaviors } from "./choices";
-import { BEHAVIOR_LABEL, HABITAT_LABEL, PLACE_LABEL, STEP_TITLES } from "./labels";
+import { ALL_BEHAVIORS, ALL_PLACES, ENTRY_MODES, ENTRY_STEPS, HABITAT_PLACES, allowedBehaviors, impliedBehaviors } from "./choices";
+import { BEHAVIOR_LABEL, ENTRY_MODE_EMOJI, ENTRY_MODE_LABEL, HABITAT_LABEL, PLACE_LABEL, STEP_TITLES } from "./labels";
 import type { Habitat } from "./types";
 
 // 選択肢のツリーをMermaid記法で作る。docs/selection-options.mdの図と一致していることをテストで確認する
@@ -37,5 +37,18 @@ export function flowDiagram(): string {
   const lines = ["flowchart LR"];
   STEP_TITLES.forEach((t, i) => lines.push(`  S${i}["${i + 1}. ${t}"]`));
   lines.push("  " + STEP_TITLES.map((_, i) => `S${i}`).join(" --> "));
+  return lines.join("\n");
+}
+
+/** 入口（鳴き声から／姿から／両方）ごとの、カードの流れ */
+export function modeDiagram(): string {
+  const lines = ["flowchart LR"];
+  for (const m of ENTRY_MODES) {
+    lines.push(`  subgraph MODE_${m}["${ENTRY_MODE_EMOJI[m]} ${ENTRY_MODE_LABEL[m]}"]`);
+    lines.push(`    direction LR`);
+    ENTRY_STEPS[m].forEach((step, i) => lines.push(`    M_${m}_${i}["${STEP_TITLES[step]}"]`));
+    lines.push("    " + ENTRY_STEPS[m].map((_, i) => `M_${m}_${i}`).join(" --> "));
+    lines.push("  end");
+  }
   return lines.join("\n");
 }

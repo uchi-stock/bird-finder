@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { allowedBehaviors, allowedPlaces, behaviorsAfterPlaceChange, impliedBehaviors } from "./choices";
+import { allowedBehaviors, allowedPlaces, behaviorsAfterPlaceChange, ENTRY_MODES, ENTRY_STEPS, impliedBehaviors } from "./choices";
 
 describe("allowedPlaces", () => {
   it("環境未選択なら全ての場所", () => {
@@ -90,5 +90,17 @@ describe("behaviorsAfterPlaceChange", () => {
   });
   it("場所が変わらないときは行動を変えない", () => {
     expect(behaviorsAfterPlaceChange("sky", "sky", ["flying", "singing"])).toEqual(["flying", "singing"]);
+  });
+});
+
+describe("入口ごとのカード（#60）", () => {
+  it("3つの入口があり、両方は全7枚", () => {
+    expect(ENTRY_MODES).toEqual(["voice", "sight", "both"]);
+    expect(ENTRY_STEPS.both).toEqual([0, 1, 2, 3, 4, 5, 6]);
+  });
+  it("鳴き声からは行動・大きさ・羽の色を出さず、姿からは鳴き声を出さない。環境・場所・時間帯は共通", () => {
+    expect(ENTRY_STEPS.voice).toEqual([0, 1, 3, 6]);
+    expect(ENTRY_STEPS.sight).toEqual([0, 1, 2, 4, 5, 6]);
+    for (const m of ENTRY_MODES) for (const common of [0, 1, 6]) expect(ENTRY_STEPS[m]).toContain(common);
   });
 });

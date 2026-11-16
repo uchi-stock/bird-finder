@@ -20,13 +20,15 @@ function getPosition(): Promise<GeolocationPosition> {
       reject(new Error("この端末では位置情報を使えません"));
       return;
     }
-    navigator.geolocation.getCurrentPosition(resolve, (e) => reject(new Error(e.code === 1 ? "位置情報の利用が許可されていません" : "現在地を取得できませんでした")), {
+    navigator.geolocation.getCurrentPosition(resolve, (e) => reject(new Error(e.code === 1 ? "位置情報の利用が許可されていません。iPhoneは「設定」→「Safari」→「位置情報」で許可できます。手動でも選べます" : "現在地を取得できませんでした")), {
       enableHighAccuracy: true,
       timeout: 15000,
     });
   });
 }
 
+// 外部APIの応答は形が決まっていないため any とし、受け取る側の関数（classifyHabitats等）が中身を確かめる
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function fetchJson(url: string, init?: RequestInit): Promise<any> {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
