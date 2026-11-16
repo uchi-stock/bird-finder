@@ -47,22 +47,21 @@ package:
 functions:
   postSighting:
     handler: src/handlers/postSighting.handler
-    # 暴走・悪用時の請求を抑えるため、同時実行数に上限を設ける
-    reservedConcurrency: 5
     events:
       - httpApi:
           method: POST
           path: /sightings
   getSightings:
     handler: src/handlers/getSightings.handler
-    reservedConcurrency: 5
     events:
       - httpApi:
           method: GET
           path: /sightings
 
 resources:
-  # Serverlessが作るHTTP APIのステージに、既定の流量制限を加える（毎秒10件・瞬間20件。個人利用の規模に十分で、暴走時の請求を抑える）
+  # Serverlessが作るHTTP APIのステージに、既定の流量制限を加える（毎秒10件・瞬間20件。個人利用の規模に十分で、暴走時の請求を抑える）。
+  # Lambdaの同時実行数の予約（reservedConcurrency）は使わない。このアカウントはLambda全体の同時実行の枠が小さく、
+  # 予約すると「未予約の枠の最小値（10）」を下回ってデプロイが失敗する（#74の初回デプロイで確認）
   extensions:
     HttpApiStage:
       Properties:

@@ -92,6 +92,6 @@ standard-tech-stackの「選定の考え方」に沿って要否を判断した�
 ## 共有バックエンドの運用（費用の目安・上限）
 
 - 想定規模は、1日数十件の投稿と数百回の取得。AWSの無料枠（Lambda・API Gateway・DynamoDBのオンデマンド）の範囲に収まる見込み
-- 上限（`backend/serverless.yml`）: APIは毎秒10件・瞬間20件、Lambdaの同時実行は各5、1人（アクセス元）あたりの投稿は1日30件
+- 上限（`backend/serverless.yml`）: APIは毎秒10件・瞬間20件、1人（アクセス元）あたりの投稿は1日30件。Lambdaの同時実行数の予約は、アカウントの枠が小さく使えない（予約するとデプロイが失敗する）ため、APIの流量制限で抑える
 - 監視: CloudWatchアラーム3つ（Lambdaのエラー・APIの5xx。5分で5件以上）。通知先は作らず、週1回の[`ops-backend-health.yml`](.github/workflows/ops-backend-health.yml)が状態を確認し、異常なら失敗してGitHubの通知で届く（手動でも実行できる）
 - 不正な投稿の削除: [`ops-delete-sightings.yml`](.github/workflows/ops-delete-sightings.yml)をGitHubのActions画面から実行する。区画と日付が必須で、最初は件数の確認だけを行う（`confirm`を`true`にすると削除する）
