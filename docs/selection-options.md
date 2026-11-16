@@ -2,7 +2,7 @@
 
 「探す」タブで入力する条件の選択肢と、前の回答による絞り込みの規則を図にまとめる。
 規則の正本は`frontend/src/domain/choices.ts`である。
-1・2・3番目の図は、そのコードから自動生成した文字列と一致することをテストで確認している。
+1〜4番目の図は、そのコードから自動生成した文字列と一致することをテストで確認している。
 規則を変えて図を直し忘れると、テストが失敗する。
 
 ## 絞り込みの原則
@@ -154,24 +154,47 @@ flowchart LR
 
 </details>
 
-## 4. 入口の三択（案・Issue #60、未実装）
+## 4. 入口（鳴き声から／姿から／両方）
 
-鳴き声だけ分かる場合と、姿だけ分かる場合で、不要なカードを省く案。
-この図は手書きで、実装と同期していない。
+画面の上部で、何をもとに探すかを選ぶ。出すカードが変わる（既定は「両方」）。
+出さないカードの項目は、入力済みでも判定に使わない（未入力と同じ扱い）。値は消さずに保持するので、切り替えて戻すと効く。
+この図は、`choices.ts`の`ENTRY_STEPS`から自動生成した文字列と一致することをテストで確認している。
 
 <details open><summary>図を表示</summary>
 
 ```mermaid
 flowchart LR
-  START["入力のはじめ（案）"] --> MODE{"何をもとに探す？"}
-  MODE -->|鳴き声から| V["鳴き声のカード（オノマトペ）"]
-  MODE -->|姿から| A["環境・場所・行動・大きさ・羽の色"]
-  MODE -->|両方| ALL["すべてのカード"]
-  V --> COMMON["時間帯・観察日"]
-  A --> COMMON
-  ALL --> COMMON
+  subgraph MODE_voice["🎵 鳴き声から"]
+    direction LR
+    M_voice_0["周辺の環境"]
+    M_voice_1["どこで見たか"]
+    M_voice_2["鳴き声"]
+    M_voice_3["時間帯・観察日"]
+    M_voice_0 --> M_voice_1 --> M_voice_2 --> M_voice_3
+  end
+  subgraph MODE_sight["👀 姿から"]
+    direction LR
+    M_sight_0["周辺の環境"]
+    M_sight_1["どこで見たか"]
+    M_sight_2["行動"]
+    M_sight_3["大きさ"]
+    M_sight_4["羽の色"]
+    M_sight_5["時間帯・観察日"]
+    M_sight_0 --> M_sight_1 --> M_sight_2 --> M_sight_3 --> M_sight_4 --> M_sight_5
+  end
+  subgraph MODE_both["🎵👀 両方"]
+    direction LR
+    M_both_0["周辺の環境"]
+    M_both_1["どこで見たか"]
+    M_both_2["行動"]
+    M_both_3["鳴き声"]
+    M_both_4["大きさ"]
+    M_both_5["羽の色"]
+    M_both_6["時間帯・観察日"]
+    M_both_0 --> M_both_1 --> M_both_2 --> M_both_3 --> M_both_4 --> M_both_5 --> M_both_6
+  end
 ```
 
-![選択肢の図（rendered）](https://raw.githubusercontent.com/uchi-stock/bird-finder/docs-diagrams/latest/selection-options-4.png)
+![選択肢の図（rendered）](https://raw.githubusercontent.com/uchi-stock/bird-finder/docs-diagrams/latest/selection-options-4.png?8f54c97b8e8b188553cb8dc15c1f0d2ad537b533)
 
 </details>
