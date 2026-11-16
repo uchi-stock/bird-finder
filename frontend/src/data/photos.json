@@ -208,5 +208,17 @@
   "pageUrl": "https://commons.wikimedia.org/wiki/File:Rose-ringed_parakeet_(Psittacula_krameri_borealis)_male_Jaipur_2.jpg",
   "credit": "Charles J. Sharp",
   "license": "CC BY-SA 4.0"
+ },
+ "ヒヨドリ": {
+  "thumbnail": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5a/Hypsipetes_amaurotis_eating_Melia_azedarach.jpg/500px-Hypsipetes_amaurotis_eating_Melia_azedarach.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "pageUrl": "https://commons.wikimedia.org/wiki/File:Hypsipetes_amaurotis_eating_Melia_azedarach.jpg",
+  "credit": "Alpsdake",
+  "license": "CC BY-SA 4.0"
+ },
+ "ガビチョウ": {
+  "thumbnail": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/40/Garrulax_canorus_02.jpg/500px-Garrulax_canorus_02.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "pageUrl": "https://commons.wikimedia.org/wiki/File:Garrulax_canorus_02.jpg",
+  "credit": "Sun Jiao (Interaccoonale)",
+  "license": "CC BY 4.0"
  }
 }
