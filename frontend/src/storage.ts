@@ -4,6 +4,18 @@ import type { Sighting } from "./domain/sightings";
 
 const KEY = "bird-finder:collection:v1";
 
+/** 端末へ保存できるか（プライベートブラウズ等では書き込みに失敗する）。書き込みを1回試す */
+export function canSaveToStorage(): boolean {
+  try {
+    const k = "bird-finder:probe";
+    localStorage.setItem(k, "1");
+    localStorage.removeItem(k);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /** localStorageが使えない（プライベートモード等）場合も例外にしない */
 export function loadCollection(): Collection {
   try {
