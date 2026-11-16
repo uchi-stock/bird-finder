@@ -11,7 +11,7 @@ export function StepCards({ o }: { o: ObservationState }) {
   const {
     sizeLevel, setSizeLevel, colors, setColors, behaviors, setBehaviors, place, selectPlace,
     date, setDate, useDate, setUseDate, habitats, setHabitats, time, setTime, voice, setVoice, noVoice, setNoVoice,
-    locMsg, locBusy, locate, stepDone,
+    locMsg, locBusy, locate, seen, stepDone,
   } = o;
   const stepsRef = useRef<HTMLDivElement>(null);
   const [stepIdx, setStepIdx] = useState(0);
@@ -58,7 +58,6 @@ export function StepCards({ o }: { o: ObservationState }) {
 
             <section className="step">
               <h2>どこで見たか</h2>
-              {habitats.length > 0 && <p className="hint">選んだ環境にある場所だけ表示しています。</p>}
               <div className="chips">
                 {PLACES.filter((p) => allowedPlaces(habitats).includes(p.v)).map((p) => (
                   <button key={p.v} className={place === p.v ? "chip on" : "chip"} aria-pressed={place === p.v} onClick={() => selectPlace(place === p.v ? undefined : p.v)}>
@@ -71,8 +70,6 @@ export function StepCards({ o }: { o: ObservationState }) {
 
             <section className="step">
               <h2>行動（複数可）</h2>
-              {place === "sky" && <p className="hint">空で見たので「飛ぶ」を自動で選んでいます。</p>}
-              {place === "unseen" && <p className="hint">姿が見えないので「鳴く・歌う」を自動で選んでいます。</p>}
               <div className="chips">
                 {BEHAVIORS.filter((b) => allowedBehaviors(place, habitats).includes(b.v)).map((b) => (
                   <button key={b.v} className={behaviors.includes(b.v) ? "chip on" : "chip"} aria-pressed={behaviors.includes(b.v)} onClick={() => setBehaviors(toggle(behaviors, b.v))}>
@@ -108,7 +105,8 @@ export function StepCards({ o }: { o: ObservationState }) {
 
             <section className="step">
               <h2>大きさ</h2>
-              <div className="sizes">
+              {!seen && <p className="hint">姿が見えないので、不明として扱います。</p>}
+              <div className="sizes" hidden={!seen}>
                 {SIZES.map((s) => (
                   <button key={s.level} className={sizeLevel === s.level ? "chip on" : "chip"} aria-pressed={sizeLevel === s.level} onClick={() => setSizeLevel(sizeLevel === s.level ? undefined : s.level)}>
                     <Emoji c={s.emoji} />
@@ -116,14 +114,15 @@ export function StepCards({ o }: { o: ObservationState }) {
                   </button>
                 ))}
               </div>
-              <p className="hint">
+              <p className="hint" hidden={!seen}>
                 {sizeLevel ? `${SIZES[sizeLevel - 1].ref}くらい（${SIZES[sizeLevel - 1].cm}）` : "1（最小）〜7（最大）。もう一度タップで解除"}
               </p>
             </section>
 
             <section className="step">
               <h2>羽の色（複数可）</h2>
-              <div className="chips">
+              {!seen && <p className="hint">姿が見えないので、不明として扱います。</p>}
+              <div className="chips" hidden={!seen}>
                 {COLORS.map((c) => (
                   <button key={c.v} className={colors.includes(c.v) ? "chip on" : "chip"} aria-pressed={colors.includes(c.v)} onClick={() => setColors(toggle(colors, c.v))}>
                     <span className="dot" style={{ background: c.css }} />

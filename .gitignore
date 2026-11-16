@@ -36,3 +36,6 @@ commit_msg*.txt
 *.tsbuildinfo
 .serverless/
 backend/coverage/
+frontend/e2e-screenshots/
+frontend/playwright-report/
+frontend/test-results/
