@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { largeImageUrl } from "../domain/habitat";
-import { useFlightPhoto, usePhoto } from "../photo";
+import { retryPhoto, useFlightPhoto, usePhoto, usePhotoFailed } from "../photo";
 import { useModal } from "../hooks/useModal";
 import { Emoji } from "./Emoji";
 
@@ -19,6 +19,7 @@ interface PhotoProps {
 
 export function Photo({ name, scientificName, flying = false, zoomed, onZoomChange, caption, showNameWhenEmpty = false }: PhotoProps) {
   const standing = usePhoto(name);
+  const failed = usePhotoFailed(name);
   // 飛んでいる状況なら飛翔の画像を探す。見つからなければ通常の画像（多くは止まっている・立っている姿）
   const flight = useFlightPhoto(scientificName ?? "", flying && Boolean(scientificName));
   const photo = flying && flight ? flight : standing;
@@ -85,6 +86,11 @@ export function Photo({ name, scientificName, flying = false, zoomed, onZoomChan
       <>
         <div className="photo empty">
           <span>写真なし</span>
+          {failed && (
+            <button type="button" className="photo-retry" onClick={() => retryPhoto(name)}>
+              再読み込み
+            </button>
+          )}
           {showNameWhenEmpty && <strong className="empty-name">{name}</strong>}
         </div>
         {lightbox}

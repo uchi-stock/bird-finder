@@ -6,6 +6,8 @@ import { App } from "./App";
 const detectHabitats = vi.fn();
 const getCoords = vi.fn();
 const usePhoto = vi.fn();
+const usePhotoFailed = vi.fn();
+const retryPhoto = vi.fn();
 const fetchCallAudio = vi.fn();
 const playAudio = vi.fn();
 const stopAudio = vi.fn();
@@ -18,7 +20,12 @@ vi.mock("./callAudio", () => ({
   unlockAudio: () => unlockAudio(),
 }));
 vi.mock("./location", () => ({ detectHabitats: () => detectHabitats(), getCoords: () => getCoords() }));
-vi.mock("./photo", () => ({ usePhoto: (n: string) => usePhoto(n), useFlightPhoto: (s: string, e: boolean) => useFlightPhoto(s, e) }));
+vi.mock("./photo", () => ({
+  usePhoto: (n: string) => usePhoto(n),
+  usePhotoFailed: (n: string) => usePhotoFailed(n),
+  retryPhoto: (n: string) => retryPhoto(n),
+  useFlightPhoto: (s: string, e: boolean) => useFlightPhoto(s, e),
+}));
 
 const section = (title: string) => screen.getByRole("heading", { name: new RegExp(title) }).closest("section") as HTMLElement;
 const uguisuCard = () => screen.getByText("ウグイス").closest("li") as HTMLElement;
@@ -40,6 +47,8 @@ beforeEach(() => {
   detectHabitats.mockReset().mockResolvedValue([]);
   getCoords.mockReset().mockRejectedValue(new Error("位置なし"));
   usePhoto.mockReset().mockReturnValue(null);
+  usePhotoFailed.mockReset().mockReturnValue(false);
+  retryPhoto.mockReset();
   useFlightPhoto.mockReset().mockReturnValue(null);
   fetchCallAudio.mockReset().mockResolvedValue({ src: "https://u/a.mp3", pageUrl: "https://c/File:a", title: "a.ogg", credit: "録音者A", license: "CC BY 4.0" });
   playAudio.mockReset().mockResolvedValue(undefined);
@@ -515,6 +524,32 @@ describe("App: 注意文言のモーダル", () => {
     expect(within(dialog).getByText(/暫定値/)).toBeInTheDocument();
     await userEvent.click(within(dialog).getByRole("button", { name: "閉じる" }));
     expect(screen.queryByRole("dialog", { name: "使い方と注意" })).toBeNull();
+  });
+});
+
+describe("App: 外部サービスの失敗時の案内（#75）", () => {
+  it("写真の取得が一時的に失敗したときは「再読み込み」を出し、押すと取り直す", async () => {
+    usePhotoFailed.mockReturnValue(true);
+    await renderApp();
+    const btn = (await screen.findAllByRole("button", { name: "再読み込み" }))[0];
+    await userEvent.click(btn);
+    expect(retryPhoto).toHaveBeenCalled();
+  });
+  it("端末へ保存できないときは、図鑑タブに案内を出す。保存できるときは出さない", async () => {
+    await renderApp();
+    await userEvent.click(screen.getByRole("button", { name: /図鑑/ }));
+    expect(screen.queryByText(/図鑑を保存できません/)).toBeNull();
+    await userEvent.click(screen.getByRole("button", { name: /探す/ }));
+    const spy = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new Error("quota");
+    });
+    await userEvent.click(screen.getByRole("button", { name: /図鑑/ }));
+    expect(screen.getByText(/図鑑を保存できません/)).toBeInTheDocument();
+    spy.mockRestore();
+  });
+  it("もともと写真が無い（失敗ではない）ときは、再読み込みを出さない", async () => {
+    await renderApp();
+    expect(screen.queryByRole("button", { name: "再読み込み" })).toBeNull();
   });
 });
 

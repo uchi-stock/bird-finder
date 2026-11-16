@@ -10,33 +10,75 @@ export interface BirdPhoto {
 }
 
 const cache = new Map<string, Promise<BirdPhoto | null>>();
+// 一時的な失敗（通信エラー・5xx）をした題名。「もともと写真が無い」（404・画像なし）とは区別し、結果を残さず、再読み込みできるようにする
+const failedTitles = new Set<string>();
+const failureListeners = new Set<() => void>();
+const retryListeners = new Set<() => void>();
 
-/** Wikipedia（日本語版）の要約APIから代表画像を取得する。失敗時はnull（写真なしで動作） */
+/** 一時的な失敗か（通信エラー・サーバーエラー・混雑）。404などは「該当なし」として扱う */
+function isTransient(status: number): boolean {
+  return status >= 500 || status === 429 || status === 408;
+}
+
+/** Wikipedia（日本語版）の要約APIから代表画像を取得する。失敗・該当なしはnull（写真なしで動作）。一時的な失敗は記憶せず、再読み込みで取り直せる */
 export function fetchPhoto(title: string): Promise<BirdPhoto | null> {
   let p = cache.get(title);
   if (!p) {
+    const fail = () => {
+      cache.delete(title);
+      failedTitles.add(title);
+      failureListeners.forEach((l) => l());
+      return null;
+    };
     p = fetch(`https://ja.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`)
-      .then((r) => (r.ok ? r.json() : null))
+      .then((r) => (r.ok ? r.json() : isTransient(r.status) ? fail() : null))
       .then((j) => {
         if (!j || j.type === "disambiguation" || !j.thumbnail?.source) return null;
+        failedTitles.delete(title);
         return { thumbnail: j.thumbnail.source as string, pageUrl: j.content_urls?.mobile?.page ?? j.content_urls?.desktop?.page } as BirdPhoto;
       })
-      .catch(() => null);
+      .catch(fail);
     cache.set(title, p);
   }
   return p;
 }
 
+/** 失敗の記録を消して、もう一度取得させる（「再読み込み」ボタン用） */
+export function retryPhoto(title: string): void {
+  failedTitles.delete(title);
+  cache.delete(title);
+  failureListeners.forEach((l) => l());
+  retryListeners.forEach((l) => l());
+}
+
 export function usePhoto(title: string): BirdPhoto | null {
   const [photo, setPhoto] = useState<BirdPhoto | null>(null);
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    const l = () => setTick((t) => t + 1);
+    retryListeners.add(l);
+    return () => void retryListeners.delete(l);
+  }, []);
   useEffect(() => {
     let alive = true;
     fetchPhoto(title).then((p) => alive && setPhoto(p));
     return () => {
       alive = false;
     };
-  }, [title]);
+  }, [title, tick]);
   return photo;
+}
+
+/** 写真の取得が一時的に失敗したか（「もともと無い」場合はfalse） */
+export function usePhotoFailed(title: string): boolean {
+  const [failed, setFailed] = useState(failedTitles.has(title));
+  useEffect(() => {
+    const l = () => setFailed(failedTitles.has(title));
+    failureListeners.add(l);
+    l();
+    return () => void failureListeners.delete(l);
+  }, [title]);
+  return failed;
 }
 
 // ---- 飛翔の画像（Wikimedia Commons） ----

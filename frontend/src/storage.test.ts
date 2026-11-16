@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { clearHome, getPrivacySecret, loadCollection, loadHome, loadSightings, saveCollection, saveHome, saveSightings } from "./storage";
+import { canSaveToStorage, clearHome, getPrivacySecret, loadCollection, loadHome, loadSightings, saveCollection, saveHome, saveSightings } from "./storage";
 
 beforeEach(() => {
   localStorage.clear();
@@ -95,5 +95,16 @@ describe("捕まえた記録（見つけた場所つき）の保存", () => {
     });
     expect(loadSightings()).toEqual([]);
     expect(() => saveSightings(s)).not.toThrow();
+  });
+});
+
+describe("canSaveToStorage（#75）", () => {
+  it("書き込めれば true、書き込みに失敗すれば false", () => {
+    expect(canSaveToStorage()).toBe(true);
+    const spy = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new Error("quota");
+    });
+    expect(canSaveToStorage()).toBe(false);
+    spy.mockRestore();
   });
 });

@@ -20,7 +20,7 @@ function getPosition(): Promise<GeolocationPosition> {
       reject(new Error("この端末では位置情報を使えません"));
       return;
     }
-    navigator.geolocation.getCurrentPosition(resolve, (e) => reject(new Error(e.code === 1 ? "位置情報の利用が許可されていません" : "現在地を取得できませんでした")), {
+    navigator.geolocation.getCurrentPosition(resolve, (e) => reject(new Error(e.code === 1 ? "位置情報の利用が許可されていません。iPhoneは「設定」→「Safari」→「位置情報」で許可できます。手動でも選べます" : "現在地を取得できませんでした")), {
       enableHighAccuracy: true,
       timeout: 15000,
     });

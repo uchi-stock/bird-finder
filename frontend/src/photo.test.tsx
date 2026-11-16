@@ -117,3 +117,25 @@ describe("fetchFlightPhoto / useFlightPhoto", () => {
     await waitFor(() => expect(result.current).toBeNull());
   });
 });
+
+describe("写真の取得失敗の区別（#75）", () => {
+  afterEach(() => vi.restoreAllMocks());
+  it("通信エラー・5xxは一時的な失敗として結果を残さず、取り直せる。404は「該当なし」として残す", async () => {
+    const { fetchPhoto, retryPhoto } = await import("./photo");
+    const ok = { type: "standard", thumbnail: { source: "https://u/a.jpg" }, content_urls: { mobile: { page: "https://w/a" } } };
+    const f = vi.fn();
+    vi.stubGlobal("fetch", f);
+    f.mockRejectedValueOnce(new Error("net")).mockResolvedValueOnce({ ok: true, json: async () => ok });
+    expect(await fetchPhoto("再試行テスト鳥")).toBeNull();
+    retryPhoto("再試行テスト鳥");
+    expect((await fetchPhoto("再試行テスト鳥"))?.thumbnail).toBe("https://u/a.jpg");
+    f.mockResolvedValueOnce({ ok: false, status: 503 }).mockResolvedValueOnce({ ok: true, json: async () => ok });
+    expect(await fetchPhoto("サーバーエラー鳥")).toBeNull();
+    expect((await fetchPhoto("サーバーエラー鳥"))?.thumbnail).toBe("https://u/a.jpg"); // 失敗は記憶されず、次の呼び出しで取り直す
+    f.mockResolvedValueOnce({ ok: false, status: 404 });
+    expect(await fetchPhoto("存在しない鳥")).toBeNull();
+    expect(await fetchPhoto("存在しない鳥")).toBeNull();
+    expect(f).toHaveBeenCalledTimes(5); // 404は結果を残すので、2回目は取得しない
+    vi.unstubAllGlobals();
+  });
+});

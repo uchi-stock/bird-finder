@@ -207,3 +207,7 @@ footer { font-size:.75rem; opacity:.7; padding:8px 0 24px; }
 /* アクセシビリティ: キーボード操作時のフォーカスの見た目、拡大表示の閉じるボタン */
 :focus-visible { outline:2px solid var(--acc); outline-offset:2px; }
 .lb-close { align-self:flex-end; padding:6px 14px; border-radius:999px; border:1px solid rgba(255,255,255,.5); background:rgba(0,0,0,.35); color:#fff; font-size:.85rem; }
+
+/* 失敗時の案内 */
+.photo-retry { margin-top:4px; padding:2px 8px; border-radius:999px; border:1px solid var(--line); background:var(--card); color:var(--fg); font-size:.7rem; }
+.hint.warn { color:#c0392b; }
