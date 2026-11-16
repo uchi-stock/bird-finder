@@ -56,9 +56,10 @@ export function Photo({ name, scientificName, flying = false, zoomed, onZoomChan
       {photo ? (
         // 読み込み済みの小さい版を、開いた瞬間に拡大して出す。大きい版は、読み込み完了後に上へ重ねて切り替える
         <div className="lb-photo">
-          <img className="lb-thumb" src={photo.thumbnail} alt={name} />
+          <img className="lb-thumb" src={photo.thumbnail} alt={name} crossOrigin="anonymous" />
           <img
             className={largeLoaded ? "lb-large on" : "lb-large"}
+            crossOrigin="anonymous"
             src={largeSrc}
             alt=""
             aria-hidden="true"
@@ -100,7 +101,7 @@ export function Photo({ name, scientificName, flying = false, zoomed, onZoomChan
   return (
     <>
       <div className="photo">
-        <img src={photo.thumbnail} alt={name} loading="lazy" />
+        <img src={photo.thumbnail} alt={name} loading="lazy" crossOrigin="anonymous" />
         {photo.flight && <span className="flight-badge">飛翔</span>}
         <button
           type="button"

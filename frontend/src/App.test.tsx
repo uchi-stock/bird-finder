@@ -586,6 +586,42 @@ describe("App: 補足の案内はモーダルにまとめる", () => {
   });
 });
 
+describe("App: オフライン（#70）", () => {
+  const goOffline = () => vi.spyOn(navigator, "onLine", "get").mockReturnValue(false);
+  afterEach(() => vi.restoreAllMocks());
+
+  it("オフラインの案内は、オフラインのときだけ出る", async () => {
+    await renderApp();
+    expect(screen.queryByText(/オフラインです/)).toBeNull();
+    const spy = goOffline();
+    act(() => void window.dispatchEvent(new Event("offline")));
+    expect(screen.getByRole("status")).toHaveTextContent("オフラインです。鳥の判定は使えます");
+    spy.mockReturnValue(true);
+    act(() => void window.dispatchEvent(new Event("online")));
+    expect(screen.queryByText(/オフラインです/)).toBeNull();
+  });
+  it("すべての通信が失敗する状態でも、条件を入力すれば候補が出る（判定は端末内で完結する）", async () => {
+    goOffline();
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
+    render(<App />);
+    await act(async () => {});
+    expect(detectHabitats).not.toHaveBeenCalled(); // 通信を試みない
+    expect(screen.getByText(/オフラインのため、周辺の環境を判定できません/)).toBeInTheDocument();
+    await userEvent.click(chip("大きさ", "2"));
+    expect(within(screen.getByRole("list")).getAllByRole("listitem").length).toBeGreaterThan(0);
+    vi.unstubAllGlobals();
+  });
+  it("オフラインで鳥をタップすると、音源を探さず、理由を表示する", async () => {
+    await renderApp();
+    await userEvent.click(chip("大きさ", "2"));
+    goOffline();
+    fireEvent.click(firstCard());
+    expect(await screen.findAllByText(/オフラインのため、.+の鳴き声は再生できません/)).not.toHaveLength(0);
+    expect(fetchCallAudio).not.toHaveBeenCalled();
+    expect(unlockAudio).toHaveBeenCalled(); // iOSの解錠は、タップの同期処理で行う
+  });
+});
+
 describe("App: アクセシビリティ", () => {
   it("条件のチップは、選択状態をaria-pressedで示す", async () => {
     await renderApp();

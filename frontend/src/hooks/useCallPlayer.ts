@@ -1,8 +1,9 @@
 import { useRef, useState } from "react";
 import { fetchCallAudio, playAudio, stopAudio, unlockAudio, type CallAudio } from "../callAudio";
 import type { Species } from "../domain/types";
+import { isOnlineNow } from "./useOnline";
 
-export type NowPlaying = { id: string; name: string; status: "loading" | "playing" | "none" | "error"; info?: CallAudio };
+export type NowPlaying = { id: string; name: string; status: "loading" | "playing" | "none" | "error" | "offline"; info?: CallAudio };
 
 /** 鳴き声の再生状態。候補のタップで再生し、同じ鳥をもう一度タップすると停止する */
 export function useCallPlayer() {
@@ -19,6 +20,10 @@ export function useCallPlayer() {
     }
     unlockAudio();
     const token = ++playToken.current;
+    if (!isOnlineNow()) {
+      setNow({ id: sp.species_id, name: sp.name_ja, status: "offline" });
+      return;
+    }
     setNow({ id: sp.species_id, name: sp.name_ja, status: "loading" });
     const info = await fetchCallAudio(sp.scientific_name);
     if (token !== playToken.current) return; // 別の鳥をタップした

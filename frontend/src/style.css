@@ -1258,3 +1258,12 @@ footer {
 .hint.warn {
   color: #c0392b;
 }
+
+/* オフライン時の案内 */
+.offline-note {
+  margin: 4px 0;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: color-mix(in srgb, #e0a800 22%, var(--card));
+  font-size: 0.8rem;
+}
