@@ -58,10 +58,29 @@ export function backgroundRatio(gray, w, h) {
   return { ring, center, ratio: center > 0 ? ring / center : Infinity };
 }
 
-const ALLOWED_LICENSE = /^(CC0|Public domain|PD|CC BY(-SA)? [\d.]+)/i;
-const EXCLUDED_TITLE = /map|range|distribution|egg|nest|skull|illustration|drawing|plate|painting|specimen|museum|taxiderm|chick|juvenile|feather|footprint|track|flock|in flight|flying|take.?off|landing|soaring|hover/i;
+// 使えるライセンス。Public domainは外す（現代の野鳥の写真はCCライセンスで、Public domainの多くは、古い図版・絵画だったため）
+const ALLOWED_LICENSE = /^(CC0|CC BY(-SA)? [\d.]+)/i;
+// 除外する題名: 図・地図・卵・巣・飛翔など、標準の姿ではないもの、図版・絵画・標本（背景が無地で、指標で有利になりやすいが、写真としては不向き）
+const EXCLUDED_TITLE = /map|range|distribution|egg|nest|skull|illustration|drawing|plate|painting|lithograph|engraving|aquarel|watercolo|scroll|folio|tafel|ukiyo|specimen|museum|taxiderm|mounted|stuffed|MHNT|NHMUK|NMNH|BMNH|\.ZOO\.|chick|juvenile|feather|footprint|track|flock|in flight|flying|take.?off|landing|soaring|hover|図|图|圖|絵|画|卷|巻|写生/i;
 const MIN_WIDTH = 800;
 const MIN_HEIGHT = 600;
+
+/** 題名とライセンスが、使える写真の条件を満たすか */
+export function isAllowedPhoto(title, license) {
+  return ALLOWED_LICENSE.test(license ?? "") && !EXCLUDED_TITLE.test(title ?? "");
+}
+
+/** photos.jsonの項目（選び直し済みの写真）が、いまの条件を満たすか。説明ページのURLの末尾（File:...）を題名として見る */
+export function isAllowedEntry(entry) {
+  if (!entry) return false;
+  let title = "";
+  try {
+    title = decodeURIComponent(String(entry.pageUrl ?? "").split("/").pop() ?? "");
+  } catch {
+    title = String(entry.pageUrl ?? "");
+  }
+  return isAllowedPhoto(title, entry.license);
+}
 
 /**
  * Commonsの検索結果（pages）から、使える写真の候補を選ぶ。
@@ -74,10 +93,9 @@ export function filterCandidates(pages) {
     if (!info?.thumburl) continue;
     if (info.mime !== "image/jpeg") continue;
     if ((info.width ?? 0) < MIN_WIDTH || (info.height ?? 0) < MIN_HEIGHT) continue;
-    if (EXCLUDED_TITLE.test(pg.title ?? "")) continue;
     const meta = info.extmetadata ?? {};
     const license = meta.LicenseShortName?.value ?? "";
-    if (!ALLOWED_LICENSE.test(license)) continue;
+    if (!isAllowedPhoto(pg.title ?? "", license)) continue;
     out.push({
       title: pg.title,
       thumbnail: info.thumburl,
@@ -120,7 +138,8 @@ export function tooManyFailures(failed) {
  * existingMeasure・wikipediaMeasure: backgroundRatioの結果（測れなければnull）
  */
 export function decide({ existing, existingMeasure, wikipediaMeasure, candidates }) {
-  const existingOk = Boolean(existing) && Boolean(existingMeasure) && existingMeasure.center >= MIN_CENTER && Number.isFinite(existingMeasure.ratio);
+  // 選び直し済みの写真も、いまの条件（ライセンス・題名）を満たさなくなったら、使えないものとして扱う（条件を厳しくしたとき、自動で直る）
+  const existingOk = isAllowedEntry(existing) && Boolean(existingMeasure) && existingMeasure.center >= MIN_CENTER && Number.isFinite(existingMeasure.ratio);
   const baseline = existingOk ? existingMeasure : wikipediaMeasure;
   const best = pickBest(candidates, baseline);
   if (best) return { action: "replace", best, baseline };
