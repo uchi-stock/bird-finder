@@ -254,7 +254,8 @@ describe("App: 現在地から周辺環境", () => {
     detectHabitats.mockResolvedValue(["waterside"]);
     await renderApp();
     expect(chip("周辺の環境", "川辺")).toHaveClass("on");
-    expect(screen.getByText(/現在地の周辺から判定しました/)).toBeInTheDocument();
+    // 判定できたときの案内は画面に出さない（ⓘのモーダルに載せた）
+    expect(screen.queryByText(/違う場合はタップで修正/)).toBeNull();
   });
   it("判定できなければ手動選択を促す", async () => {
     detectHabitats.mockResolvedValue([]);
@@ -550,6 +551,38 @@ describe("App: 外部サービスの失敗時の案内（#75）", () => {
   it("もともと写真が無い（失敗ではない）ときは、再読み込みを出さない", async () => {
     await renderApp();
     expect(screen.queryByRole("button", { name: "再読み込み" })).toBeNull();
+  });
+});
+
+describe("App: 見えない（声だけ）のとき、大きさ・羽の色は不明（#88）", () => {
+  it("選ぶと、入力済みの大きさ・羽の色が消え、問いの代わりに案内が出る。別の場所へ変えると戻る", async () => {
+    await renderApp();
+    await userEvent.click(chip("大きさ", "2"));
+    await userEvent.click(chip("羽の色", "茶"));
+    expect(chip("大きさ", "2")).toHaveAttribute("aria-pressed", "true");
+    await userEvent.click(chip("どこで見たか", "見えない（声だけ）"));
+    expect(screen.getAllByText("姿が見えないので、不明として扱います。")).toHaveLength(2);
+    expect(section("大きさ").querySelector(".sizes")).toHaveAttribute("hidden");
+    expect(section("羽の色").querySelector(".chips")).toHaveAttribute("hidden");
+    await userEvent.click(chip("どこで見たか", "見えない（声だけ）")); // もう一度押して解除
+    expect(screen.queryByText("姿が見えないので、不明として扱います。")).toBeNull();
+    expect(chip("大きさ", "2")).toHaveAttribute("aria-pressed", "false");
+    expect(chip("羽の色", "茶")).toHaveAttribute("aria-pressed", "false");
+  });
+});
+
+describe("App: 補足の案内はモーダルにまとめる", () => {
+  it("環境の判定結果・場所の絞り込み・自動選択の案内は画面に出さず、ⓘのモーダルにある", async () => {
+    detectHabitats.mockResolvedValue(["waterside"]);
+    await renderApp();
+    await userEvent.click(chip("どこで見たか", "空"));
+    expect(screen.queryByText(/選んだ環境にある場所だけ/)).toBeNull();
+    expect(screen.queryByText(/自動で選んでいます/)).toBeNull();
+    await userEvent.click(screen.getByRole("button", { name: "使い方と注意" }));
+    const dialog = screen.getByRole("dialog", { name: "使い方と注意" });
+    expect(within(dialog).getByText(/違う場合はタップで修正できます/)).toBeInTheDocument();
+    expect(within(dialog).getByText(/その環境にある場所だけ/)).toBeInTheDocument();
+    expect(within(dialog).getByText(/自動で選ばれます/)).toBeInTheDocument();
   });
 });
 

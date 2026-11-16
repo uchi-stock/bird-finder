@@ -32,6 +32,11 @@ export function allowedBehaviors(place: Place | undefined, habitats: Habitat[]):
   return ALL_BEHAVIORS.filter((b) => b !== "flying" && ((b !== "swimming" && b !== "wading") || inWater));
 }
 
+/** 姿が見えている場所か。見えない（声だけ）のとき、大きさ・羽の色は答えようがないので不明として扱う */
+export function appearanceKnown(place: Place | undefined): boolean {
+  return place !== "unseen";
+}
+
 /** 場所から自動で決まる行動（空なら飛ぶ） */
 export function impliedBehaviors(place: Place | undefined): Behavior[] {
   if (place === "sky") return ["flying"];

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { allowedBehaviors, allowedPlaces, behaviorsAfterPlaceChange } from "../domain/choices";
+import { allowedBehaviors, allowedPlaces, appearanceKnown, behaviorsAfterPlaceChange } from "../domain/choices";
 import { hasAnyInput, identify, pickTop } from "../domain/scoring";
 import { timeSlotFromHour } from "../domain/time";
 import type { Behavior, Color, Habitat, Observation, Place, TimeSlot } from "../domain/types";
@@ -45,7 +45,8 @@ export function useObservation() {
     try {
       const found = await detectHabitats();
       setHabitats(found);
-      setLocMsg(found.length > 0 ? "現在地の周辺から判定しました。違う場合はタップで修正できます。" : "周辺の環境を判定できませんでした。手動で選んでください。");
+      // 判定できたときの案内は出さない（ⓘのモーダルに載せた）。判定できなかったときだけ、次の行動を案内する
+      setLocMsg(found.length > 0 ? "" : "周辺の環境を判定できませんでした。手動で選んでください。");
     } catch (e) {
       setLocMsg(e instanceof Error ? e.message : "現在地を取得できませんでした");
     } finally {
@@ -76,7 +77,16 @@ export function useObservation() {
     setBehaviors((prev) => (prev.every((b) => ok.includes(b)) ? prev : prev.filter((b) => ok.includes(b))));
   }, [habitats, place]);
 
-  const stepDone = [habitats.length > 0, place !== undefined, behaviors.length > 0, voice !== "" || noVoice, sizeLevel !== undefined, colors.length > 0, time !== undefined];
+  // 見えない（声だけ）なら、大きさ・羽の色は不明として扱う（入力済みの値は消す）
+  const seen = appearanceKnown(place);
+  useEffect(() => {
+    if (!seen) {
+      setSizeLevel(undefined);
+      setColors([]);
+    }
+  }, [seen]);
+
+  const stepDone = [habitats.length > 0, place !== undefined, behaviors.length > 0, voice !== "" || noVoice, !seen || sizeLevel !== undefined, !seen || colors.length > 0, time !== undefined];
   // 飛んでいる状況（行動に「飛ぶ」、または場所が空）なら飛翔の画像を表示する
   const flying = behaviors.includes("flying") || place === "sky";
 
@@ -93,7 +103,7 @@ export function useObservation() {
   return {
     sizeLevel, setSizeLevel, colors, setColors, behaviors, setBehaviors, place, selectPlace,
     date, setDate, useDate, setUseDate, habitats, setHabitats, time, setTime, voice, setVoice, noVoice, setNoVoice,
-    locMsg, locBusy, locate, results, inputForResults, stepDone, flying, reset,
+    locMsg, locBusy, locate, seen, results, inputForResults, stepDone, flying, reset,
   };
 }
 
