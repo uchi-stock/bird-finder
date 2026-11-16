@@ -1316,6 +1316,7 @@ footer {
   border-radius: 50%;
 }
 
+<<<<<<< HEAD
 /* 入口（鳴き声から／姿から／両方） */
 .entry-mode {
   display: flex;
@@ -1324,23 +1325,88 @@ footer {
 }
 
 .entry-mode button {
+=======
+/* 図鑑: 表示の切り替え・全種の一覧 */
+.dex-view {
+  display: flex;
+  gap: 6px;
+  margin: 8px 0;
+}
+
+.dex-view button {
+>>>>>>> 5c68d73 (feat: 全種の一覧を図鑑タブに追加する（デバッグ・図鑑用、各行の頭に画像）(#96))
   flex: 1;
   padding: 6px 4px;
   border: 1px solid var(--line);
   border-radius: 999px;
   background: var(--card);
   color: var(--fg);
+<<<<<<< HEAD
   font-size: 0.8rem;
   white-space: nowrap;
 }
 
 .entry-mode button.on {
+=======
+  font-size: 0.85rem;
+}
+
+.dex-view button.on {
+>>>>>>> 5c68d73 (feat: 全種の一覧を図鑑タブに追加する（デバッグ・図鑑用、各行の頭に画像）(#96))
   border-color: var(--acc);
   background: var(--acc);
   color: var(--accfg);
   font-weight: bold;
 }
 
+<<<<<<< HEAD
 .step[hidden] {
   display: none;
+=======
+.sp-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sp-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+  content-visibility: auto;
+  contain-intrinsic-size: auto 84px;
+}
+
+.sp-photo {
+  flex: none;
+  width: 72px;
+}
+
+.sp-photo .photo {
+  width: 72px;
+  height: 72px;
+}
+
+.sp-info {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 1px;
+  font-size: 0.8rem;
+}
+
+.sp-info strong {
+  font-size: 0.95rem;
+}
+
+.sp-sci {
+  font-style: italic;
+  opacity: 0.75;
+}
+
+.sp-meta {
+  opacity: 0.85;
+>>>>>>> 5c68d73 (feat: 全種の一覧を図鑑タブに追加する（デバッグ・図鑑用、各行の頭に画像）(#96))
 }
