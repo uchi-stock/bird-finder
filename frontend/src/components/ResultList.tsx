@@ -17,10 +17,11 @@ interface Props {
   isActive: (speciesId: string) => boolean;
   collection: Collection;
   onCatch: (id: string) => { isNew: boolean; count: number };
+  onShare: (id: string) => Promise<string>;
 }
 
 /** 候補の一覧。カードのタップで、鳴き声の再生と拡大表示を同時に行う */
-export function ResultList({ results, inputForResults, flying, reset, now, onPlay, isActive, collection, onCatch }: Props) {
+export function ResultList({ results, inputForResults, flying, reset, now, onPlay, isActive, collection, onCatch, onShare }: Props) {
   // 拡大表示中の候補
   const [zoomId, setZoomId] = useState<string | null>(null);
   return (
@@ -67,7 +68,7 @@ export function ResultList({ results, inputForResults, flying, reset, now, onPla
                                 {c.unknown.length > 0 && <span className="un">未入力: {c.unknown.join("・")}</span>}
                               </p>
                               {now?.id === c.species.species_id && <PlayStatus now={now} />}
-                              <CatchButton speciesId={c.species.species_id} collection={collection} onCatch={onCatch} />
+                              <CatchButton speciesId={c.species.species_id} collection={collection} onCatch={onCatch} onShare={onShare} />
                             </>
                           }
                         />

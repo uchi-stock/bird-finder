@@ -94,3 +94,30 @@ for (const size of SIZES) {
     });
   });
 }
+
+test.describe("みんなの観察（地図）", () => {
+  test("みんなの観察に切り替えると、取得できる縮尺まで寄り、共有された鳥がピンで出る。自分の記録へ戻せる", async ({ page }, testInfo) => {
+    const requested: string[] = [];
+    await page.route("https://*.execute-api.ap-northeast-1.amazonaws.com/**", (r) => {
+      requested.push(r.request().url());
+      return r.fulfill({
+        status: 200,
+        contentType: "application/json",
+        headers: { "access-control-allow-origin": "*" },
+        body: JSON.stringify({ items: [{ speciesId: "sparrow", date: "2026-11-15", lat: 35.65, lon: 139.54 }] }),
+      });
+    });
+    await openApp(page);
+    await page.getByRole("button", { name: /地図/ }).click();
+    await page.getByRole("button", { name: "みんなの観察" }).click();
+    await expect(page.locator(".bird-pin.shared")).toHaveCount(1);
+    await expect(page.getByText("地図を拡大すると")).toHaveCount(0);
+    // 取得した区画は、バックエンドの上限（25）以内
+    const tiles = new URL(requested[requested.length - 1]).searchParams.get("tiles")?.split(",") ?? [];
+    expect(tiles.length).toBeGreaterThan(0);
+    expect(tiles.length).toBeLessThanOrEqual(25);
+    await captureScreenshot(page, testInfo, "shared-map", "みんなの観察（地図）", { fullPage: false });
+    await page.getByRole("button", { name: "自分の記録" }).click();
+    await expect(page.locator(".bird-pin.shared")).toHaveCount(0);
+  });
+});

@@ -45,8 +45,8 @@ export function Photo({ name, scientificName, flying = false, zoomed, onZoomChan
       aria-label={`${name}の詳細`}
       onClick={(e) => {
         e.stopPropagation();
-        // 拡大表示内のボタン・リンクでは閉じない。背景をタップすると閉じる
-        if (!(e.target as HTMLElement).closest("button, a")) setOpen(false);
+        // 拡大表示内のボタン・リンク・入力（共有のチェック等）では閉じない。背景をタップすると閉じる
+        if (!(e.target as HTMLElement).closest("button, a, input, label")) setOpen(false);
       }}
     >
       <div className="lightbox-inner">

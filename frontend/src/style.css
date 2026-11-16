@@ -1267,3 +1267,51 @@ footer {
   background: color-mix(in srgb, #e0a800 22%, var(--card));
   font-size: 0.8rem;
 }
+
+/* みんなに共有・みんなの観察 */
+.share-opt {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 0.85rem;
+}
+
+.share-note {
+  margin: 4px 0 0;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  opacity: 0.85;
+}
+
+.map-mode {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  z-index: 500;
+  display: flex;
+  transform: translateX(-50%);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--card);
+  overflow: hidden;
+}
+
+.map-mode button {
+  padding: 6px 12px;
+  border: none;
+  background: transparent;
+  color: var(--fg);
+  font-size: 0.8rem;
+}
+
+.map-mode button.on {
+  background: var(--acc);
+  color: var(--accfg);
+  font-weight: bold;
+}
+
+.bird-pin.shared .pin-emoji {
+  outline: 2px solid #3b8cff;
+  border-radius: 50%;
+}
