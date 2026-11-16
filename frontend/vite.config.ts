@@ -22,7 +22,7 @@ export default defineConfig({
   server: { fs: { allow: [".."] } },
   test: {
     // E2E（Playwright）はvitestの対象外。npm run test:e2eで実行する
-    include: ["src/**/*.test.{ts,tsx}", "*.test.js"],
+    include: ["src/**/*.test.{ts,tsx}", "*.test.js", "scripts/**/*.test.js"],
     environment: "jsdom",
     setupFiles: ["./src/setupTests.ts"],
     coverage: {
