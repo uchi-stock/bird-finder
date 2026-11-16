@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { MIN_CENTER, backgroundRatio, filterCandidates, pickBest } from "./photoScore.js";
+import { MAX_SEARCH_FAILURES, MIN_CENTER, backgroundRatio, decide, filterCandidates, pickBest, tooManyFailures } from "./photoScore.js";
 
 const N = 64;
 // 疑似乱数（再現できるように固定）
@@ -96,11 +96,52 @@ describe("pickBest", () => {
     expect(pickBest([c("better", 0.7)], baseline).id).toBe("better");
     expect(pickBest([c("slightly", 0.9)], baseline)).toBeNull();
   });
+  it("比が等しい（背景が同じくらい単純）ときは、入れ替えない。基準の比が0でも同じ", () => {
+    expect(pickBest([c("same", 0.5)], { ratio: 0.5, center: 20 })).toBeNull();
+    expect(pickBest([c("zero", 0)], { ratio: 0, center: 20 })).toBeNull();
+  });
   it("今の画像が測れていない（被写体が無い・測定失敗）なら、最良の候補を選ぶ", () => {
     expect(pickBest([c("a", 0.9)], { ratio: Infinity, center: 0 }).id).toBe("a");
     expect(pickBest([c("a", 0.9)], undefined).id).toBe("a");
   });
   it("候補が無ければnull", () => {
     expect(pickBest([], null)).toBeNull();
+  });
+});
+
+describe("decide（安定させる）", () => {
+  const m = (ratio, center = 20) => ({ ratio, center });
+  const cand = (id, ratio) => ({ id, ratio, center: 20, width: 2000 });
+  const existing = { thumbnail: "https://u/old.jpg" };
+
+  it("選び直し済みが今も使えて、新しい候補が明らかには良くないなら、そのまま（毎回入れ替えない）", () => {
+    const d = decide({ existing, existingMeasure: m(0.3), wikipediaMeasure: m(1.0), candidates: [cand("a", 0.28), cand("b", 0.25)] });
+    expect(d.action).toBe("keep");
+  });
+  it("新しい候補が、選び直し済みより明らかに良い（0.8倍以下）なら入れ替える", () => {
+    const d = decide({ existing, existingMeasure: m(0.5), wikipediaMeasure: m(1.0), candidates: [cand("better", 0.3)] });
+    expect(d.action).toBe("replace");
+    expect(d.best.id).toBe("better");
+  });
+  it("選び直し済みが無ければ、Wikipediaの画像を基準にする。明らかに良ければ差し替え、そうでなければ何もしない", () => {
+    expect(decide({ existing: undefined, existingMeasure: null, wikipediaMeasure: m(1.0), candidates: [cand("a", 0.5)] }).action).toBe("replace");
+    expect(decide({ existing: undefined, existingMeasure: null, wikipediaMeasure: m(1.0), candidates: [cand("a", 0.95)] }).action).toBe("none");
+  });
+  it("選び直し済みが使えない（取得できない・被写体が無い）なら、Wikipediaの画像を基準にし、良い候補が無ければ外す", () => {
+    expect(decide({ existing, existingMeasure: null, wikipediaMeasure: m(1.0), candidates: [] }).action).toBe("drop");
+    expect(decide({ existing, existingMeasure: m(0.1, 1), wikipediaMeasure: m(1.0), candidates: [] }).action).toBe("drop");
+    expect(decide({ existing, existingMeasure: null, wikipediaMeasure: m(1.0), candidates: [cand("good", 0.4)] }).action).toBe("replace");
+  });
+  it("選び直し済みと同じ画像が候補に入っていても、入れ替えない（自分自身には、明らかに良いとはならない）", () => {
+    const d = decide({ existing, existingMeasure: m(0.3), wikipediaMeasure: m(1.0), candidates: [cand("same", 0.3)] });
+    expect(d.action).toBe("keep");
+  });
+});
+
+describe("tooManyFailures（障害時に書き換えない）", () => {
+  it("検索に失敗した鳥が、上限を超えたら true", () => {
+    expect(tooManyFailures(0)).toBe(false);
+    expect(tooManyFailures(MAX_SEARCH_FAILURES)).toBe(false);
+    expect(tooManyFailures(MAX_SEARCH_FAILURES + 1)).toBe(true);
   });
 });

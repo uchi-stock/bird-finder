@@ -101,6 +101,29 @@ export function pickBest(candidates, baseline) {
   eligible.sort((a, b) => a.ratio - b.ratio || b.width - a.width);
   const best = eligible[0];
   if (!best) return null;
-  if (baseline && Number.isFinite(baseline.ratio) && baseline.center >= MIN_CENTER && best.ratio > baseline.ratio * IMPROVE) return null;
+  if (baseline && Number.isFinite(baseline.ratio) && baseline.center >= MIN_CENTER && best.ratio >= baseline.ratio * IMPROVE) return null; // 等しいときも入れ替えない（厳密に小さいときだけ）
   return best;
+}
+
+/** Commonsの検索に失敗した鳥が、この数を超えたら、障害とみなして何も書かない（写真を失わないため） */
+export const MAX_SEARCH_FAILURES = 5;
+
+export function tooManyFailures(failed) {
+  return failed > MAX_SEARCH_FAILURES;
+}
+
+/**
+ * 1種の鳥について、photos.jsonをどうするかを決める。毎回違う写真へ入れ替わらないよう、安定させる。
+ * - 選び直し済みの写真（existing）が今も使えるなら、それを基準にする。新しい候補が、それより明らかに良い（比がIMPROVE倍以下）ときだけ入れ替える（replace）。そうでなければ今のまま（keep）
+ * - 選び直し済みの写真が使えない（取得できない・被写体が無い）なら、Wikipediaの代表画像を基準にする。明らかに良い候補があれば入れ替え（replace）、なければ外す（drop。Wikipediaの画像へ戻る）
+ * - 選び直し済みが無く、候補も良くなければ、何もしない（none）
+ * existingMeasure・wikipediaMeasure: backgroundRatioの結果（測れなければnull）
+ */
+export function decide({ existing, existingMeasure, wikipediaMeasure, candidates }) {
+  const existingOk = Boolean(existing) && Boolean(existingMeasure) && existingMeasure.center >= MIN_CENTER && Number.isFinite(existingMeasure.ratio);
+  const baseline = existingOk ? existingMeasure : wikipediaMeasure;
+  const best = pickBest(candidates, baseline);
+  if (best) return { action: "replace", best, baseline };
+  if (existingOk) return { action: "keep", baseline };
+  return { action: existing ? "drop" : "none", baseline };
 }
