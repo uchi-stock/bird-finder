@@ -1,0 +1,27 @@
+# 一時的な検証用（#70）。検証後に削除する
+name: probe-cors
+on:
+  push:
+    branches:
+      - probe-cors-tmp
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wikimediaの画像・APIがCORSヘッダーを返すか確認する
+        run: |
+          ORIGIN="https://uchi-stock.github.io"
+          sum=$(curl -sS -m 30 -H "Origin: $ORIGIN" -H "User-Agent: bird-finder-probe" "https://ja.wikipedia.org/api/rest_v1/page/summary/%E3%82%B9%E3%82%BA%E3%83%A1")
+          img=$(echo "$sum" | jq -r '.thumbnail.source')
+          echo "thumbnail=$img"
+          echo "--- 画像の実体（Origin付き）"
+          curl -sS -m 30 -I -H "Origin: $ORIGIN" -H "User-Agent: bird-finder-probe" "$img" | grep -i -E "^HTTP|access-control|timing-allow|cache-control|vary" 
+          echo "--- 500px版"
+          big=$(echo "$img" | sed -E 's#/[0-9]+px-#/500px-#')
+          curl -sS -m 30 -I -H "Origin: $ORIGIN" -H "User-Agent: bird-finder-probe" "$big" | grep -i -E "^HTTP|access-control"
+          echo "--- Wikipedia API"
+          curl -sS -m 30 -I -H "Origin: $ORIGIN" -H "User-Agent: bird-finder-probe" "https://ja.wikipedia.org/api/rest_v1/page/summary/%E3%82%B9%E3%82%BA%E3%83%A1" | grep -i -E "^HTTP|access-control"
+          echo "--- Commons API"
+          curl -sS -m 30 -I -H "Origin: $ORIGIN" -H "User-Agent: bird-finder-probe" "https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&titles=File:Test.jpg" | grep -i -E "^HTTP|access-control"
