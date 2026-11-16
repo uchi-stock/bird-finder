@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import curatedJson from "./data/photos.json";
 
 export interface BirdPhoto {
   thumbnail: string;
@@ -7,7 +8,13 @@ export interface BirdPhoto {
   credit?: string;
   license?: string;
   flight?: boolean;
+  /** 背景が単純な写真へ選び直した画像（Wikimedia Commons。撮影者・ライセンスを持つ。大きさは500px） */
+  curated?: boolean;
 }
+
+// 選び直した写真（frontend/scripts/curatePhotos.jsが作る）。鳥の和名をキーにする。あれば、Wikipediaの代表画像より優先する
+type Curated = { thumbnail: string; pageUrl: string; credit?: string; license?: string };
+const curated = curatedJson as Record<string, Curated>;
 
 const cache = new Map<string, Promise<BirdPhoto | null>>();
 // 一時的な失敗（通信エラー・5xx）をした題名。「もともと写真が無い」（404・画像なし）とは区別し、結果を残さず、再読み込みできるようにする
@@ -22,6 +29,8 @@ function isTransient(status: number): boolean {
 
 /** Wikipedia（日本語版）の要約APIから代表画像を取得する。失敗・該当なしはnull（写真なしで動作）。一時的な失敗は記憶せず、再読み込みで取り直せる */
 export function fetchPhoto(title: string): Promise<BirdPhoto | null> {
+  const c = curated[title];
+  if (c) return Promise.resolve({ ...c, curated: true }); // 選び直した写真があれば、通信しない
   let p = cache.get(title);
   if (!p) {
     const fail = () => {

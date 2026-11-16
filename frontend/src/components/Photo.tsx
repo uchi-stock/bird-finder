@@ -30,7 +30,8 @@ export function Photo({ name, scientificName, flying = false, zoomed, onZoomChan
   const [largeLoaded, setLargeLoaded] = useState(false);
   useEffect(() => {
     if (photo) {
-      setLargeSrc(photo.flight ? photo.thumbnail : largeImageUrl(photo.thumbnail));
+      // 飛翔画像・選び直した写真は、すでに大きい版（500px）なので、そのまま使う
+      setLargeSrc(photo.flight || photo.curated ? photo.thumbnail : largeImageUrl(photo.thumbnail));
       setLargeLoaded(false);
     }
   }, [photo]);
@@ -74,7 +75,7 @@ export function Photo({ name, scientificName, flying = false, zoomed, onZoomChan
       {caption}
       {photo && (
         <a href={photo.pageUrl} target="_blank" rel="noreferrer">
-          {photo.flight
+          {photo.flight || photo.curated
             ? `出典: Wikimedia Commons（撮影: ${photo.credit ?? "不明"} ／ ${photo.license ?? "ライセンスはリンク先を参照"}）`
             : `出典: Wikipedia「${name}」（画像の著作者・ライセンスはリンク先を参照）`}
         </a>

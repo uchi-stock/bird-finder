@@ -69,6 +69,17 @@ describe("App: 拡大表示で、先に画像を出す", () => {
   });
 });
 
+describe("App: 選び直した写真（背景が単純な写真）", () => {
+  it("拡大表示では、大きい版への書き換えをせず（すでに500px）、撮影者とライセンスを出典に出す", async () => {
+    usePhoto.mockReturnValue({ thumbnail: "https://u/500px-curated.jpg", pageUrl: "https://c/File:Curated.jpg", credit: "撮影者X", license: "CC BY 4.0", curated: true });
+    await renderApp();
+    fireEvent.click(firstCard());
+    expect((document.querySelector(".lightbox .lb-large") as HTMLImageElement).src).toContain("/500px-curated.jpg");
+    expect(screen.getByRole("link", { name: /撮影: 撮影者X ／ CC BY 4.0/ })).toHaveAttribute("href", "https://c/File:Curated.jpg");
+    expect(screen.queryByText("飛翔")).toBeNull(); // 飛翔画像の印は出さない
+  });
+});
+
 describe("App: 状況に応じた姿の画像", () => {
   const standing = { thumbnail: "https://u/330px-stand.jpg", pageUrl: "https://w/stand" };
   const flightPhoto = { thumbnail: "https://c/500px-fly.jpg", pageUrl: "https://c/File:Fly.jpg", credit: "撮影者A", license: "CC BY 4.0", flight: true };
