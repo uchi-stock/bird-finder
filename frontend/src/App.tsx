@@ -62,7 +62,7 @@ export function App() {
         </p>
       )}
       {tab === "dex" ? (
-        <Dex collection={collection} />
+        <Dex collection={collection} onCatch={onCatch} onShare={shareSighting} />
       ) : tab === "map" ? (
         <Suspense fallback={<p className="hint">地図を読み込み中…</p>}>
           <MapView points={mapPoints} speciesLabel={speciesLabel} withoutLocation={countWithoutLocation(sightings)} locate={getCoords} shared={shared} />

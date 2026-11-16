@@ -140,3 +140,25 @@ for (const size of SIZES) {
     });
   });
 }
+
+for (const size of SIZES) {
+  test.describe(`全種の一覧 ${size.name}`, () => {
+    test.use({ viewport: { width: size.width, height: size.height } });
+    test("図鑑タブの全種の一覧に、全44種が並び、各行の頭に画像が出る。画像は画面に入った行だけ取得する", async ({ page }, testInfo) => {
+      const wikiRequests: string[] = [];
+      page.on("request", (r) => {
+        if (r.url().includes("ja.wikipedia.org")) wikiRequests.push(r.url());
+      });
+      await openApp(page);
+      const before = wikiRequests.length;
+      await page.getByRole("button", { name: /図鑑/ }).click();
+      await page.getByRole("button", { name: "全種の一覧" }).click();
+      await expect(page.locator(".sp-row")).toHaveCount(44);
+      await expect(page.locator(".sp-row .photo img").first()).toBeVisible();
+      expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBe(0);
+      // 画面に入っていない行の画像は、まだ取得していない（44件を一度に取得しない）
+      expect(wikiRequests.length - before).toBeLessThan(44);
+      await captureScreenshot(page, testInfo, `${size.name}-8-species-list`, `全種の一覧（${size.name}）`, { fullPage: false });
+    });
+  });
+}

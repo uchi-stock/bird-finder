@@ -22,6 +22,11 @@ export const SIZES = [
   { level: 7, ref: "アオサギ", cm: "約90cm", emoji: "🦢" },
 ];
 export const HABITAT_EMOJI: Record<Habitat, string> = { waterside: "🏞️", urban: "🏘️", woodland: "🌳", open: "🌾" };
+/** 出現頻度の表示名（暫定値。識別確率ではない） */
+export const ABUNDANCE_LABEL: Record<Species["abundance"], string> = { very_common: "よく見られる", common: "普通", uncommon: "少ない", rare: "まれ" };
+/** データの確度の表示名 */
+export const CONFIDENCE_LABEL: Record<string, string> = { unverified: "未確認", partial: "一部確認", verified: "確認済み" };
+
 export const COLORS: { v: Color; label: string; css: string }[] = [
   { v: "brown", label: "茶", css: "#8b5a2b" },
   { v: "black", label: "黒", css: "#222" },
