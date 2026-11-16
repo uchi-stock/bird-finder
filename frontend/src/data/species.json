@@ -618,6 +618,7 @@
   ],
   "habitats": [
    "waterside",
+   "urban",
    "open"
   ],
   "abundance": "very_common",
@@ -849,7 +850,8 @@
   ],
   "habitats": [
    "urban",
-   "woodland"
+   "woodland",
+   "open"
   ],
   "abundance": "common",
   "silent": false,
@@ -943,6 +945,7 @@
    "evening"
   ],
   "habitats": [
+   "woodland",
    "open"
   ],
   "abundance": "uncommon",
@@ -1074,6 +1077,7 @@
    "day"
   ],
   "habitats": [
+   "waterside",
    "open"
   ],
   "abundance": "uncommon",
@@ -1117,6 +1121,7 @@
   "confidence": "unverified",
   "times": [
    "morning",
+   "day",
    "evening"
   ],
   "habitats": [
@@ -1163,6 +1168,7 @@
   "confidence": "unverified",
   "times": [
    "morning",
+   "day",
    "evening"
   ],
   "habitats": [
@@ -1204,6 +1210,7 @@
   "confidence": "unverified",
   "times": [
    "morning",
+   "day",
    "evening"
   ],
   "habitats": [
@@ -1248,6 +1255,7 @@
   "confidence": "unverified",
   "times": [
    "morning",
+   "day",
    "evening"
   ],
   "habitats": [
@@ -1343,6 +1351,7 @@
   "confidence": "unverified",
   "times": [
    "morning",
+   "day",
    "evening"
   ],
   "habitats": [
@@ -1389,6 +1398,7 @@
   "confidence": "unverified",
   "times": [
    "morning",
+   "day",
    "evening"
   ],
   "habitats": [
@@ -1430,6 +1440,7 @@
   "confidence": "unverified",
   "times": [
    "morning",
+   "day",
    "evening"
   ],
   "habitats": [
@@ -1829,7 +1840,9 @@
    "day"
   ],
   "habitats": [
-   "urban"
+   "waterside",
+   "urban",
+   "open"
   ],
   "abundance": "uncommon",
   "silent": false,

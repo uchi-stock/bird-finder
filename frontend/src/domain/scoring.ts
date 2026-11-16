@@ -18,7 +18,11 @@ export function monthToSeason(month: number): Season {
 export function normalizeVoice(s: string): string {
   return s
     .replace(/[ぁ-ゖ]/g, (c) => String.fromCharCode(c.charCodeAt(0) + 0x60))
-    .replace(/[ー〜～ッっ\s、。・,.!！?？]/g, "");
+    .replace(/[ー〜～ッっ\s、。・,.!！?？]/g, "")
+    // 「グェ」と「グエ」のような、小さい仮名の書き方の違いを同じとみなす
+    .replace(/[ァィゥェォャュョヮ]/g, (c) => String.fromCharCode(c.charCodeAt(0) + 1))
+    // 「チュピ」と「チュビ」のような、半濁音と濁音の聞こえ方の違いを同じとみなす
+    .replace(/[パピプペポ]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 1));
 }
 
 function bigrams(s: string): string[] {
@@ -28,9 +32,7 @@ function bigrams(s: string): string[] {
 }
 
 /** 0〜1。bigramのDice係数（1文字同士は一致/不一致） */
-export function voiceSimilarity(a: string, b: string): number {
-  const x = normalizeVoice(a);
-  const y = normalizeVoice(b);
+function dice(x: string, y: string): number {
   if (!x || !y) return 0;
   if (x.length === 1 || y.length === 1) return x === y ? 1 : x.includes(y) || y.includes(x) ? 0.5 : 0;
   const bx = bigrams(x);
@@ -45,6 +47,36 @@ export function voiceSimilarity(a: string, b: string): number {
     }
   }
   return (2 * hit) / (bx.length + by.length);
+}
+
+/** 「ピリピリ」のような繰り返しなら、繰り返しの単位（2文字以上）を返す。繰り返しでなければそのまま返す */
+export function repeatUnit(s: string): string {
+  for (let len = 2; len <= s.length / 2; len++) {
+    if (s.length % len === 0 && s.slice(0, len).repeat(s.length / len) === s) return s.slice(0, len);
+  }
+  return s;
+}
+
+/** 繰り返しの回数の違い（「ピリッ」と「ピリピリ」）で一致度が下がらないよう、繰り返しの単位でも比べる */
+function phraseSimilarity(x: string, y: string): number {
+  const ux = repeatUnit(x);
+  const uy = repeatUnit(y);
+  return Math.max(dice(x, y), ux !== x || uy !== y ? dice(ux, uy) : 0);
+}
+
+const PART_MATCH = 0.85;
+
+/**
+ * 0〜1。聞こえた声と、鳥の声の表記の近さ。
+ * 空白や読点で区切って複数の聞こえ方を書いた場合（「きーきー ぎゃー」）は、全体と、区切りごとの、最も近いものを使う
+ */
+export function voiceSimilarity(a: string, b: string): number {
+  const y = normalizeVoice(b);
+  const whole = normalizeVoice(a);
+  if (!whole || !y) return 0;
+  const parts = a.split(/[\s、。・,.!！?？]+/).map(normalizeVoice).filter((p) => p.length >= 2);
+  // 一部だけの一致は、全体の一致より少し弱い手がかりとして扱う
+  return Math.max(phraseSimilarity(whole, y), ...parts.map((p) => PART_MATCH * phraseSimilarity(p, y)));
 }
 
 export function scoreSpecies(obs: Observation, sp: Species): Candidate {
@@ -87,7 +119,8 @@ export function scoreSpecies(obs: Observation, sp: Species): Candidate {
   }
 
   // 行動
-  if (obs.behaviors.length === 0) unknown.push("行動");
+  // 姿が見えない（声だけ）ときの「鳴く」は自動で入る選択で、声が聞こえた以上の手がかりにならないので採点しない
+  if (obs.behaviors.length === 0 || obs.place === "unseen") unknown.push("行動");
   else {
     maxScore += WEIGHT.behavior;
     const hit = obs.behaviors.filter((b) => sp.behaviors.includes(b)).length;
@@ -164,7 +197,8 @@ export function scoreSpecies(obs: Observation, sp: Species): Candidate {
   } else if (!normalizeVoice(obs.onomatopoeia)) unknown.push("鳴き声");
   else {
     maxScore += WEIGHT.voice;
-    const best = Math.max(...sp.onomatopoeia.map((o) => voiceSimilarity(obs.onomatopoeia, o)));
+    // 普段ほとんど声を出さない種は、声が聞こえたときの候補にしない（声の一致で加点しない）
+    const best = sp.silent ? 0 : Math.max(0, ...sp.onomatopoeia.map((o) => voiceSimilarity(obs.onomatopoeia, o)));
     if (best >= 0.4) {
       score += WEIGHT.voice * best;
       matching.push("鳴き声");
