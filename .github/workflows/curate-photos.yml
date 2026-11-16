@@ -2,9 +2,9 @@ name: Curate photos (背景が単純な写真の選び直し)
 
 # 鳥の写真を、背景が単純なものへ自動で選び直す。人の操作は要らない。
 # - 月1回の定期実行と、鳥種データ（species.json）・この仕組み自体の変更時に動く（手動実行もできる）
-# - 結果が変わったときだけ、PRとして出す。CIが通れば自動でマージされる
+# - 結果が変わったときだけ、PRとして出す。PRは、CIを待たずに自動でマージされる（commit-via-prの仕様）。そのため、コミットの前に、結果の検査（単体テスト）を実行し、失敗したらPRを出さない
 # - 安定させるため、選び直し済みの写真は、明らかに良い候補があるときだけ入れ替える（frontend/scripts/photoScore.jsのdecide）
-# - 壊れた結果を出さないため、Commonsの検索に失敗した鳥が多いときは何も書かずに失敗する。photos.jsonの中身は、単体テスト（photosData.test.ts）で検査される
+# - 壊れた結果を出さないため、Commonsの検索に失敗した鳥が多いときは何も書かずに失敗する。photos.jsonの中身は、単体テスト（photosData.test.ts）で、コミットの前に検査する
 # - 結果は、実行のJob Summaryの表（今の画像と選んだ画像）で、あとから確認できる。気になれば、そのPRを戻せる
 # 手動実行では、applyをfalseにすると、PRを出さずに、表の確認だけができる
 on:
@@ -49,6 +49,9 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: "22"
+      - name: 依存パッケージをインストールする
+        working-directory: frontend
+        run: npm ci
       # 画像の読み取りにだけsharpを使う。依存には加えない（アプリや通常のCIに影響しない）
       - name: sharpをインストールする
         working-directory: frontend
@@ -59,6 +62,11 @@ jobs:
           SPECIES_IDS: ${{ inputs.species_ids }}
           REPORT: ${{ github.workspace }}/curate-report.md
         run: node scripts/curatePhotos.js
+      # 結果は、PRのCIを待たずにマージされる（commit-via-prの仕様）。そのため、壊れた結果を出さないよう、
+      # コミットの前に、photos.jsonの検査（ライセンス・題名・URL・鳥の名前）と選別ロジックの単体テストを実行する。失敗したらPRを出さない
+      - name: 結果を検査する（失敗したらPRを出さない）
+        working-directory: frontend
+        run: npx vitest run src/photosData.test.ts scripts
       - name: 結果をJob Summaryへ出す
         run: cat curate-report.md >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v7
