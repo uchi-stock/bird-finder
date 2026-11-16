@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
+import { useModal } from "../hooks/useModal";
 
 // 常時表示すると画面を圧迫する注意文言を、「ⓘ」ボタンで開くモーダルにまとめる
 export const HELP_NOTES = [
@@ -11,6 +12,7 @@ export const HELP_NOTES = [
 
 export function HelpNotes() {
   const [open, setOpen] = useState(false);
+  const modalRef = useModal(open, () => setOpen(false));
   return (
     <>
       <button
@@ -24,7 +26,9 @@ export function HelpNotes() {
         createPortal(
           <div
             className="help-modal"
+            ref={modalRef}
             role="dialog"
+            aria-modal="true"
             aria-label="使い方と注意"
             onClick={() => setOpen(false)}
           >

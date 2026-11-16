@@ -38,15 +38,15 @@ export function App() {
         </div>
         <nav className="tabs">
           <HelpNotes />
-          <button className={tab === "search" ? "tab on" : "tab"} onClick={() => setTab("search")}>
+          <button className={tab === "search" ? "tab on" : "tab"} aria-current={tab === "search" ? "page" : undefined} onClick={() => setTab("search")}>
             <Emoji c="🔍" />
             探す
           </button>
-          <button className={tab === "dex" ? "tab on" : "tab"} onClick={() => setTab("dex")}>
+          <button className={tab === "dex" ? "tab on" : "tab"} aria-current={tab === "dex" ? "page" : undefined} onClick={() => setTab("dex")}>
             <Emoji c="📖" />
             図鑑 {caughtCount(collection)}/{SPECIES.length}
           </button>
-          <button className={tab === "map" ? "tab on" : "tab"} onClick={() => setTab("map")}>
+          <button className={tab === "map" ? "tab on" : "tab"} aria-current={tab === "map" ? "page" : undefined} onClick={() => setTab("map")}>
             <Emoji c="🗺️" />
             地図
           </button>

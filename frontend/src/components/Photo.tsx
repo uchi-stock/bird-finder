@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { largeImageUrl } from "../domain/habitat";
 import { useFlightPhoto, usePhoto } from "../photo";
+import { useModal } from "../hooks/useModal";
 import { Emoji } from "./Emoji";
 
 interface PhotoProps {
@@ -32,10 +33,15 @@ export function Photo({ name, scientificName, flying = false, zoomed, onZoomChan
       setLargeLoaded(false);
     }
   }, [photo]);
+  const modalRef = useModal(open, () => setOpen(false));
   // 拡大表示（鳥の詳細）。写真が無い鳥でも開く（捕まえる・再生中の表示を載せるため）
   const lightbox = open && (
     <div
       className="lightbox"
+      ref={modalRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${name}の詳細`}
       onClick={(e) => {
         e.stopPropagation();
         // 拡大表示内のボタン・リンクでは閉じない。背景をタップすると閉じる
@@ -43,6 +49,9 @@ export function Photo({ name, scientificName, flying = false, zoomed, onZoomChan
       }}
     >
       <div className="lightbox-inner">
+        <button type="button" className="lb-close" onClick={() => setOpen(false)}>
+          閉じる
+        </button>
       {photo ? (
         // 読み込み済みの小さい版を、開いた瞬間に拡大して出す。大きい版は、読み込み完了後に上へ重ねて切り替える
         <div className="lb-photo">
