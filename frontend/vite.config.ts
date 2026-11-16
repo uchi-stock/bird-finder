@@ -21,6 +21,8 @@ export default defineConfig({
   // docs/のMarkdownをテストから読めるようにする（選択肢ツリーの図の一致確認）
   server: { fs: { allow: [".."] } },
   test: {
+    // E2E（Playwright）はvitestの対象外。npm run test:e2eで実行する
+    include: ["src/**/*.test.{ts,tsx}", "*.test.js"],
     environment: "jsdom",
     setupFiles: ["./src/setupTests.ts"],
     coverage: {

@@ -20,6 +20,8 @@ jobs:
       packages: '[{"dir":"frontend","build":true,"node_version":"22","coverage_threshold":85},{"dir":"backend","node_version":"22","coverage_threshold":85}]'
       # dev-standardsのsymlink共有（sw.js等）の欠落・リンク切れを検知する
       enable_standards_check: true
+      # スマホ幅（390x844・375x667）のE2E。スクリーンショットはJob Summary・PRコメントへ画像で出る
+      enable_e2e_test: true
       # 選択肢ツリーのmermaid図をPR差分ビューでも画像として見られるようにする
       enable_mermaid_render: true
       mermaid_doc_paths: "docs/selection-options.md"
