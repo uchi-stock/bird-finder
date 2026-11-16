@@ -195,6 +195,6 @@ flowchart LR
   end
 ```
 
-![選択肢の図（rendered）](https://raw.githubusercontent.com/uchi-stock/bird-finder/docs-diagrams/latest/selection-options-4.png?8f54c97b8e8b188553cb8dc15c1f0d2ad537b533)
+![選択肢の図（rendered）](https://raw.githubusercontent.com/uchi-stock/bird-finder/docs-diagrams/latest/selection-options-4.png?77fe3a902a07108dbdfe97e2423cd6b568dce294)
 
 </details>
