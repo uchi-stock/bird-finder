@@ -27,6 +27,8 @@ function getPosition(): Promise<GeolocationPosition> {
   });
 }
 
+// 外部APIの応答は形が決まっていないため any とし、受け取る側の関数（classifyHabitats等）が中身を確かめる
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function fetchJson(url: string, init?: RequestInit): Promise<any> {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS);

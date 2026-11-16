@@ -322,7 +322,7 @@ describe("App: 鳥をタップで鳴き声を再生", () => {
   it("もう一度タップすると停止する", async () => {
     await renderApp();
     fireEvent.click(firstCard());
-    (await screen.findAllByText(/もう一度タップで停止/))[0];
+    await screen.findAllByText(/もう一度タップで停止/);
     fireEvent.click(firstCard());
     expect(stopAudio).toHaveBeenCalled();
     await waitFor(() => expect(screen.queryAllByText(/もう一度タップで停止/)).toHaveLength(0));
@@ -344,7 +344,7 @@ describe("App: 鳥をタップで鳴き声を再生", () => {
   it("再生が終わると表示が元に戻る", async () => {
     await renderApp();
     fireEvent.click(firstCard());
-    (await screen.findAllByText(/もう一度タップで停止/))[0];
+    await screen.findAllByText(/もう一度タップで停止/);
     const onEnded = playAudio.mock.calls[0][1] as () => void;
     act(() => onEnded());
     expect(screen.queryAllByText(/もう一度タップで停止/)).toHaveLength(0);
@@ -356,7 +356,7 @@ describe("App: 鳥をタップで鳴き声を再生", () => {
     const cards = within(screen.getByRole("list")).getAllByRole("listitem");
     fireEvent.click(cards[0]);
     fireEvent.click(cards[1]);
-    (await screen.findAllByText(/もう一度タップで停止/))[0];
+    await screen.findAllByText(/もう一度タップで停止/);
     await act(async () => resolveFirst({ src: "https://u/old.mp3", pageUrl: "x", title: "old" }));
     expect(playAudio).toHaveBeenCalledTimes(1);
     expect(playAudio.mock.calls[0][0]).toBe("https://u/a.mp3");
