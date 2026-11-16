@@ -33,7 +33,7 @@ for (const size of SIZES) {
       expect(fit).toBe(true);
       expect(await page.locator(".results li").count()).toBeGreaterThan(0);
       await captureScreenshot(page, testInfo, `${size.name}-2-results`, `候補の表示（${size.name}）`, { fullPage: false });
-      await page.click("button[aria-label='7. 時間帯・観察日']");
+      await page.click("button[aria-label='7. 時間帯']");
       await expect(page.locator(".step-title")).toContainText("7/7");
     });
 

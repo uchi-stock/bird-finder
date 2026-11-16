@@ -5,7 +5,7 @@ export type EntryMode = "voice" | "sight" | "both";
 export const ENTRY_MODES: EntryMode[] = ["voice", "sight", "both"];
 
 /**
- * 入口ごとに出すカード（STEP_TITLESの添字）。0:環境 1:場所 2:行動 3:鳴き声 4:大きさ 5:羽の色 6:時間帯・観察日。
+ * 入口ごとに出すカード（STEP_TITLESの添字）。0:環境 1:場所 2:行動 3:鳴き声 4:大きさ 5:羽の色 6:時間帯。
  * 出さないカードの項目は、入力済みでも判定に使わない（未入力と同じ扱い。値は消さずに保持する）
  */
 export const ENTRY_STEPS: Record<EntryMode, number[]> = {

@@ -4,7 +4,7 @@ import { hasAnyInput, identify, pickTop } from "../domain/scoring";
 import { timeSlotFromHour } from "../domain/time";
 import type { Behavior, Color, Habitat, Observation, Place, TimeSlot } from "../domain/types";
 import { detectHabitats } from "../location";
-import { SPECIES, todayStr } from "../options";
+import { SPECIES } from "../options";
 import { isOnlineNow } from "./useOnline";
 
 /** 条件の入力一式と、前の回答による絞り込み（選べなくなった選択の自動解除）、候補の計算 */
@@ -13,8 +13,6 @@ export function useObservation() {
   const [colors, setColors] = useState<Color[]>([]);
   const [behaviors, setBehaviors] = useState<Behavior[]>([]);
   const [place, setPlace] = useState<Place | undefined>();
-  const [date, setDate] = useState(todayStr());
-  const [useDate, setUseDate] = useState(true);
   const [habitats, setHabitats] = useState<Habitat[]>([]);
   const [locMsg, setLocMsg] = useState("");
   const [locBusy, setLocBusy] = useState(false);
@@ -32,19 +30,21 @@ export function useObservation() {
   const showSize = visibleSteps.includes(4);
   const showColor = visibleSteps.includes(5);
 
+  const month = new Date().getMonth() + 1;
   const obs: Observation = useMemo(
     () => ({
       sizeLevel: showSize ? sizeLevel : undefined,
       colors: showColor ? colors : [],
       behaviors: showBehavior ? behaviors : [],
       place,
-      month: useDate && date ? Number(date.split("-")[1]) : undefined,
+      // 検索は、いま見えている・聞こえている状況をもとにする。季節は、常に今の月から判定に使う
+      month,
       time,
       habitats,
       onomatopoeia: showVoice ? voice : "",
       noVoice: showVoice ? noVoice : false,
     }),
-    [sizeLevel, colors, behaviors, place, date, useDate, time, habitats, voice, noVoice, showSize, showColor, showBehavior, showVoice],
+    [sizeLevel, colors, behaviors, place, month, time, habitats, voice, noVoice, showSize, showColor, showBehavior, showVoice],
   );
   const results = useMemo(() => pickTop(identify(obs, SPECIES)), [obs]);
   // 日付だけでは「何か入力した」とみなさない（初期値が入っているため）
@@ -117,7 +117,7 @@ export function useObservation() {
 
   return {
     sizeLevel, setSizeLevel, colors, setColors, behaviors, setBehaviors, place, selectPlace,
-    date, setDate, useDate, setUseDate, habitats, setHabitats, time, setTime, voice, setVoice, noVoice, setNoVoice,
+    habitats, setHabitats, time, setTime, voice, setVoice, noVoice, setNoVoice,
     locMsg, locBusy, locate, seen, mode, setMode, visibleSteps, results, inputForResults, stepDone, flying, reset,
   };
 }

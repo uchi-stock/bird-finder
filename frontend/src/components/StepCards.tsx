@@ -10,7 +10,7 @@ import { Emoji } from "./Emoji";
 export function StepCards({ o }: { o: ObservationState }) {
   const {
     sizeLevel, setSizeLevel, colors, setColors, behaviors, setBehaviors, place, selectPlace,
-    date, setDate, useDate, setUseDate, habitats, setHabitats, time, setTime, voice, setVoice, noVoice, setNoVoice,
+    habitats, setHabitats, time, setTime, voice, setVoice, noVoice, setNoVoice,
     locMsg, locBusy, locate, mode, setMode, visibleSteps, stepDone,
   } = o;
   const stepsRef = useRef<HTMLDivElement>(null);
@@ -157,12 +157,6 @@ export function StepCards({ o }: { o: ObservationState }) {
                   </button>
                 ))}
               </div>
-              <h2 className="sub">観察日</h2>
-              <label className="row">
-                <input type="checkbox" checked={useDate} onChange={(e) => setUseDate(e.target.checked)} />
-                季節を判定に使う
-              </label>
-              <input type="date" value={date} disabled={!useDate} onChange={(e) => setDate(e.target.value)} />
             </section>
           </div>
     </>
