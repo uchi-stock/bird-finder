@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import speciesJson from "../data/species.json";
 import scenariosJson from "./evalScenarios.json";
 import { evaluate, type Scenario } from "./evaluate";
+import { identify, pickTop } from "./scoring";
 import type { Species } from "./types";
 
 const species = speciesJson as Species[];
@@ -52,5 +53,18 @@ describe("識別精度（回帰の検知）", () => {
   });
   it(`正解が1番目に出る割合が${MIN_TOP1 * 100}%以上`, () => {
     expect(r.top1, `1番目ではなかったシナリオ:\n${list(r.notFirst)}`).toBeGreaterThanOrEqual(MIN_TOP1);
+  });
+});
+
+describe("カワラヒワの誤出現（#81）", () => {
+  // 出現頻度の加点が大きすぎると、正解ではないのに上位に出続ける。改善前は14件、改善後は5件
+  it("正解がカワラヒワではないシナリオで、カワラヒワが候補に出る件数が少ない", () => {
+    let wrong = 0;
+    for (const s of scenarios) {
+      if (s.expected === "oriental_greenfinch") continue;
+      const got = pickTop(identify(s.observation, species)).map((c) => c.species.species_id);
+      if (got.includes("oriental_greenfinch")) wrong++;
+    }
+    expect(wrong).toBeLessThanOrEqual(6);
   });
 });
