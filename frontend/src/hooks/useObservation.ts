@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { allowedBehaviors, allowedPlaces, appearanceKnown, behaviorsAfterPlaceChange } from "../domain/choices";
+import { allowedBehaviors, allowedPlaces, appearanceKnown, behaviorsAfterPlaceChange, ENTRY_STEPS, type EntryMode } from "../domain/choices";
 import { hasAnyInput, identify, pickTop } from "../domain/scoring";
 import { timeSlotFromHour } from "../domain/time";
 import type { Behavior, Color, Habitat, Observation, Place, TimeSlot } from "../domain/types";
@@ -22,19 +22,27 @@ export function useObservation() {
   const [voice, setVoice] = useState("");
   const [noVoice, setNoVoice] = useState(false);
 
+  // 入口（鳴き声から／姿から／両方）。既定は両方。出さないカードの項目は、入力済みでも判定に使わない（値は消さずに保持する）
+  const [mode, setMode] = useState<EntryMode>("both");
+  const visibleSteps = ENTRY_STEPS[mode];
+  const showBehavior = visibleSteps.includes(2);
+  const showVoice = visibleSteps.includes(3);
+  const showSize = visibleSteps.includes(4);
+  const showColor = visibleSteps.includes(5);
+
   const obs: Observation = useMemo(
     () => ({
-      sizeLevel,
-      colors,
-      behaviors,
+      sizeLevel: showSize ? sizeLevel : undefined,
+      colors: showColor ? colors : [],
+      behaviors: showBehavior ? behaviors : [],
       place,
       month: useDate && date ? Number(date.split("-")[1]) : undefined,
       time,
       habitats,
-      onomatopoeia: voice,
-      noVoice,
+      onomatopoeia: showVoice ? voice : "",
+      noVoice: showVoice ? noVoice : false,
     }),
-    [sizeLevel, colors, behaviors, place, date, useDate, time, habitats, voice, noVoice],
+    [sizeLevel, colors, behaviors, place, date, useDate, time, habitats, voice, noVoice, showSize, showColor, showBehavior, showVoice],
   );
   const results = useMemo(() => pickTop(identify(obs, SPECIES)), [obs]);
   // 日付だけでは「何か入力した」とみなさない（初期値が入っているため）
@@ -94,7 +102,7 @@ export function useObservation() {
 
   const stepDone = [habitats.length > 0, place !== undefined, behaviors.length > 0, voice !== "" || noVoice, !seen || sizeLevel !== undefined, !seen || colors.length > 0, time !== undefined];
   // 飛んでいる状況（行動に「飛ぶ」、または場所が空）なら飛翔の画像を表示する
-  const flying = behaviors.includes("flying") || place === "sky";
+  const flying = (showBehavior && behaviors.includes("flying")) || place === "sky";
 
   const reset = () => {
     setSizeLevel(undefined);
@@ -109,7 +117,7 @@ export function useObservation() {
   return {
     sizeLevel, setSizeLevel, colors, setColors, behaviors, setBehaviors, place, selectPlace,
     date, setDate, useDate, setUseDate, habitats, setHabitats, time, setTime, voice, setVoice, noVoice, setNoVoice,
-    locMsg, locBusy, locate, seen, results, inputForResults, stepDone, flying, reset,
+    locMsg, locBusy, locate, seen, mode, setMode, visibleSteps, results, inputForResults, stepDone, flying, reset,
   };
 }
 

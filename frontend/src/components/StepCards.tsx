@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
-import { allowedBehaviors, allowedPlaces } from "../domain/choices";
+import { allowedBehaviors, allowedPlaces, ENTRY_MODES } from "../domain/choices";
 import { HABITATS } from "../domain/habitat";
-import { STEP_TITLES } from "../domain/labels";
+import { ENTRY_MODE_EMOJI, ENTRY_MODE_LABEL, STEP_TITLES } from "../domain/labels";
 import type { ObservationState } from "../hooks/useObservation";
 import { BEHAVIORS, COLORS, HABITAT_EMOJI, PLACES, SIZES, TIMES, toggle } from "../options";
 import { Emoji } from "./Emoji";
@@ -11,36 +11,51 @@ export function StepCards({ o }: { o: ObservationState }) {
   const {
     sizeLevel, setSizeLevel, colors, setColors, behaviors, setBehaviors, place, selectPlace,
     date, setDate, useDate, setUseDate, habitats, setHabitats, time, setTime, voice, setVoice, noVoice, setNoVoice,
-    locMsg, locBusy, locate, seen, stepDone,
+    locMsg, locBusy, locate, seen, mode, setMode, visibleSteps, stepDone,
   } = o;
   const stepsRef = useRef<HTMLDivElement>(null);
   const [stepIdx, setStepIdx] = useState(0);
   const onStepsScroll = () => {
     const el = stepsRef.current;
     if (!el) return;
-    const w = el.scrollWidth / STEP_TITLES.length;
+    const w = el.scrollWidth / visibleSteps.length;
     if (!(w > 0)) return;
-    setStepIdx(Math.min(STEP_TITLES.length - 1, Math.max(0, Math.round(el.scrollLeft / w))));
+    setStepIdx(Math.min(visibleSteps.length - 1, Math.max(0, Math.round(el.scrollLeft / w))));
   };
   const goStep = (i: number) => {
     const el = stepsRef.current;
-    el?.scrollTo?.({ left: i * (el.scrollWidth / STEP_TITLES.length), behavior: "smooth" });
+    el?.scrollTo?.({ left: i * (el.scrollWidth / visibleSteps.length), behavior: "smooth" });
     setStepIdx(i);
   };
+  // 入口を切り替えたら、最初のカードへ戻る
+  const changeMode = (m: typeof mode) => {
+    setMode(m);
+    setStepIdx(0);
+    stepsRef.current?.scrollTo?.({ left: 0 });
+  };
+  const show = (step: number) => visibleSteps.includes(step);
   return (
     <>
+          <div className="entry-mode" role="group" aria-label="何をもとに探すか">
+            {ENTRY_MODES.map((m) => (
+              <button key={m} type="button" className={mode === m ? "on" : ""} aria-pressed={mode === m} onClick={() => changeMode(m)}>
+                <Emoji c={ENTRY_MODE_EMOJI[m]} />
+                {ENTRY_MODE_LABEL[m]}
+              </button>
+            ))}
+          </div>
           <div className="step-nav">
             <div className="dots">
-              {STEP_TITLES.map((t, i) => (
-                <button key={t} aria-label={`${i + 1}. ${t}`} className={`dot-step${i === stepIdx ? " cur" : ""}${stepDone[i] ? " done" : ""}`} onClick={() => goStep(i)} />
+              {visibleSteps.map((step, pos) => (
+                <button key={step} aria-label={`${pos + 1}. ${STEP_TITLES[step]}`} className={`dot-step${pos === stepIdx ? " cur" : ""}${stepDone[step] ? " done" : ""}`} onClick={() => goStep(pos)} />
               ))}
             </div>
             <span className="step-title">
-              {stepIdx + 1}/{STEP_TITLES.length} {STEP_TITLES[stepIdx]}{"\u3000"}← スライド →
+              {stepIdx + 1}/{visibleSteps.length} {STEP_TITLES[visibleSteps[stepIdx] ?? 0]}{"\u3000"}← スライド →
             </span>
           </div>
           <div className="steps" ref={stepsRef} onScroll={onStepsScroll}>
-            <section className="step">
+            <section className="step" hidden={!show(0)}>
               <h2>周辺の環境（複数可）</h2>
               <button className="chip locate" onClick={() => locate()} disabled={locBusy}>
                 {locBusy ? "判定中…" : <><Emoji c="📍" />現在地から判定する</>}
@@ -56,7 +71,7 @@ export function StepCards({ o }: { o: ObservationState }) {
               {locMsg && <p className="hint">{locMsg}</p>}
             </section>
 
-            <section className="step">
+            <section className="step" hidden={!show(1)}>
               <h2>どこで見たか</h2>
               <div className="chips">
                 {PLACES.filter((p) => allowedPlaces(habitats).includes(p.v)).map((p) => (
@@ -68,7 +83,7 @@ export function StepCards({ o }: { o: ObservationState }) {
               </div>
             </section>
 
-            <section className="step">
+            <section className="step" hidden={!show(2)}>
               <h2>行動（複数可）</h2>
               <div className="chips">
                 {BEHAVIORS.filter((b) => allowedBehaviors(place, habitats).includes(b.v)).map((b) => (
@@ -80,7 +95,7 @@ export function StepCards({ o }: { o: ObservationState }) {
               </div>
             </section>
 
-            <section className="step">
+            <section className="step" hidden={!show(3)}>
               <h2>鳴き声（オノマトペ）</h2>
               <input
                 type="text"
@@ -103,7 +118,7 @@ export function StepCards({ o }: { o: ObservationState }) {
               </div>
             </section>
 
-            <section className="step">
+            <section className="step" hidden={!show(4)}>
               <h2>大きさ</h2>
               {!seen && <p className="hint">姿が見えないので、不明として扱います。</p>}
               <div className="sizes" hidden={!seen}>
@@ -119,7 +134,7 @@ export function StepCards({ o }: { o: ObservationState }) {
               </p>
             </section>
 
-            <section className="step">
+            <section className="step" hidden={!show(5)}>
               <h2>羽の色（複数可）</h2>
               {!seen && <p className="hint">姿が見えないので、不明として扱います。</p>}
               <div className="chips" hidden={!seen}>
@@ -132,7 +147,7 @@ export function StepCards({ o }: { o: ObservationState }) {
               </div>
             </section>
 
-            <section className="step">
+            <section className="step" hidden={!show(6)}>
               <h2>時間帯</h2>
               <div className="chips">
                 {TIMES.map((t) => (

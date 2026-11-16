@@ -1,5 +1,19 @@
 import type { Behavior, Habitat, Place } from "./types";
 
+/** 入口: 鳴き声だけ分かる／姿だけ分かる／両方 */
+export type EntryMode = "voice" | "sight" | "both";
+export const ENTRY_MODES: EntryMode[] = ["voice", "sight", "both"];
+
+/**
+ * 入口ごとに出すカード（STEP_TITLESの添字）。0:環境 1:場所 2:行動 3:鳴き声 4:大きさ 5:羽の色 6:時間帯・観察日。
+ * 出さないカードの項目は、入力済みでも判定に使わない（未入力と同じ扱い。値は消さずに保持する）
+ */
+export const ENTRY_STEPS: Record<EntryMode, number[]> = {
+  voice: [0, 1, 3, 6],
+  sight: [0, 1, 2, 4, 5, 6],
+  both: [0, 1, 2, 3, 4, 5, 6],
+};
+
 export const ALL_PLACES: Place[] = ["feeder", "ground", "tree", "wire", "roof", "water", "grass", "sky", "unseen"];
 export const ALL_BEHAVIORS: Behavior[] = ["swimming", "wading", "perching", "flying", "singing", "foraging", "preening"];
 
