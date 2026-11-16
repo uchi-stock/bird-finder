@@ -29,7 +29,7 @@ export default defineConfig({
       provider: "v8",
       include: ["src/**/*.{ts,tsx}"],
       // symlink共有（dev-standards側で管理）・エントリ・型宣言・テスト基盤は対象外
-      exclude: ["src/**/*.test.{ts,tsx}", "src/setupTests.ts", "src/main.tsx", "src/vite-env.d.ts", "src/shared/**"],
+      exclude: ["src/**/*.test.{ts,tsx}", "src/setupTests.ts", "src/testApp.tsx", "src/main.tsx", "src/vite-env.d.ts", "src/shared/**"],
     },
   },
 });
