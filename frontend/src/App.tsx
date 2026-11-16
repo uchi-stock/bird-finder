@@ -12,6 +12,7 @@ import { ResultList } from "./components/ResultList";
 import { useCallPlayer } from "./hooks/useCallPlayer";
 import { useCollection } from "./hooks/useCollection";
 import { useObservation } from "./hooks/useObservation";
+import { useOnline } from "./hooks/useOnline";
 import { SPECIES, speciesLabel } from "./options";
 import formatBuildTime from "./shared/formatBuildTime.js";
 
@@ -24,6 +25,7 @@ export function App() {
   const { collection, sightings, mapPoints, onCatch } = useCollection();
   const o = useObservation();
   const { now, onPlay, isActive } = useCallPlayer();
+  const online = useOnline();
 
   return (
     <main className={tab === "dex" ? "app" : "app fit"}>
@@ -52,6 +54,11 @@ export function App() {
           </button>
         </nav>
       </header>
+      {!online && (
+        <p className="offline-note" role="status">
+          オフラインです。鳥の判定は使えます。写真・鳴き声・地図は表示できないことがあります。
+        </p>
+      )}
       {tab === "dex" ? (
         <Dex collection={collection} />
       ) : tab === "map" ? (

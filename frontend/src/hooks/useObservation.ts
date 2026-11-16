@@ -5,6 +5,7 @@ import { timeSlotFromHour } from "../domain/time";
 import type { Behavior, Color, Habitat, Observation, Place, TimeSlot } from "../domain/types";
 import { detectHabitats } from "../location";
 import { SPECIES, todayStr } from "../options";
+import { isOnlineNow } from "./useOnline";
 
 /** 条件の入力一式と、前の回答による絞り込み（選べなくなった選択の自動解除）、候補の計算 */
 export function useObservation() {
@@ -40,6 +41,11 @@ export function useObservation() {
   const inputForResults = hasAnyInput({ ...obs, month: undefined });
 
   const locate = async (auto = false) => {
+    if (!isOnlineNow()) {
+      // 環境の判定は地図サービスへの問い合わせが要るため、通信を試みずに、手動で選ぶよう案内する
+      setLocMsg("オフラインのため、周辺の環境を判定できません。手動で選んでください。");
+      return;
+    }
     setLocBusy(true);
     setLocMsg(auto ? "現在地を確認しています…" : "");
     try {
