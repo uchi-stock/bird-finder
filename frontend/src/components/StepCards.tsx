@@ -47,7 +47,7 @@ export function StepCards({ o }: { o: ObservationState }) {
               </button>
               <div className="chips">
                 {HABITATS.map((h) => (
-                  <button key={h.v} className={habitats.includes(h.v) ? "chip on" : "chip"} onClick={() => setHabitats(toggle(habitats, h.v))}>
+                  <button key={h.v} className={habitats.includes(h.v) ? "chip on" : "chip"} aria-pressed={habitats.includes(h.v)} onClick={() => setHabitats(toggle(habitats, h.v))}>
                     <Emoji c={HABITAT_EMOJI[h.v]} />
                     {h.label}
                   </button>
@@ -61,7 +61,7 @@ export function StepCards({ o }: { o: ObservationState }) {
               {habitats.length > 0 && <p className="hint">選んだ環境にある場所だけ表示しています。</p>}
               <div className="chips">
                 {PLACES.filter((p) => allowedPlaces(habitats).includes(p.v)).map((p) => (
-                  <button key={p.v} className={place === p.v ? "chip on" : "chip"} onClick={() => selectPlace(place === p.v ? undefined : p.v)}>
+                  <button key={p.v} className={place === p.v ? "chip on" : "chip"} aria-pressed={place === p.v} onClick={() => selectPlace(place === p.v ? undefined : p.v)}>
                     <Emoji c={p.emoji} />
                     {p.label}
                   </button>
@@ -75,7 +75,7 @@ export function StepCards({ o }: { o: ObservationState }) {
               {place === "unseen" && <p className="hint">姿が見えないので「鳴く・歌う」を自動で選んでいます。</p>}
               <div className="chips">
                 {BEHAVIORS.filter((b) => allowedBehaviors(place, habitats).includes(b.v)).map((b) => (
-                  <button key={b.v} className={behaviors.includes(b.v) ? "chip on" : "chip"} onClick={() => setBehaviors(toggle(behaviors, b.v))}>
+                  <button key={b.v} className={behaviors.includes(b.v) ? "chip on" : "chip"} aria-pressed={behaviors.includes(b.v)} onClick={() => setBehaviors(toggle(behaviors, b.v))}>
                     <Emoji c={b.emoji} />
                     {b.label}
                   </button>
@@ -94,7 +94,7 @@ export function StepCards({ o }: { o: ObservationState }) {
               />
               <div className="chips">
                 <button
-                  className={noVoice ? "chip on" : "chip"}
+                  className={noVoice ? "chip on" : "chip"} aria-pressed={noVoice}
                   onClick={() => {
                     setNoVoice(!noVoice);
                     setVoice("");
@@ -110,7 +110,7 @@ export function StepCards({ o }: { o: ObservationState }) {
               <h2>大きさ</h2>
               <div className="sizes">
                 {SIZES.map((s) => (
-                  <button key={s.level} className={sizeLevel === s.level ? "chip on" : "chip"} onClick={() => setSizeLevel(sizeLevel === s.level ? undefined : s.level)}>
+                  <button key={s.level} className={sizeLevel === s.level ? "chip on" : "chip"} aria-pressed={sizeLevel === s.level} onClick={() => setSizeLevel(sizeLevel === s.level ? undefined : s.level)}>
                     <Emoji c={s.emoji} />
                     {s.level}
                   </button>
@@ -125,7 +125,7 @@ export function StepCards({ o }: { o: ObservationState }) {
               <h2>羽の色（複数可）</h2>
               <div className="chips">
                 {COLORS.map((c) => (
-                  <button key={c.v} className={colors.includes(c.v) ? "chip on" : "chip"} onClick={() => setColors(toggle(colors, c.v))}>
+                  <button key={c.v} className={colors.includes(c.v) ? "chip on" : "chip"} aria-pressed={colors.includes(c.v)} onClick={() => setColors(toggle(colors, c.v))}>
                     <span className="dot" style={{ background: c.css }} />
                     {c.label}
                   </button>
@@ -137,7 +137,7 @@ export function StepCards({ o }: { o: ObservationState }) {
               <h2>時間帯</h2>
               <div className="chips">
                 {TIMES.map((t) => (
-                  <button key={t.v} className={time === t.v ? "chip on" : "chip"} onClick={() => setTime(time === t.v ? undefined : t.v)}>
+                  <button key={t.v} className={time === t.v ? "chip on" : "chip"} aria-pressed={time === t.v} onClick={() => setTime(time === t.v ? undefined : t.v)}>
                     <Emoji c={t.emoji} />
                     {t.label}
                   </button>

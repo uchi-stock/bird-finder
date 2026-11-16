@@ -6,7 +6,7 @@ body { margin:0; background:var(--bg); color:var(--fg); font-family: "M PLUS Rou
 h1 { font-size: 1.4rem; margin: 0 0 4px; }
 h2 { font-size: 1rem; margin: 0 0 8px; }
 section { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; margin:12px 0; }
-.lead, .hint, .note { color: color-mix(in srgb, var(--fg) 65%, transparent); font-size:.85rem; margin:4px 0; }
+.lead, .hint, .note { color: color-mix(in srgb, var(--fg) 78%, transparent); font-size:.85rem; margin:4px 0; }
 input[type=text], input[type=date] { width:100%; font-size:16px; padding:10px; border:1px solid var(--line); border-radius:8px; background:var(--bg); color:var(--fg); }
 .chips, .sizes { display:flex; flex-wrap:wrap; gap:8px; }
 .chip { font-size:15px; padding:10px 14px; border-radius:999px; border:1px solid var(--line); background:var(--bg); color:var(--fg); display:inline-flex; align-items:center; gap:6px; min-height:44px; }
@@ -54,7 +54,7 @@ footer { font-size:.75rem; opacity:.7; padding:8px 0 24px; }
 .dex .photo { width:100%; height:auto; aspect-ratio:1; }
 .photo.q { font-size:2rem; font-weight:bold; }
 @media (prefers-reduced-motion: reduce) { .ball, .got { animation: none; } }
-.version { font-size:.75rem; opacity:.6; margin:0 0 4px; }
+.version { font-size:.75rem; opacity:.78; margin:0 0 4px; }
 .update-notifier { position:fixed; left:50%; bottom:16px; transform:translateX(-50%); z-index:30; display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:10px; background:var(--card); border:1px solid var(--line); box-shadow:0 2px 10px rgba(0,0,0,.25); }
 .update-notifier button { padding:8px 14px; border-radius:999px; border:none; background:var(--acc); color:var(--accfg); font-size:14px; font-weight:bold; }
 
@@ -203,3 +203,7 @@ footer { font-size:.75rem; opacity:.7; padding:8px 0 24px; }
 .top h1 { font-size:1rem; line-height:1.25; margin:0; }
 .top h1 { white-space:normal; }
 @media (max-width:400px) { .top h1 { font-size:.8rem; } .top .tab { padding:6px 7px; font-size:12px; } }
+
+/* アクセシビリティ: キーボード操作時のフォーカスの見た目、拡大表示の閉じるボタン */
+:focus-visible { outline:2px solid var(--acc); outline-offset:2px; }
+.lb-close { align-self:flex-end; padding:6px 14px; border-radius:999px; border:1px solid rgba(255,255,255,.5); background:rgba(0,0,0,.35); color:#fff; font-size:.85rem; }
