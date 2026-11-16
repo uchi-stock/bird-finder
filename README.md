@@ -69,6 +69,7 @@
 - 必須: 声・姿から候補を絞る、現在地と時刻の自動入力、図鑑、スマホ表示
 - 次: 鳴き声／姿／両方の入口の切り替え（Issue #60）、共有地図の公開（Issue #46）
 - 選択肢の構造は[`docs/selection-options.md`](docs/selection-options.md)にMermaid図でまとめている
+- 識別精度の測り方と実測値は[`docs/accuracy.md`](docs/accuracy.md)に記録している
 
 ## 技術構成の判断（フェーズ3の見直し結果）
 
