@@ -151,7 +151,7 @@ flowchart LR
   S0 --> S1 --> S2 --> S3 --> S4 --> S5 --> S6
 ```
 
-![選択肢の図（rendered）](https://raw.githubusercontent.com/uchi-stock/bird-finder/docs-diagrams/latest/selection-options-3.png)
+![選択肢の図（rendered）](https://raw.githubusercontent.com/uchi-stock/bird-finder/docs-diagrams/latest/selection-options-3.png?1da8a258203ce41929821ab1932786317fe220f7)
 
 </details>
 
@@ -196,6 +196,6 @@ flowchart LR
   end
 ```
 
-![選択肢の図（rendered）](https://raw.githubusercontent.com/uchi-stock/bird-finder/docs-diagrams/latest/selection-options-4.png?8f54c97b8e8b188553cb8dc15c1f0d2ad537b533)
+![選択肢の図（rendered）](https://raw.githubusercontent.com/uchi-stock/bird-finder/docs-diagrams/latest/selection-options-4.png?1da8a258203ce41929821ab1932786317fe220f7)
 
 </details>
