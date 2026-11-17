@@ -4,6 +4,7 @@ import "leaflet/dist/leaflet.css";
 import type { MapPoint } from "../domain/sightings";
 import type { LatLon } from "../domain/privacy";
 import type { Bounds } from "../domain/shared";
+import type { DummyPoint } from "../domain/dummySpots";
 
 interface Props {
   points: MapPoint[];
@@ -15,6 +16,8 @@ interface Props {
   locate: () => Promise<LatLon>;
   /** みんなの観察（共有された記録）。省略すると、自分の記録だけを出す */
   shared?: { points: MapPoint[]; message: string; loading: boolean; load: (bounds: Bounds) => void };
+  /** バトル試作用のダミー（実際の観察ではない）。指定すると、「ダミー（バトル用）」の表示を足す */
+  dummy?: DummyPoint[];
 }
 
 // みんなの観察を取得できる縮尺（これより広いと、区画が多すぎて取得しない）。切り替えたとき、これより広ければ寄せる
@@ -48,13 +51,36 @@ function drawPins(layer: L.LayerGroup, list: MapPoint[], speciesLabel: Props["sp
   }
 }
 
+/** ダミーのピン。破線の枠・灰色がかった色・「ダミー」の札で、本物の記録と取り違えないようにする */
+function drawDummyPins(layer: L.LayerGroup, list: DummyPoint[], speciesLabel: Props["speciesLabel"]): void {
+  for (const p of list) {
+    const { name, emoji } = speciesLabel(p.speciesId);
+    const icon = L.divIcon({
+      className: "bird-pin dummy",
+      html: `<span class="pin-emoji">${emoji}</span><b class="pin-dummy">ダミー</b>`,
+      iconSize: [28, 28],
+      iconAnchor: [14, 14],
+    });
+    const el = document.createElement("div");
+    const strong = document.createElement("strong");
+    strong.textContent = `（ダミー）${name}`;
+    const warn = document.createElement("div");
+    warn.textContent = "ダミーデータ（実際の観察ではありません）";
+    const info = document.createElement("div");
+    info.textContent = `${p.spotLabel}・いる可能性: ${p.likelihood}`;
+    el.append(strong, warn, info);
+    L.marker([p.lat, p.lon], { icon, title: `（ダミー）${name}` }).bindPopup(el).addTo(layer);
+  }
+}
+
 /** 地図に、見つけた鳥をプロットする。位置はぼかし済みの点だけを受け取る（正確な位置は渡さない） */
-export default function MapView({ points, speciesLabel, withoutLocation, locate, shared }: Props) {
+export default function MapView({ points, speciesLabel, withoutLocation, locate, shared, dummy }: Props) {
   const elRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const layerRef = useRef<L.LayerGroup | null>(null);
   const sharedLayerRef = useRef<L.LayerGroup | null>(null);
-  const [mode, setMode] = useState<"mine" | "all">("mine");
+  const dummyLayerRef = useRef<L.LayerGroup | null>(null);
+  const [mode, setMode] = useState<"mine" | "all" | "dummy">("mine");
   const meRef = useRef<L.CircleMarker | null>(null);
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
@@ -66,12 +92,14 @@ export default function MapView({ points, speciesLabel, withoutLocation, locate,
     L.tileLayer(TILE_URL, { attribution: ATTRIBUTION, maxZoom: 18 }).addTo(map);
     layerRef.current = L.layerGroup().addTo(map);
     sharedLayerRef.current = L.layerGroup().addTo(map);
+    dummyLayerRef.current = L.layerGroup().addTo(map);
     mapRef.current = map;
     return () => {
       map.remove();
       mapRef.current = null;
       layerRef.current = null;
       sharedLayerRef.current = null;
+      dummyLayerRef.current = null;
       meRef.current = null;
     };
   }, []);
@@ -117,6 +145,17 @@ export default function MapView({ points, speciesLabel, withoutLocation, locate,
     if (mode === "all" && sharedPoints) drawPins(layer, sharedPoints, speciesLabel, "bird-pin shared");
   }, [sharedPoints, speciesLabel, mode]);
 
+  // ダミー（バトル用）: 本物の記録とは別のレイヤーに出す。ダミー地点がすべて見える範囲へ寄せる
+  useEffect(() => {
+    const map = mapRef.current;
+    const layer = dummyLayerRef.current;
+    if (!map || !layer) return;
+    layer.clearLayers();
+    if (mode !== "dummy" || !dummy) return;
+    drawDummyPins(layer, dummy, speciesLabel);
+    if (dummy.length > 0) map.fitBounds(L.latLngBounds(dummy.map((p) => [p.lat, p.lon] as [number, number])), { padding: [40, 40], maxZoom: 13 });
+  }, [dummy, speciesLabel, mode]);
+
   const goToMe = async () => {
     setBusy(true);
     setMsg("");
@@ -137,15 +176,27 @@ export default function MapView({ points, speciesLabel, withoutLocation, locate,
   return (
     <div className="map-wrap">
       <div className="map-canvas" ref={elRef} data-testid="map-canvas" />
-      {shared && (
+      {(shared || dummy) && (
         <div className="map-mode" role="group" aria-label="表示する記録">
           <button type="button" className={mode === "mine" ? "on" : ""} aria-pressed={mode === "mine"} onClick={() => setMode("mine")}>
             自分の記録
           </button>
-          <button type="button" className={mode === "all" ? "on" : ""} aria-pressed={mode === "all"} onClick={() => setMode("all")}>
-            みんなの観察
-          </button>
+          {shared && (
+            <button type="button" className={mode === "all" ? "on" : ""} aria-pressed={mode === "all"} onClick={() => setMode("all")}>
+              みんなの観察
+            </button>
+          )}
+          {dummy && (
+            <button type="button" className={mode === "dummy" ? "on" : ""} aria-pressed={mode === "dummy"} onClick={() => setMode("dummy")}>
+              ダミー（バトル用）
+            </button>
+          )}
         </div>
+      )}
+      {mode === "dummy" && (
+        <p className="map-note dummy-note" role="status">
+          ダミーデータです。実際の観察ではありません（バトルの試作用）。
+        </p>
       )}
       <button type="button" className="map-locate" onClick={goToMe} disabled={busy}>
         <span className="emoji" aria-hidden="true">

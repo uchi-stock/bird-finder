@@ -16,6 +16,10 @@ import { useObservation } from "./hooks/useObservation";
 import { useSharedSightings } from "./hooks/useSharedSightings";
 import { useOnline } from "./hooks/useOnline";
 import { SPECIES, speciesLabel } from "./options";
+import { buildDummyPoints } from "./domain/dummySpots";
+
+// バトル試作用のダミー（実際の観察ではない）。決め方は固定なので、起動時に1回だけ作る
+const DUMMY_POINTS = buildDummyPoints(SPECIES);
 
 // 地図は大きいので、地図タブを開いたときに読み込む
 const MapView = lazy(() => import("./components/MapView"));
@@ -45,7 +49,7 @@ export function App() {
         <Quiz />
       ) : tab === "map" ? (
         <Suspense fallback={<p className="hint">地図を読み込み中…</p>}>
-          <MapView points={mapPoints} speciesLabel={speciesLabel} withoutLocation={countWithoutLocation(sightings)} locate={getCoords} shared={shared} />
+          <MapView points={mapPoints} speciesLabel={speciesLabel} withoutLocation={countWithoutLocation(sightings)} locate={getCoords} shared={shared} dummy={DUMMY_POINTS} />
         </Suspense>
       ) : (
         <>
