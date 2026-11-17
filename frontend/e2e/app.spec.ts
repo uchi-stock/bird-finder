@@ -11,14 +11,18 @@ for (const size of SIZES) {
   test.describe(`スマホ幅 ${size.name}（${size.width}x${size.height}）`, () => {
     test.use({ viewport: { width: size.width, height: size.height } });
 
-    test("初期表示: 横スクロールが出ず、タイトルがタブと重ならない", async ({ page }, testInfo) => {
+    test("初期表示: 横スクロールが出ず、ヘッダーは1行で、タブバーは下に固定される", async ({ page }, testInfo) => {
       const errors: string[] = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await openApp(page);
       expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBe(0);
+      const header = await page.locator(".app-header").boundingBox();
+      const menu = await page.locator(".menu-btn").boundingBox();
       const h1 = await page.locator("h1").boundingBox();
-      const tabs = await page.locator(".tabs").boundingBox();
-      expect(h1 && tabs && h1.x + h1.width <= tabs.x + 1).toBe(true);
+      expect(header && header.height <= 60).toBe(true);
+      expect(h1 && menu && h1.x + h1.width <= menu.x + 1).toBe(true);
+      const tabbar = await page.locator(".tabbar").boundingBox();
+      expect(tabbar && Math.abs(tabbar.y + tabbar.height - size.height) <= 1).toBe(true);
       await captureScreenshot(page, testInfo, `${size.name}-1-initial`, `初期表示（${size.name}）`, { fullPage: false });
       expect(errors).toEqual([]);
     });
@@ -50,9 +54,11 @@ for (const size of SIZES) {
       await expect(dialog).toBeHidden();
     });
 
-    test("ⓘのモーダルは背景が透けず、閉じられる", async ({ page }, testInfo) => {
+    test("メニューから使い方のモーダルを開ける。背景が透けず、閉じられる", async ({ page }, testInfo) => {
       await openApp(page);
-      await page.tap(".help-btn");
+      await page.tap(".menu-btn");
+      await captureScreenshot(page, testInfo, `${size.name}-4-menu`, `メニュー（${size.name}）`, { fullPage: false });
+      await page.getByRole("button", { name: "使い方と注意" }).tap();
       const box = page.locator(".help-box");
       await expect(box).toBeVisible();
       const bg = await box.evaluate((el) => getComputedStyle(el).backgroundColor);

@@ -3,7 +3,6 @@ import { caughtCount, type Collection } from "../domain/collection";
 import { SPECIES } from "../options";
 import { canSaveToStorage } from "../storage";
 import { Photo } from "./Photo";
-import { PrivacySettings } from "./PrivacySettings";
 import { SpeciesList } from "./SpeciesList";
 
 interface Props {
@@ -51,7 +50,6 @@ export function Dex({ collection, onCatch, onShare }: Props) {
           })}
         </ul>
       )}
-      <PrivacySettings />
     </section>
   );
 }

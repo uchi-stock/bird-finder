@@ -1,7 +1,7 @@
 import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { detectHabitats, usePhoto, section, labelOf, chips, chip, firstCard, renderApp, setupAppTests } from "./testApp";
+import { detectHabitats, usePhoto, section, labelOf, chips, chip, firstCard, renderApp, setupAppTests, openHelp, openMenu } from "./testApp";
 
 vi.mock("./callAudio", async () => (await import("./testApp")).callAudioMock);
 vi.mock("./location", async () => (await import("./testApp")).locationMock);
@@ -10,9 +10,11 @@ vi.mock("./photo", async () => (await import("./testApp")).photoMock);
 setupAppTests();
 
 describe("App: 基本表示", () => {
-  it("タイトル・バージョン・更新日時を表示する", async () => {
+  it("タイトルを表示し、バージョン・更新日時はメニューの中にある", async () => {
     await renderApp();
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("声しか知らない鳥を探す");
+    expect(screen.queryByText(/v0\.0\.0-test/)).toBeNull();
+    await openMenu();
     expect(screen.getByText(/v0\.0\.0-test/)).toBeInTheDocument();
   });
   it("開いた直後は、現在の時間帯（朝）に合う鳥を最大3件出す", async () => {
@@ -261,7 +263,7 @@ describe("App: 補足の案内はモーダルにまとめる", () => {
     await userEvent.click(chip("どこで見たか", "空"));
     expect(screen.queryByText(/選んだ環境にある場所だけ/)).toBeNull();
     expect(screen.queryByText(/自動で選んでいます/)).toBeNull();
-    await userEvent.click(screen.getByRole("button", { name: "使い方と注意" }));
+    await openHelp();
     const dialog = screen.getByRole("dialog", { name: "使い方と注意" });
     expect(within(dialog).getByText(/違う場合はタップで修正できます/)).toBeInTheDocument();
     expect(within(dialog).getByText(/その環境にある場所だけ/)).toBeInTheDocument();

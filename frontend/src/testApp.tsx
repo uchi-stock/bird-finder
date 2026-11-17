@@ -1,3 +1,4 @@
+import userEvent from "@testing-library/user-event";
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, expect, vi } from "vitest";
 
@@ -80,3 +81,12 @@ export async function renderApp() {
   await act(async () => {});
   return view;
 }
+/** ヘッダーのメニュー（☰）を開く */
+export const openMenu = async () => {
+  await userEvent.click(screen.getByRole("button", { name: "メニュー" }));
+};
+/** メニューから「使い方と注意」を開く */
+export const openHelp = async () => {
+  await openMenu();
+  await userEvent.click(screen.getByRole("button", { name: "使い方と注意" }));
+};
