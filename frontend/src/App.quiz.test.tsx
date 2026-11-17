@@ -1,7 +1,7 @@
-import { screen, within } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fetchPhoto, renderApp, setupAppTests } from "./testApp";
+import { fetchCallAudio, fetchPhoto, playAudio, renderApp, renderAppNoWait, setupAppTests, stopAudio, unlockAudio } from "./testApp";
 import { SPECIES } from "./options";
 
 vi.mock("./callAudio", async () => (await import("./testApp")).callAudioMock);
@@ -15,7 +15,7 @@ const openQuiz = async () => {
   await userEvent.click(screen.getByRole("button", { name: /クイズ/ }));
 };
 const start = async () => {
-  await userEvent.click(screen.getByRole("button", { name: "はじめる" }));
+  await userEvent.click(screen.getByRole("button", { name: /名前を見て、写真から選ぶ/ }));
   await screen.findByRole("group", { name: "写真の選択肢" });
 };
 const choices = () => within(screen.getByRole("group", { name: "写真の選択肢" })).getAllByRole("button");
@@ -88,9 +88,9 @@ describe("App: クイズ", () => {
   it("写真が1枚も取得できないと、案内を出し、もう一度できる", async () => {
     fetchPhoto.mockResolvedValue(null);
     await openQuiz();
-    await userEvent.click(screen.getByRole("button", { name: "はじめる" }));
-    expect(await screen.findByText(/写真を取得できませんでした/)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "はじめる" })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: /名前を見て、写真から選ぶ/ }));
+    expect(await screen.findByText(/問題を作れませんでした/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /名前を見て、写真から選ぶ/ })).toBeInTheDocument();
   });
 
   it("保存できない環境でも、クイズは動く", async () => {
@@ -123,9 +123,9 @@ describe("App: クイズ", () => {
 
   it("復習では、間違えた鳥が最初の問題に出る", async () => {
     const wrong = SPECIES.slice(0, 3);
-    localStorage.setItem("bird-finder:quiz:v1", JSON.stringify({ best: 4, wrong: Object.fromEntries(wrong.map((s) => [s.species_id, 1])) }));
+    localStorage.setItem("bird-finder:quiz:v1", JSON.stringify({ best: 4, bestCall: 0, wrong: Object.fromEntries(wrong.map((s) => [s.species_id, 1])) }));
     await openQuiz();
-    expect(screen.getByText("最高: 4問正解")).toBeInTheDocument();
+    expect(screen.getByText(/最高: 名前 4問正解/)).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "間違えた鳥を復習（3種）" }));
     await screen.findByRole("group", { name: "写真の選択肢" });
     const firstThree: string[] = [];
@@ -135,5 +135,106 @@ describe("App: クイズ", () => {
       await userEvent.click(screen.getByRole("button", { name: "次へ" }));
     }
     expect(firstThree.sort()).toEqual(wrong.map((s) => s.name_ja).sort());
+  });
+});
+
+describe("App: クイズ（鳴き声を聞いて、写真から選ぶ）", () => {
+  const startCall = async () => {
+    await openQuiz();
+    await userEvent.click(screen.getByRole("button", { name: /鳴き声を聞いて、写真から選ぶ/ }));
+    await screen.findByRole("group", { name: "写真の選択肢" });
+  };
+  const playButton = () => screen.getByRole("button", { name: /鳴き声を聞く|止める|音源を探しています/ });
+
+  beforeEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("名前は出さず、再生ボタンで鳴き声を聞ける。再生はタップの中で解錠してから行う", async () => {
+    await openQuiz();
+    await userEvent.click(screen.getByRole("button", { name: /鳴き声を聞いて、写真から選ぶ/ }));
+    // 解錠は、タップの同期処理内（音源を探すより前）で行う。自動再生はしない
+    expect(unlockAudio).toHaveBeenCalledTimes(1);
+    await screen.findByRole("group", { name: "写真の選択肢" });
+    expect(unlockAudio.mock.invocationCallOrder[0]).toBeLessThan(fetchCallAudio.mock.invocationCallOrder[0]);
+    expect(playAudio).not.toHaveBeenCalled();
+    expect(screen.getByRole("heading", { level: 2 }).textContent).toBe("この鳴き声の鳥は？");
+    await waitFor(() => expect(playButton()).toBeEnabled());
+    await userEvent.click(playButton());
+    expect(unlockAudio.mock.invocationCallOrder.at(-1)!).toBeLessThan(playAudio.mock.invocationCallOrder[0]);
+    expect(playAudio).toHaveBeenCalledWith("https://u/a.mp3", expect.any(Function));
+    // 再生中は「止める」になり、押すと停止する。聞き直せる
+    await userEvent.click(screen.getByRole("button", { name: /止める/ }));
+    expect(stopAudio).toHaveBeenCalled();
+    await userEvent.click(playButton());
+    expect(playAudio).toHaveBeenCalledTimes(2);
+  });
+
+  it("音源が見つからない鳥は飛ばして別の問題にし、10問遊べる。回答後に音源の出典が出る", async () => {
+    // 最初の問題の音源だけ見つからない（確実に飛ばされる）。以降は、すべて見つかる
+    fetchCallAudio.mockReset().mockResolvedValue({ src: "https://u/a.mp3", pageUrl: "https://c/File:a", title: "a.ogg", credit: "録音者A", license: "CC BY 4.0" });
+    fetchCallAudio.mockResolvedValueOnce(null);
+    await startCall();
+    let skipped = false;
+    for (let i = 0; i < 10; i++) {
+      await waitFor(() => expect(playButton()).toBeEnabled());
+      skipped ||= screen.queryByText(/音源が見つからなかったので/) !== null;
+      await answerFirst();
+      if (i === 0) expect(screen.getByText(/音源: Wikimedia Commons（録音: 録音者A ／ CC BY 4\.0）/)).toBeInTheDocument();
+      await userEvent.click(screen.getByRole("button", { name: nextLabel(i) }));
+    }
+    expect(screen.getByText(/\/ 10 問正解/)).toBeInTheDocument();
+    // 音源が見つからなかった問題は、実際に飛ばされている
+    expect(skipped).toBe(true);
+  });
+
+  it("すべての音源が見つからなければ、止まらずに案内を出す", async () => {
+    fetchCallAudio.mockResolvedValue(null);
+    await openQuiz();
+    await userEvent.click(screen.getByRole("button", { name: /鳴き声を聞いて、写真から選ぶ/ }));
+    expect(await screen.findByText(/問題を作れませんでした/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /鳴き声を聞いて、写真から選ぶ/ })).toBeInTheDocument();
+  });
+
+  it("音源の取得が失敗しても、止まらずに次の問題へ進む", async () => {
+    fetchCallAudio.mockRejectedValueOnce(new Error("net")).mockResolvedValue({ src: "https://u/a.mp3", pageUrl: "https://c/File:a", title: "a.ogg" });
+    await startCall();
+    await waitFor(() => expect(playButton()).toBeEnabled());
+    expect(screen.getByRole("group", { name: "写真の選択肢" })).toBeInTheDocument();
+  });
+
+  it("再生に失敗したら、案内を出す（音量・マナーモード）", async () => {
+    playAudio.mockRejectedValueOnce(new Error("NotAllowedError"));
+    await startCall();
+    await waitFor(() => expect(playButton()).toBeEnabled());
+    await userEvent.click(playButton());
+    expect(await screen.findByText(/再生できませんでした/)).toBeInTheDocument();
+    expect(playButton()).toHaveTextContent("鳴き声を聞く");
+  });
+
+  it("オフラインでは、鳴き声のクイズを選べず、理由を出す", async () => {
+    const onLine = vi.spyOn(window.navigator, "onLine", "get").mockReturnValue(false);
+    try {
+      // オフラインでは環境の判定をしないため、判定を待たずに開く
+      await renderAppNoWait();
+      await userEvent.click(screen.getByRole("button", { name: /クイズ/ }));
+      expect(screen.getByRole("button", { name: /鳴き声を聞いて、写真から選ぶ/ })).toBeDisabled();
+      expect(screen.getByText(/オフラインでは使えません/)).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /名前を見て、写真から選ぶ/ })).toBeEnabled();
+    } finally {
+      onLine.mockRestore();
+    }
+  });
+
+  it("鳴き声のクイズの成績は、名前のクイズとは別に保存される", async () => {
+    await startCall();
+    for (let i = 0; i < 10; i++) {
+      await waitFor(() => expect(playButton()).toBeEnabled());
+      await answerFirst();
+      await userEvent.click(screen.getByRole("button", { name: nextLabel(i) }));
+    }
+    const stored = JSON.parse(localStorage.getItem("bird-finder:quiz:v1") ?? "{}");
+    expect(stored.best).toBe(0);
+    expect(typeof stored.bestCall).toBe("number");
   });
 });
