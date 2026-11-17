@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { createPortal } from "react-dom";
 import { useModal } from "../hooks/useModal";
 
@@ -14,42 +13,24 @@ export const HELP_NOTES = [
   "鳥のデータは一般的な図鑑知識に基づく暫定値で、地域の調査資料での確認は未実施です（試作版）。",
 ];
 
-export function HelpNotes() {
-  const [open, setOpen] = useState(false);
-  const modalRef = useModal(open, () => setOpen(false));
-  return (
-    <>
-      <button
-        className="help-btn"
-        aria-label="使い方と注意"
-        onClick={() => setOpen(true)}
-      >
-        ⓘ
-      </button>
-      {open &&
-        createPortal(
-          <div
-            className="help-modal"
-            ref={modalRef}
-            role="dialog"
-            aria-modal="true"
-            aria-label="使い方と注意"
-            onClick={() => setOpen(false)}
-          >
-            <div className="help-box" onClick={(e) => e.stopPropagation()}>
-              <h2>使い方と注意</h2>
-              <ul>
-                {HELP_NOTES.map((n) => (
-                  <li key={n}>{n}</li>
-                ))}
-              </ul>
-              <button className="help-close" onClick={() => setOpen(false)}>
-                閉じる
-              </button>
-            </div>
-          </div>,
-          document.body,
-        )}
-    </>
+/** 使い方と注意のモーダル。開閉は、呼び出し側（ヘッダーのメニュー）が持つ */
+export function HelpNotes({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const modalRef = useModal(open, onClose);
+  if (!open) return null;
+  return createPortal(
+    <div className="help-modal" ref={modalRef} role="dialog" aria-modal="true" aria-label="使い方と注意" onClick={onClose}>
+      <div className="help-box" onClick={(e) => e.stopPropagation()}>
+        <h2>使い方と注意</h2>
+        <ul>
+          {HELP_NOTES.map((n) => (
+            <li key={n}>{n}</li>
+          ))}
+        </ul>
+        <button className="help-close" onClick={onClose}>
+          閉じる
+        </button>
+      </div>
+    </div>,
+    document.body,
   );
 }

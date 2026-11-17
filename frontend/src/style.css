@@ -265,17 +265,6 @@ footer {
   opacity: 0.6;
 }
 
-.tabs {
-  display: flex;
-  gap: 8px;
-  margin: 8px 0;
-  position: sticky;
-  top: 0;
-  background: var(--bg);
-  padding: 6px 0;
-  z-index: 5;
-}
-
 .tab {
   flex: 1;
   padding: 12px;
@@ -475,35 +464,6 @@ footer {
   flex-direction: column;
   padding: 8px 12px;
   overflow: hidden;
-}
-
-.top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.top h1 {
-  font-size: 1.05rem;
-  margin: 0;
-}
-
-.top .version {
-  margin: 0;
-}
-
-.top .tabs {
-  margin: 0;
-  padding: 0;
-  position: static;
-  flex: none;
-}
-
-.top .tab {
-  padding: 8px 12px;
-  font-size: 14px;
-  flex: none;
 }
 
 .step-nav {
@@ -732,27 +692,6 @@ footer {
   margin-right: 6px;
 }
 
-/* 絵文字を付けたぶん大きくなったヘッダー・ボタンを詰めて、一画面に収める */
-.top h1 {
-  font-size: 0.95rem;
-  white-space: nowrap;
-}
-
-.top .version {
-  font-size: 0.68rem;
-  white-space: nowrap;
-}
-
-.top .tab {
-  padding: 6px 9px;
-  font-size: 13px;
-  white-space: nowrap;
-}
-
-.top .tabs {
-  gap: 6px;
-}
-
 .step .chip {
   font-size: 14px;
   padding: 4px 10px;
@@ -878,20 +817,6 @@ footer {
 
 .privacy h2 {
   font-size: 0.95rem;
-}
-
-/* 3つのタブ（探す・図鑑・地図）を、ヘッダーに収める */
-.top h1 {
-  font-size: 0.85rem;
-}
-
-.top .tab {
-  padding: 6px 8px;
-  font-size: 12px;
-}
-
-.top .tab .emoji {
-  margin-right: 2px;
 }
 
 /* 地図 */
@@ -1132,33 +1057,7 @@ footer {
   color: rgb(255 255 255 / 60%);
 }
 
-/* バージョン表示が長くなっても、タブが切れないようにする（バージョンは折り返す） */
-.top > div:first-child {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-.top .version {
-  white-space: normal;
-  line-height: 1.25;
-  font-size: 0.62rem;
-}
-
-.top .tabs {
-  flex: none;
-}
-
 /* 注意文言のモーダル */
-.help-btn {
-  padding: 0 4px;
-  border: none;
-  background: transparent;
-  color: var(--fg);
-  font-size: 1.2rem;
-  opacity: 0.7;
-  flex: none;
-}
-
 .help-modal {
   position: fixed;
   inset: 0;
@@ -1201,31 +1100,6 @@ footer {
   background: var(--acc);
   color: var(--accfg);
   font-weight: bold;
-}
-
-.top > div {
-  min-width: 0;
-}
-
-.top h1 {
-  font-size: 1rem;
-  line-height: 1.25;
-  margin: 0;
-}
-
-.top h1 {
-  white-space: normal;
-}
-
-@media (width <= 400px) {
-  .top h1 {
-    font-size: 0.8rem;
-  }
-
-  .top .tab {
-    padding: 6px 7px;
-    font-size: 12px;
-  }
 }
 
 /* アクセシビリティ: キーボード操作時のフォーカスの見た目、拡大表示の閉じるボタン */
@@ -1414,4 +1288,83 @@ footer {
 
 .sp-meta {
   opacity: 0.85;
+}
+
+/* 共通のヘッダー（全画面で同じ位置に固定）と、下部のタブバー */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 0;
+  background: var(--bg);
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.menu-btn {
+  flex: none;
+  min-width: 44px;
+  min-height: 44px;
+  border: none;
+  background: transparent;
+  color: var(--fg);
+  font-size: 1.4rem;
+}
+
+.menu-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 85dvh;
+  overflow-y: auto;
+}
+
+.menu-item {
+  min-height: 44px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--fg);
+  font-size: 15px;
+  text-align: left;
+}
+
+.tabbar {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 5;
+  display: flex;
+  gap: 6px;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 6px 12px calc(6px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line);
+  background: var(--bg);
+}
+
+.tabbar .tab {
+  min-height: 44px;
+  padding: 6px 4px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+/* 下部のタブバーに隠れないよう、余白を取る */
+.app,
+.app.fit {
+  padding-bottom: calc(64px + env(safe-area-inset-bottom));
 }

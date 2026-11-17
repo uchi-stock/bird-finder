@@ -1,7 +1,7 @@
 import { act, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { getCoords, usePhoto, uguisuCard, detail, openDetail, renderApp, setupAppTests } from "./testApp";
+import { getCoords, usePhoto, uguisuCard, detail, openDetail, renderApp, setupAppTests, openMenu } from "./testApp";
 
 vi.mock("./callAudio", async () => (await import("./testApp")).callAudioMock);
 vi.mock("./location", async () => (await import("./testApp")).locationMock);
@@ -75,9 +75,9 @@ describe("App: 捕まえる・図鑑", () => {
     const others = within(screen.getByRole("list")).getAllByRole("listitem").filter((li) => li !== uguisuCard());
     for (const li of others) expect(within(li).queryByRole("img", { name: "捕獲済み" })).toBeNull();
   });
-  it("図鑑タブに、自宅の登録（共有から除外）が表示される", async () => {
+  it("メニューに、自宅の登録（共有から除外）が表示される", async () => {
     await renderApp();
-    await userEvent.click(screen.getByRole("button", { name: /図鑑/ }));
+    await openMenu();
     expect(screen.getByRole("heading", { name: /自宅の登録（共有から除外）/ })).toBeInTheDocument();
   });
   it("捕まえたとき現在地が取れれば、見つけた場所つきで記録され、地図タブにピンが出る（位置はぼかされる）", async () => {
