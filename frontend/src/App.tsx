@@ -7,6 +7,7 @@ import { UpdateNotifier } from "./components/UpdateNotifier";
 import { AppHeader } from "./components/AppHeader";
 import { Emoji } from "./components/Emoji";
 import { Dex } from "./components/Dex";
+import { Quiz } from "./components/Quiz";
 import { StepCards } from "./components/StepCards";
 import { ResultList } from "./components/ResultList";
 import { useCallPlayer } from "./hooks/useCallPlayer";
@@ -21,7 +22,7 @@ const MapView = lazy(() => import("./components/MapView"));
 
 // タブの切り替えと、状態（条件・再生・図鑑）の結線だけを持つ
 export function App() {
-  const [tab, setTab] = useState<"search" | "dex" | "map">("search");
+  const [tab, setTab] = useState<"search" | "dex" | "quiz" | "map">("search");
   const { collection, sightings, mapPoints, onCatch, shareSighting } = useCollection();
   const shared = useSharedSightings();
   const o = useObservation();
@@ -29,7 +30,7 @@ export function App() {
   const online = useOnline();
 
   return (
-    <main className={tab === "dex" ? "app" : "app fit"}>
+    <main className={tab === "dex" || tab === "quiz" ? "app" : "app fit"}>
       <ServiceWorkerRegistration swUrl={`${import.meta.env.BASE_URL}sw.js`} />
       <UpdateNotifier />
       <AppHeader />
@@ -40,6 +41,8 @@ export function App() {
       )}
       {tab === "dex" ? (
         <Dex collection={collection} onCatch={onCatch} onShare={shareSighting} />
+      ) : tab === "quiz" ? (
+        <Quiz />
       ) : tab === "map" ? (
         <Suspense fallback={<p className="hint">地図を読み込み中…</p>}>
           <MapView points={mapPoints} speciesLabel={speciesLabel} withoutLocation={countWithoutLocation(sightings)} locate={getCoords} shared={shared} />
@@ -58,6 +61,10 @@ export function App() {
         <button className={tab === "dex" ? "tab on" : "tab"} aria-current={tab === "dex" ? "page" : undefined} onClick={() => setTab("dex")}>
           <Emoji c="📖" />
           図鑑 {caughtCount(collection)}/{SPECIES.length}
+        </button>
+        <button className={tab === "quiz" ? "tab on" : "tab"} aria-current={tab === "quiz" ? "page" : undefined} onClick={() => setTab("quiz")}>
+          <Emoji c="🎯" />
+          クイズ
         </button>
         <button className={tab === "map" ? "tab on" : "tab"} aria-current={tab === "map" ? "page" : undefined} onClick={() => setTab("map")}>
           <Emoji c="🗺️" />

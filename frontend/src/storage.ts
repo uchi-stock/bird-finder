@@ -108,3 +108,35 @@ export function saveSightings(list: Sighting[]): void {
     /* 保存できなくても動作に影響しない */
   }
 }
+
+// ---- クイズの成績。端末の中にだけ保存し、送信しない ----
+
+const QUIZ_KEY = "bird-finder:quiz:v1";
+
+export interface QuizStats {
+  /** 最高の正答数 */
+  best: number;
+  /** 鳥ごとの、間違えた回数（復習で優先して出題する）。正解すると消える */
+  wrong: Record<string, number>;
+}
+
+/** 保存できない環境（プライベートブラウズ等）や壊れた値でも、例外にせず初期値を返す */
+export function loadQuizStats(): QuizStats {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(QUIZ_KEY) ?? "null");
+    if (parsed && typeof parsed === "object" && typeof parsed.best === "number" && parsed.wrong && typeof parsed.wrong === "object") {
+      return { best: parsed.best, wrong: parsed.wrong as Record<string, number> };
+    }
+  } catch {
+    /* 初期値を返す */
+  }
+  return { best: 0, wrong: {} };
+}
+
+export function saveQuizStats(stats: QuizStats): void {
+  try {
+    localStorage.setItem(QUIZ_KEY, JSON.stringify(stats));
+  } catch {
+    /* 保存できなくても、クイズは動作させる */
+  }
+}

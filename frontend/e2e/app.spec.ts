@@ -86,6 +86,31 @@ for (const size of SIZES) {
       expect(labels).toEqual(["飛ぶ・滑空する", "鳴く・歌う"]);
     });
 
+    test("クイズ: 名前と4枚の写真が出て、1ラウンド（10問）遊べる。横スクロールは出ない", async ({ page }, testInfo) => {
+      const errors: string[] = [];
+      page.on("pageerror", (e) => errors.push(e.message));
+      await openApp(page);
+      await page.getByRole("button", { name: /クイズ/ }).click();
+      await page.getByRole("button", { name: "はじめる" }).click();
+      const group = page.getByRole("group", { name: "写真の選択肢" });
+      await expect(group.getByRole("button")).toHaveCount(4);
+      // 各辺44px以上で、1画面に収まる
+      for (const b of await group.getByRole("button").all()) {
+        const box = await b.boundingBox();
+        expect(box && box.width >= 44 && box.height >= 44).toBe(true);
+      }
+      expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBe(0);
+      await captureScreenshot(page, testInfo, `${size.name}-9-quiz`, `クイズの問題（${size.name}）`, { fullPage: false });
+      for (let i = 0; i < 10; i++) {
+        await group.getByRole("button").first().tap();
+        if (i === 0) await captureScreenshot(page, testInfo, `${size.name}-9-quiz-answer`, `クイズの回答後（${size.name}）`, { fullPage: false });
+        await page.getByRole("button", { name: i < 9 ? "次へ" : "結果を見る" }).tap();
+      }
+      await expect(page.getByRole("heading", { name: "結果" })).toBeVisible();
+      await captureScreenshot(page, testInfo, `${size.name}-9-quiz-result`, `クイズの結果（${size.name}）`, { fullPage: false });
+      expect(errors).toEqual([]);
+    });
+
     test("図鑑タブ・地図タブが開き、JavaScriptのエラーが出ない", async ({ page }, testInfo) => {
       const errors: string[] = [];
       page.on("pageerror", (e) => errors.push(e.message));

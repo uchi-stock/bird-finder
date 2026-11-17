@@ -60,7 +60,7 @@ describe("App: アクセシビリティ", () => {
   it("画面の切り替えは、名前つきのナビゲーションにある", async () => {
     await renderApp();
     const nav = screen.getByRole("navigation", { name: "画面の切り替え" });
-    expect(within(nav).getAllByRole("button")).toHaveLength(3);
+    expect(within(nav).getAllByRole("button")).toHaveLength(4);
   });
   it("拡大表示は、dialogとして名前を持ち、閉じるボタンで閉じられる", async () => {
     await renderApp();

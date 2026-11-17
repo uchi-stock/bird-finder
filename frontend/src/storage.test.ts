@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { canSaveToStorage, clearHome, getPrivacySecret, loadCollection, loadHome, loadSightings, saveCollection, saveHome, saveSightings } from "./storage";
+import { canSaveToStorage, clearHome, getPrivacySecret, loadCollection, loadHome, loadSightings, saveCollection, saveHome, saveSightings, loadQuizStats, saveQuizStats } from "./storage";
 
 beforeEach(() => {
   localStorage.clear();
@@ -106,5 +106,25 @@ describe("canSaveToStorage（#75）", () => {
     });
     expect(canSaveToStorage()).toBe(false);
     spy.mockRestore();
+  });
+});
+
+describe("クイズの成績の保存", () => {
+  beforeEach(() => localStorage.clear());
+  it("保存した値を読み戻せる。何も無い・壊れた値は初期値になる", () => {
+    expect(loadQuizStats()).toEqual({ best: 0, wrong: {} });
+    saveQuizStats({ best: 7, wrong: { sparrow: 2 } });
+    expect(loadQuizStats()).toEqual({ best: 7, wrong: { sparrow: 2 } });
+    localStorage.setItem("bird-finder:quiz:v1", "{壊れた");
+    expect(loadQuizStats()).toEqual({ best: 0, wrong: {} });
+    localStorage.setItem("bird-finder:quiz:v1", JSON.stringify({ best: "x" }));
+    expect(loadQuizStats()).toEqual({ best: 0, wrong: {} });
+  });
+  it("保存できない環境でも、例外にならない", () => {
+    vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new Error("denied");
+    });
+    expect(() => saveQuizStats({ best: 1, wrong: {} })).not.toThrow();
+    vi.restoreAllMocks();
   });
 });
