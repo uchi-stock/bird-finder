@@ -7,6 +7,7 @@ import { afterEach, beforeEach, expect, vi } from "vitest";
 export const detectHabitats = vi.fn();
 export const getCoords = vi.fn();
 export const usePhoto = vi.fn();
+export const fetchPhoto = vi.fn();
 export const usePhotoFailed = vi.fn();
 export const retryPhoto = vi.fn();
 export const fetchCallAudio = vi.fn();
@@ -24,6 +25,7 @@ export const callAudioMock = {
 };
 export const locationMock = { detectHabitats: () => detectHabitats(), getCoords: () => getCoords() };
 export const photoMock = {
+  fetchPhoto: (n: string) => fetchPhoto(n),
   usePhoto: (n: string) => usePhoto(n),
   usePhotoFailed: (n: string) => usePhotoFailed(n),
   retryPhoto: (n: string) => retryPhoto(n),
@@ -58,6 +60,7 @@ export function setupAppTests() {
     detectHabitats.mockReset().mockResolvedValue([]);
     getCoords.mockReset().mockRejectedValue(new Error("位置なし"));
     usePhoto.mockReset().mockReturnValue(null);
+    fetchPhoto.mockReset().mockResolvedValue({ thumbnail: "https://upload.wikimedia.org/x/330px-a.jpg", pageUrl: "https://ja.wikipedia.org/wiki/x" });
     usePhotoFailed.mockReset().mockReturnValue(false);
     retryPhoto.mockReset();
     useFlightPhoto.mockReset().mockReturnValue(null);

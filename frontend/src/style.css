@@ -1368,3 +1368,135 @@ footer {
 .app.fit {
   padding-bottom: calc(64px + env(safe-area-inset-bottom));
 }
+
+/* クイズ */
+.quiz-name {
+  margin: 4px 0;
+  font-size: 1.8rem;
+  text-align: center;
+}
+
+.quiz-progress {
+  margin: 0;
+  text-align: center;
+}
+
+.quiz-choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  max-width: 280px;
+  margin: 8px auto;
+}
+
+.quiz-choice {
+  position: relative;
+  min-height: 44px;
+  aspect-ratio: 1;
+  padding: 0;
+  overflow: hidden;
+  border: 3px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+}
+
+.quiz-choice img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.quiz-choice.correct {
+  border-color: #2e8b57;
+}
+
+.quiz-choice.wrong {
+  border-color: #c0392b;
+  opacity: 0.8;
+}
+
+.quiz-mark {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--bg);
+  font-weight: bold;
+}
+
+.quiz-feedback {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.quiz-result-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.9rem;
+}
+
+.quiz-detail {
+  flex: none;
+  width: 88px;
+}
+
+.quiz-next {
+  display: block;
+  margin: 8px auto 0;
+}
+
+.quiz-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.quiz-actions button {
+  min-height: 44px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--fg);
+  font-size: 15px;
+}
+
+.quiz-actions .primary,
+.quiz-next {
+  min-height: 44px;
+  padding: 10px 24px;
+  border: none;
+  border-radius: 10px;
+  background: var(--acc);
+  color: var(--accfg);
+  font-weight: bold;
+}
+
+.quiz-score {
+  font-size: 1.6rem;
+  font-weight: bold;
+  text-align: center;
+}
+
+.quiz-missed {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 0;
+  list-style: none;
+}
+
+.quiz-missed li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: center;
+  font-size: 0.85rem;
+}
