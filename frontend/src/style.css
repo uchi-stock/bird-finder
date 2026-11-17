@@ -1500,3 +1500,47 @@ footer {
   align-items: center;
   font-size: 0.85rem;
 }
+
+.quiz-call {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+}
+
+.quiz-call .quiz-name {
+  font-size: 1.3rem;
+}
+
+.quiz-play {
+  min-height: 48px;
+  padding: 10px 24px;
+  border: none;
+  border-radius: 999px;
+  background: var(--acc);
+  color: var(--accfg);
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.quiz-play:disabled {
+  opacity: 0.7;
+}
+
+.quiz-credit {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.72rem;
+  text-align: center;
+}
+
+/* 背の低い画面でも、回答後の「次へ」が1画面に収まるようにする */
+@media (height <= 700px) {
+  .quiz-choices {
+    max-width: 230px;
+  }
+
+  .quiz-name {
+    font-size: 1.4rem;
+  }
+}

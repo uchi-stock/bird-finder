@@ -91,7 +91,7 @@ for (const size of SIZES) {
       page.on("pageerror", (e) => errors.push(e.message));
       await openApp(page);
       await page.getByRole("button", { name: /クイズ/ }).click();
-      await page.getByRole("button", { name: "はじめる" }).click();
+      await page.getByRole("button", { name: /名前を見て、写真から選ぶ/ }).click();
       const group = page.getByRole("group", { name: "写真の選択肢" });
       await expect(group.getByRole("button")).toHaveCount(4);
       // 各辺44px以上で、1画面に収まる
@@ -108,6 +108,57 @@ for (const size of SIZES) {
       }
       await expect(page.getByRole("heading", { name: "結果" })).toBeVisible();
       await captureScreenshot(page, testInfo, `${size.name}-9-quiz-result`, `クイズの結果（${size.name}）`, { fullPage: false });
+      expect(errors).toEqual([]);
+    });
+
+    test("クイズ（鳴き声）: 名前は出ず、再生ボタンで鳴き声を聞けて、1ラウンド（10問）遊べる", async ({ page }, testInfo) => {
+      const errors: string[] = [];
+      page.on("pageerror", (e) => errors.push(e.message));
+      await openApp(page);
+      // 音源は偽物（Wikimedia Commonsの検索結果とMP3）
+      await page.route("https://commons.wikimedia.org/w/api.php**", (r) =>
+        r.fulfill({
+          status: 200,
+          contentType: "application/json",
+          headers: { "access-control-allow-origin": "*" },
+          body: JSON.stringify({
+            query: {
+              pages: {
+                "1": {
+                  index: 1,
+                  title: "File:Call.ogg",
+                  videoinfo: [
+                    {
+                      url: "https://upload.wikimedia.org/call.ogg",
+                      mime: "audio/ogg",
+                      descriptionurl: "https://commons.wikimedia.org/wiki/File:Call.ogg",
+                      derivatives: [{ src: "https://upload.wikimedia.org/call.mp3", type: "audio/mpeg" }],
+                      extmetadata: { Artist: { value: "録音者" }, LicenseShortName: { value: "CC BY 4.0" } },
+                    },
+                  ],
+                },
+              },
+            },
+          }),
+        }),
+      );
+      await page.route("https://upload.wikimedia.org/**/*.mp3", (r) => r.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.alloc(64) }));
+      await page.getByRole("button", { name: /クイズ/ }).click();
+      await page.getByRole("button", { name: /鳴き声を聞いて、写真から選ぶ/ }).click();
+      await expect(page.getByRole("heading", { name: "この鳴き声の鳥は？" })).toBeVisible();
+      const play = page.getByRole("button", { name: /鳴き声を聞く/ });
+      await expect(play).toBeEnabled();
+      await expect(page.getByRole("group", { name: "写真の選択肢" }).getByRole("button")).toHaveCount(4);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBe(0);
+      await captureScreenshot(page, testInfo, `${size.name}-9-quiz-call`, `鳴き声のクイズ（${size.name}）`, { fullPage: false });
+      await play.tap();
+      const group = page.getByRole("group", { name: "写真の選択肢" });
+      for (let i = 0; i < 10; i++) {
+        await expect(group.getByRole("button").first()).toBeEnabled();
+        await group.getByRole("button").first().tap();
+        await page.getByRole("button", { name: i < 9 ? "次へ" : "結果を見る" }).tap();
+      }
+      await expect(page.getByRole("heading", { name: "結果" })).toBeVisible();
       expect(errors).toEqual([]);
     });
 

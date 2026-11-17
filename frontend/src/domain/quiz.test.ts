@@ -53,6 +53,13 @@ describe("buildRound", () => {
   });
 });
 
+describe("buildRound: 問題の種類", () => {
+  it("種類を指定すると、各問に種類が付く。既定はname", () => {
+    expect(buildRound(POOL, { rng: seededRng(1), kind: "call" }).every((q) => q.kind === "call")).toBe(true);
+    expect(buildRound(POOL, { rng: seededRng(1) }).every((q) => q.kind === "name")).toBe(true);
+  });
+});
+
 describe("seededRng", () => {
   it("0以上1未満を返し、同じシードで再現する", () => {
     const r = seededRng(9);
