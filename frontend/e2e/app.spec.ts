@@ -162,6 +162,20 @@ for (const size of SIZES) {
       expect(errors).toEqual([]);
     });
 
+    test("地図: 「ダミー（バトル用）」で、ダミーと分かる表示で、鳥が出る", async ({ page }, testInfo) => {
+      const errors: string[] = [];
+      page.on("pageerror", (e) => errors.push(e.message));
+      await openApp(page);
+      await page.getByRole("button", { name: /地図/ }).click();
+      await page.getByRole("button", { name: "ダミー（バトル用）" }).click();
+      await expect(page.getByText("ダミーデータです。実際の観察ではありません")).toBeVisible();
+      expect(await page.locator(".bird-pin.dummy").count()).toBeGreaterThan(0);
+      await expect(page.locator(".bird-pin.dummy .pin-dummy").first()).toHaveText("ダミー");
+      expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBe(0);
+      await captureScreenshot(page, testInfo, `${size.name}-6-map-dummy`, `地図のダミー（${size.name}）`, { fullPage: false });
+      expect(errors).toEqual([]);
+    });
+
     test("図鑑タブ・地図タブが開き、JavaScriptのエラーが出ない", async ({ page }, testInfo) => {
       const errors: string[] = [];
       page.on("pageerror", (e) => errors.push(e.message));

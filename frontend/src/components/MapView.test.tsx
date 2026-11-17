@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import MapView from "./MapView";
 import type { MapPoint } from "../domain/sightings";
+import type { DummyPoint } from "../domain/dummySpots";
 
 const label = (id: string) => ({ name: id === "bat" ? "アブラコウモリ" : "スズメ", emoji: id === "bat" ? "🦇" : "🐦" });
 const pt = (over: Partial<MapPoint> = {}): MapPoint => ({ key: "k", speciesId: "sparrow", date: "2026-11-15", lat: 35.65, lon: 139.54, count: 1, ...over });
@@ -101,6 +102,46 @@ describe("MapView", () => {
       expect(screen.getByRole("status")).toHaveTextContent("オフラインのため");
       fireEvent.click(screen.getByRole("button", { name: "自分の記録" }));
       expect(screen.getByRole("status")).toHaveTextContent("見つけた場所つきの記録がありません");
+    });
+  });
+
+  describe("ダミー（バトル用）", () => {
+    const dp = (over: Partial<DummyPoint> = {}): DummyPoint => ({ key: "d1", spotId: "dummy-a", spotLabel: "ダミー地点A（水辺）", speciesId: "sparrow", lat: 35.64, lon: 139.5, likelihood: "高", ...over });
+
+    it("dummyを渡さなければ、ダミーの表示は出ない（既存の表示は変わらない）", () => {
+      render(<MapView points={[]} speciesLabel={label} withoutLocation={0} locate={locate} />);
+      expect(screen.queryByRole("button", { name: /ダミー/ })).toBeNull();
+    });
+
+    it("「ダミー（バトル用）」に切り替えると、ダミーのピンと、常時の注記が出る。本物のピンは出ない", () => {
+      const { container } = render(<MapView points={[pt()]} speciesLabel={label} withoutLocation={0} locate={locate} dummy={[dp(), dp({ key: "d2", lat: 35.65 })]} />);
+      expect(container.querySelectorAll(".bird-pin.dummy")).toHaveLength(0);
+      fireEvent.click(screen.getByRole("button", { name: "ダミー（バトル用）" }));
+      expect(container.querySelectorAll(".bird-pin.dummy")).toHaveLength(2);
+      expect(container.querySelectorAll(".bird-pin:not(.dummy)")).toHaveLength(0);
+      expect(screen.getByText(/ダミーデータです。実際の観察ではありません/)).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "ダミー（バトル用）" })).toHaveAttribute("aria-pressed", "true");
+    });
+
+    it("ダミーのピンには「ダミー」の札があり、タップすると、ダミーである旨・地点・いる可能性を表示する", async () => {
+      const { container } = render(<MapView points={[]} speciesLabel={label} withoutLocation={0} locate={locate} dummy={[dp({ likelihood: "中" })]} />);
+      fireEvent.click(screen.getByRole("button", { name: "ダミー（バトル用）" }));
+      expect(container.querySelector(".pin-dummy")).toHaveTextContent("ダミー");
+      fireEvent.click(container.querySelector(".bird-pin.dummy") as HTMLElement);
+      await waitFor(() => expect(container.querySelector(".leaflet-popup-content")).not.toBeNull());
+      const popup = container.querySelector(".leaflet-popup-content");
+      expect(popup).toHaveTextContent("（ダミー）スズメ");
+      expect(popup).toHaveTextContent("ダミーデータ（実際の観察ではありません）");
+      expect(popup).toHaveTextContent("ダミー地点A（水辺）・いる可能性: 中");
+    });
+
+    it("自分の記録へ戻すと、ダミーのピンと注記は消える", () => {
+      const { container } = render(<MapView points={[pt()]} speciesLabel={label} withoutLocation={0} locate={locate} dummy={[dp()]} />);
+      fireEvent.click(screen.getByRole("button", { name: "ダミー（バトル用）" }));
+      fireEvent.click(screen.getByRole("button", { name: "自分の記録" }));
+      expect(container.querySelectorAll(".bird-pin.dummy")).toHaveLength(0);
+      expect(screen.queryByText(/ダミーデータです/)).toBeNull();
+      expect(container.querySelectorAll(".bird-pin")).toHaveLength(1);
     });
   });
 });
