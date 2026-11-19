@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { allowedBehaviors, allowedPlaces } from "../domain/choices";
 import { HABITATS } from "../domain/habitat";
 import { STEP_TITLES } from "../domain/labels";
@@ -11,15 +11,17 @@ export function StepCards({ o }: { o: ObservationState }) {
   const {
     sizeLevel, setSizeLevel, colors, setColors, behaviors, setBehaviors, place, selectPlace,
     habitats, setHabitats, time, setTime, voice, setVoice, noVoice, setNoVoice,
-    locMsg, locBusy, locate, visibleSteps, stepDone,
+    locMsg, locBusy, locate, autoLocated, visibleSteps, stepDone,
   } = o;
   const stepsRef = useRef<HTMLDivElement>(null);
   const [rawIdx, setStepIdx] = useState(0);
+  const moved = useRef(false);
   // 出すカードが減ったとき（見えないを選んだ等）も、現在位置が枚数を超えないようにする
   const stepIdx = Math.min(rawIdx, visibleSteps.length - 1);
   const onStepsScroll = () => {
     const el = stepsRef.current;
     if (!el) return;
+    if (el.scrollLeft > 0 && !autoLocated) moved.current = true;
     const w = el.scrollWidth / visibleSteps.length;
     if (!(w > 0)) return;
     setStepIdx(Math.min(visibleSteps.length - 1, Math.max(0, Math.round(el.scrollLeft / w))));
@@ -29,6 +31,12 @@ export function StepCards({ o }: { o: ObservationState }) {
     el?.scrollTo?.({ left: i * (el.scrollWidth / visibleSteps.length), behavior: "smooth" });
     setStepIdx(i);
   };
+  // 現在地から環境を判定できたら、環境（1枚目）と時間帯（2枚目。自動で入る）は答え済みなので、3枚目から始める。
+  // 利用者が先にスライドしていたら、動かさない
+  useEffect(() => {
+    if (autoLocated && !moved.current) goStep(2);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- 判定できた瞬間にだけ動かす
+  }, [autoLocated]);
   const show = (step: number) => visibleSteps.includes(step);
   return (
     <>
@@ -59,6 +67,18 @@ export function StepCards({ o }: { o: ObservationState }) {
               {locMsg && <p className="hint">{locMsg}</p>}
             </section>
 
+            <section className="step" hidden={!show(6)}>
+              <h2>時間帯</h2>
+              <div className="chips">
+                {TIMES.map((t) => (
+                  <button key={t.v} className={time === t.v ? "chip on" : "chip"} aria-pressed={time === t.v} onClick={() => setTime(time === t.v ? undefined : t.v)}>
+                    <Emoji c={t.emoji} />
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            </section>
+
             <section className="step" hidden={!show(1)}>
               <h2>どこで見たか</h2>
               <div className="chips">
@@ -80,29 +100,6 @@ export function StepCards({ o }: { o: ObservationState }) {
                     {b.label}
                   </button>
                 ))}
-              </div>
-            </section>
-
-            <section className="step" hidden={!show(3)}>
-              <h2>鳴き声（オノマトペ）</h2>
-              <input
-                type="text"
-                value={voice}
-                disabled={noVoice}
-                placeholder="例: ホーホケキョ、ピーヒョロロ、チチチ"
-                onChange={(e) => setVoice(e.target.value)}
-              />
-              <div className="chips">
-                <button
-                  className={noVoice ? "chip on" : "chip"} aria-pressed={noVoice}
-                  onClick={() => {
-                    setNoVoice(!noVoice);
-                    setVoice("");
-                  }}
-                >
-                  <Emoji c="🔇" />
-                  鳴き声は聞こえなかった
-                </button>
               </div>
             </section>
 
@@ -133,15 +130,26 @@ export function StepCards({ o }: { o: ObservationState }) {
               </div>
             </section>
 
-            <section className="step" hidden={!show(6)}>
-              <h2>時間帯</h2>
+            <section className="step" hidden={!show(3)}>
+              <h2>鳴き声（オノマトペ）</h2>
+              <input
+                type="text"
+                value={voice}
+                disabled={noVoice}
+                placeholder="例: ホーホケキョ、ピーヒョロロ、チチチ"
+                onChange={(e) => setVoice(e.target.value)}
+              />
               <div className="chips">
-                {TIMES.map((t) => (
-                  <button key={t.v} className={time === t.v ? "chip on" : "chip"} aria-pressed={time === t.v} onClick={() => setTime(time === t.v ? undefined : t.v)}>
-                    <Emoji c={t.emoji} />
-                    {t.label}
-                  </button>
-                ))}
+                <button
+                  className={noVoice ? "chip on" : "chip"} aria-pressed={noVoice}
+                  onClick={() => {
+                    setNoVoice(!noVoice);
+                    setVoice("");
+                  }}
+                >
+                  <Emoji c="🔇" />
+                  鳴き声は聞こえなかった
+                </button>
               </div>
             </section>
           </div>

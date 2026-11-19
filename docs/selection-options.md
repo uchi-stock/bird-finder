@@ -142,16 +142,16 @@ flowchart LR
 ```mermaid
 flowchart LR
   S0["1. 周辺の環境"]
-  S1["2. どこで見たか"]
-  S2["3. 行動"]
-  S3["4. 鳴き声"]
+  S6["2. 時間帯"]
+  S1["3. どこで見たか"]
+  S2["4. 行動"]
   S4["5. 大きさ"]
   S5["6. 羽の色"]
-  S6["7. 時間帯"]
-  S0 --> S1 --> S2 --> S3 --> S4 --> S5 --> S6
+  S3["7. 鳴き声"]
+  S0 --> S6 --> S1 --> S2 --> S4 --> S5 --> S3
 ```
 
-![選択肢の図（rendered）](https://raw.githubusercontent.com/uchi-stock/bird-finder/docs-diagrams/latest/selection-options-3.png?1da8a258203ce41929821ab1932786317fe220f7)
+![選択肢の図（rendered）](https://raw.githubusercontent.com/uchi-stock/bird-finder/docs-diagrams/latest/selection-options-3.png?0def0b6d0e32391fde8e82ac0cf08c0c12bc6b0e)
 
 </details>
 
@@ -168,34 +168,34 @@ flowchart LR
   subgraph MODE_voice["🎵 鳴き声から"]
     direction LR
     M_voice_0["周辺の環境"]
-    M_voice_1["どこで見たか"]
-    M_voice_2["鳴き声"]
-    M_voice_3["時間帯"]
+    M_voice_1["時間帯"]
+    M_voice_2["どこで見たか"]
+    M_voice_3["鳴き声"]
     M_voice_0 --> M_voice_1 --> M_voice_2 --> M_voice_3
   end
   subgraph MODE_sight["👀 姿から"]
     direction LR
     M_sight_0["周辺の環境"]
-    M_sight_1["どこで見たか"]
-    M_sight_2["行動"]
-    M_sight_3["大きさ"]
-    M_sight_4["羽の色"]
-    M_sight_5["時間帯"]
+    M_sight_1["時間帯"]
+    M_sight_2["どこで見たか"]
+    M_sight_3["行動"]
+    M_sight_4["大きさ"]
+    M_sight_5["羽の色"]
     M_sight_0 --> M_sight_1 --> M_sight_2 --> M_sight_3 --> M_sight_4 --> M_sight_5
   end
   subgraph MODE_both["🎵👀 両方"]
     direction LR
     M_both_0["周辺の環境"]
-    M_both_1["どこで見たか"]
-    M_both_2["行動"]
-    M_both_3["鳴き声"]
+    M_both_1["時間帯"]
+    M_both_2["どこで見たか"]
+    M_both_3["行動"]
     M_both_4["大きさ"]
     M_both_5["羽の色"]
-    M_both_6["時間帯"]
+    M_both_6["鳴き声"]
     M_both_0 --> M_both_1 --> M_both_2 --> M_both_3 --> M_both_4 --> M_both_5 --> M_both_6
   end
 ```
 
-![選択肢の図（rendered）](https://raw.githubusercontent.com/uchi-stock/bird-finder/docs-diagrams/latest/selection-options-4.png?1da8a258203ce41929821ab1932786317fe220f7)
+![選択肢の図（rendered）](https://raw.githubusercontent.com/uchi-stock/bird-finder/docs-diagrams/latest/selection-options-4.png?0def0b6d0e32391fde8e82ac0cf08c0c12bc6b0e)
 
 </details>

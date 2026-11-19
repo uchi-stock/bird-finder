@@ -94,13 +94,13 @@ describe("behaviorsAfterPlaceChange", () => {
 });
 
 describe("入口ごとのカード（#60）", () => {
-  it("3つの入口があり、両方は全7枚", () => {
+  it("3つの入口があり、両方は全7枚。順序は 環境 → 時間帯 → 場所 → 行動 → 大きさ → 羽の色 → 鳴き声（#186）", () => {
     expect(ENTRY_MODES).toEqual(["voice", "sight", "both"]);
-    expect(ENTRY_STEPS.both).toEqual([0, 1, 2, 3, 4, 5, 6]);
+    expect(ENTRY_STEPS.both).toEqual([0, 6, 1, 2, 4, 5, 3]);
   });
   it("鳴き声からは行動・大きさ・羽の色を出さず、姿からは鳴き声を出さない。環境・場所・時間帯は共通", () => {
-    expect(ENTRY_STEPS.voice).toEqual([0, 1, 3, 6]);
-    expect(ENTRY_STEPS.sight).toEqual([0, 1, 2, 4, 5, 6]);
+    expect(ENTRY_STEPS.voice).toEqual([0, 6, 1, 3]);
+    expect(ENTRY_STEPS.sight).toEqual([0, 6, 1, 2, 4, 5]);
     for (const m of ENTRY_MODES) for (const common of [0, 1, 6]) expect(ENTRY_STEPS[m]).toContain(common);
   });
 });

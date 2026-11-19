@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { allowedBehaviors, allowedPlaces, appearanceKnown, behaviorsAfterPlaceChange, ENTRY_STEPS } from "../domain/choices";
+import { allowedBehaviors, allowedPlaces, appearanceKnown, behaviorsAfterPlaceChange, ENTRY_STEPS, impliedBehaviors } from "../domain/choices";
 import { hasAnyInput, identify, pickTop } from "../domain/scoring";
 import { timeSlotFromHour } from "../domain/time";
 import type { Behavior, Color, Habitat, Observation, Place, TimeSlot } from "../domain/types";
@@ -16,13 +16,16 @@ export function useObservation() {
   const [habitats, setHabitats] = useState<Habitat[]>([]);
   const [locMsg, setLocMsg] = useState("");
   const [locBusy, setLocBusy] = useState(false);
+  // アプリを開いたときの自動の現在地取得で、環境を判定できた（カードを、環境と時間帯の次から始めるため）
+  const [autoLocated, setAutoLocated] = useState(false);
   const [time, setTime] = useState<TimeSlot | undefined>(() => timeSlotFromHour(new Date().getHours()));
   const [voice, setVoice] = useState("");
   const [noVoice, setNoVoice] = useState(false);
 
-  // 見えない（声だけ）なら、姿に関する大きさ（4）・羽の色（5）は回答不要なので、カード自体を出さない
+  // 見えない（声だけ）なら、行動（2）・大きさ（4）・羽の色（5）は回答不要なので、カード自体を出さない。
+  // 行動は、場所から「鳴く」が決まる（判定には、その行動を使う）
   const seen = appearanceKnown(place);
-  const visibleSteps = ENTRY_STEPS.both.filter((step) => seen || (step !== 4 && step !== 5));
+  const visibleSteps = ENTRY_STEPS.both.filter((step) => seen || (step !== 2 && step !== 4 && step !== 5));
   const showBehavior = visibleSteps.includes(2);
   const showVoice = visibleSteps.includes(3);
   const showSize = visibleSteps.includes(4);
@@ -33,7 +36,7 @@ export function useObservation() {
     () => ({
       sizeLevel: showSize ? sizeLevel : undefined,
       colors: showColor ? colors : [],
-      behaviors: showBehavior ? behaviors : [],
+      behaviors: showBehavior ? behaviors : impliedBehaviors(place),
       place,
       // 検索は、いま見えている・聞こえている状況をもとにする。季節は、常に今の月から判定に使う
       month,
@@ -59,6 +62,7 @@ export function useObservation() {
     try {
       const found = await detectHabitats();
       setHabitats(found);
+      if (auto && found.length > 0) setAutoLocated(true);
       // 判定できたときの案内は出さない（ⓘのモーダルに載せた）。判定できなかったときだけ、次の行動を案内する
       setLocMsg(found.length > 0 ? "" : "周辺の環境を判定できませんでした。手動で選んでください。");
     } catch (e) {
@@ -69,10 +73,10 @@ export function useObservation() {
   };
 
   // アプリを開いた時点で現在地を取得し、周辺環境の初期値にする（StrictModeでの二重実行を防ぐ）
-  const autoLocated = useRef(false);
+  const autoLocateStarted = useRef(false);
   useEffect(() => {
-    if (autoLocated.current) return;
-    autoLocated.current = true;
+    if (autoLocateStarted.current) return;
+    autoLocateStarted.current = true;
     void locate(true);
   }, []);
 
@@ -116,7 +120,7 @@ export function useObservation() {
   return {
     sizeLevel, setSizeLevel, colors, setColors, behaviors, setBehaviors, place, selectPlace,
     habitats, setHabitats, time, setTime, voice, setVoice, noVoice, setNoVoice,
-    locMsg, locBusy, locate, seen, visibleSteps, results, inputForResults, stepDone, flying, reset,
+    locMsg, locBusy, locate, autoLocated, seen, visibleSteps, results, inputForResults, stepDone, flying, reset,
   };
 }
 

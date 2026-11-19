@@ -35,8 +35,8 @@ export function behaviorsDiagram(): string {
 /** 条件を入力するカードの流れ */
 export function flowDiagram(): string {
   const lines = ["flowchart LR"];
-  STEP_TITLES.forEach((t, i) => lines.push(`  S${i}["${i + 1}. ${t}"]`));
-  lines.push("  " + STEP_TITLES.map((_, i) => `S${i}`).join(" --> "));
+  ENTRY_STEPS.both.forEach((step, i) => lines.push(`  S${step}["${i + 1}. ${STEP_TITLES[step]}"]`));
+  lines.push("  " + ENTRY_STEPS.both.map((step) => `S${step}`).join(" --> "));
   return lines.join("\n");
 }
 

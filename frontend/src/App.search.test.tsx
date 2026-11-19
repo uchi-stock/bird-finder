@@ -27,11 +27,11 @@ describe("App: 基本表示", () => {
     await userEvent.click(chip("時間帯", "朝"));
     expect(screen.getByText(/1つ以上入力すると/)).toBeInTheDocument();
   });
-  it("入力の順序は 環境 → 場所 → 行動", async () => {
+  it("入力の順序は 環境 → 時間帯 → 場所 → 行動 → 大きさ → 羽の色 → 鳴き声（#186）", async () => {
     await renderApp();
     const order = screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent);
-    expect(order.indexOf("周辺の環境（複数可）")).toBeLessThan(order.indexOf("どこで見たか"));
-    expect(order.indexOf("どこで見たか")).toBeLessThan(order.indexOf("行動（複数可）"));
+    const titles = ["周辺の環境（複数可）", "時間帯", "どこで見たか", "行動（複数可）", "大きさ", "羽の色（複数可）", "鳴き声（オノマトペ）"];
+    expect(titles.map((t) => order.indexOf(t))).toEqual([...titles.keys()].map((i) => order.indexOf(titles[0]) + i));
   });
 });
 
@@ -163,11 +163,13 @@ describe("App: 行動の選択肢と絵文字", () => {
     await renderApp();
     expect(chips("行動")).toEqual(["泳ぐ", "水の中に立つ・歩く", "止まる・立つ・歩く", "鳴く・歌う", "採食する・つつく", "羽繕いする"]);
   });
-  it("見えない（声だけ）を選ぶと、鳴くが自動で選ばれる", async () => {
+  it("見えない（声だけ）を選ぶと、行動の欄は出さない。戻すと出る（#186）", async () => {
     await renderApp();
     await userEvent.click(chip("どこで見たか", "見えない（声だけ）"));
-    expect(chips("行動")).toEqual(["鳴く・歌う"]);
-    expect(chip("行動", "鳴く")).toHaveClass("on");
+    expect(screen.queryByRole("heading", { name: /^行動/ })).toBeNull();
+    await userEvent.click(chip("どこで見たか", "見えない（声だけ）")); // もう一度押して解除
+    expect(screen.getByRole("heading", { name: /^行動/ })).toBeInTheDocument();
+    expect(chip("行動", "鳴く")).not.toHaveClass("on");
   });
   it("地面の上では、泳ぐ・水の中に立つ・歩くを出さない", async () => {
     await renderApp();
@@ -196,6 +198,17 @@ describe("App: 行動の選択肢と絵文字", () => {
 });
 
 describe("App: 現在地から周辺環境", () => {
+  it("現在地から環境を判定できたら、環境と時間帯の次（3枚目）から始まる（#186）", async () => {
+    detectHabitats.mockResolvedValue(["waterside"]);
+    await renderApp();
+    expect(screen.getByRole("button", { name: "3. どこで見たか" })).toHaveClass("cur");
+    expect(screen.getByText(/3\/7 どこで見たか/)).toBeInTheDocument();
+  });
+  it("現在地を判定できなければ、1枚目から始まる", async () => {
+    detectHabitats.mockResolvedValue([]);
+    await renderApp();
+    expect(screen.getByRole("button", { name: "1. 周辺の環境" })).toHaveClass("cur");
+  });
   it("起動時に現在地から環境を判定して初期値にする", async () => {
     detectHabitats.mockResolvedValue(["waterside"]);
     await renderApp();
@@ -223,16 +236,16 @@ describe("App: 現在地から周辺環境", () => {
   });
 });
 
-describe("App: 見えない（声だけ）のとき、大きさ・羽の色は回答不要（#88・#99）", () => {
+describe("App: 見えない（声だけ）のとき、行動・大きさ・羽の色は回答不要（#88・#99・#186）", () => {
   const dots = () => screen.getAllByRole("button", { name: /^\d\. / }).map((b) => b.getAttribute("aria-label"));
-  it("選ぶと、大きさ・羽の色のカードを出さず（5枚になる）、入力済みの値は消える。別の場所へ変えると戻る", async () => {
+  it("選ぶと、行動・大きさ・羽の色のカードを出さず（4枚になる）、入力済みの値は消える。別の場所へ変えると戻る", async () => {
     await renderApp();
     await userEvent.click(chip("大きさ", "2"));
     await userEvent.click(chip("羽の色", "茶"));
     expect(chip("大きさ", "2")).toHaveAttribute("aria-pressed", "true");
     expect(dots()).toHaveLength(7);
     await userEvent.click(chip("どこで見たか", "見えない（声だけ）"));
-    expect(dots()).toEqual(["1. 周辺の環境", "2. どこで見たか", "3. 行動", "4. 鳴き声", "5. 時間帯"]);
+    expect(dots()).toEqual(["1. 周辺の環境", "2. 時間帯", "3. どこで見たか", "4. 鳴き声"]);
     expect(screen.queryByRole("heading", { name: /^大きさ/ })).toBeNull();
     expect(screen.queryByRole("heading", { name: /^羽の色/ })).toBeNull();
     expect(screen.queryByText(/不明として扱います/)).toBeNull(); // 案内も不要（カード自体が無い）
@@ -244,14 +257,14 @@ describe("App: 見えない（声だけ）のとき、大きさ・羽の色は�
   it("見えない（声だけ）を選ぶと、大きさ・羽の色のカードが減り、枚数が合う", async () => {
     await renderApp();
     await userEvent.click(chip("どこで見たか", "見えない（声だけ）"));
-    expect(dots()).toEqual(["1. 周辺の環境", "2. どこで見たか", "3. 行動", "4. 鳴き声", "5. 時間帯"]);
+    expect(dots()).toEqual(["1. 周辺の環境", "2. 時間帯", "3. どこで見たか", "4. 鳴き声"]);
   });
   it("現在位置の表示は、カードの枚数を超えない", async () => {
     await renderApp();
-    await userEvent.click(screen.getByRole("button", { name: "7. 時間帯" })); // 7枚目へ
-    await userEvent.click(screen.getByRole("button", { name: "2. どこで見たか" }));
+    await userEvent.click(screen.getByRole("button", { name: "7. 鳴き声" })); // 7枚目へ
+    await userEvent.click(screen.getByRole("button", { name: "3. どこで見たか" }));
     await userEvent.click(chip("どこで見たか", "見えない（声だけ）"));
-    expect(screen.getByText(/\d\/5 /)).toBeInTheDocument();
+    expect(screen.getByText(/\d\/4 /)).toBeInTheDocument();
   });
 });
 
@@ -301,15 +314,15 @@ describe("App: 条件の横スライド", () => {
     const dots = screen.getAllByRole("button", { name: /^\d\. / });
     expect(dots).toHaveLength(7);
     expect(dots[0]).toHaveClass("cur");
-    expect(dots[6]).toHaveClass("done"); // 時間帯は現在時刻で回答済み
+    expect(dots[1]).toHaveClass("done"); // 時間帯（2枚目）は現在時刻で回答済み
     await userEvent.click(chip("大きさ", "2"));
     expect(screen.getByRole("button", { name: "5. 大きさ" })).toHaveClass("done");
   });
   it("点をタップするとそのカードへ移動し、現在位置の表示が変わる", async () => {
     await renderApp();
-    await userEvent.click(screen.getByRole("button", { name: "3. 行動" }));
-    expect(screen.getByRole("button", { name: "3. 行動" })).toHaveClass("cur");
-    expect(screen.getByText(/3\/7 行動/)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "4. 行動" }));
+    expect(screen.getByRole("button", { name: "4. 行動" })).toHaveClass("cur");
+    expect(screen.getByText(/4\/7 行動/)).toBeInTheDocument();
   });
   it("スライドしたら、スクロール位置に応じて現在位置が変わる", async () => {
     await renderApp();
@@ -317,7 +330,7 @@ describe("App: 条件の横スライド", () => {
     Object.defineProperty(steps, "scrollWidth", { configurable: true, value: 700 });
     Object.defineProperty(steps, "scrollLeft", { configurable: true, value: 200 });
     fireEvent.scroll(steps);
-    expect(screen.getByRole("button", { name: "3. 行動" })).toHaveClass("cur");
+    expect(screen.getByRole("button", { name: "3. どこで見たか" })).toHaveClass("cur");
   });
   it("幅が取れない環境ではスクロールしても現在位置を変えない", async () => {
     await renderApp();
