@@ -8,7 +8,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { backgroundRatio, decide, filterCandidates, tooManyFailures } from "./photoScore.js";
-import { isFlying, flyingScore, poseName, POSE_LABELS } from "./poseScore.js";
+import { binaryFlyingScore, BINARY_LABELS, isFlying, flyingScore, poseName, POSE_LABELS } from "./poseScore.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const SPECIES_FILE = path.resolve(here, "../src/data/species.json");
@@ -61,7 +61,7 @@ async function measure(sharp, url) {
   try {
     const { data } = await sharp(buf).resize(SIZE, SIZE, { fit: "fill" }).greyscale().raw().toBuffer({ resolveWithObject: true });
     const pose = await classifyPose(buf);
-    return { ...backgroundRatio(new Uint8Array(data), SIZE, SIZE), flying: isFlying(pose), flyingScore: flyingScore(pose), pose: poseName(pose) };
+    return { ...backgroundRatio(new Uint8Array(data), SIZE, SIZE), flying: isFlying(pose), flyingScore: flyingScore(pose?.three), binaryScore: binaryFlyingScore(pose?.binary), pose: poseName(pose) };
   } catch {
     return null;
   }
@@ -73,7 +73,10 @@ async function main() {
   try {
     const { pipeline, RawImage } = await import("@huggingface/transformers");
     const clf = await pipeline("zero-shot-image-classification", "Xenova/clip-vit-base-patch32");
-    classifyPose = async (buf) => clf(await RawImage.fromBlob(new Blob([buf])), Object.values(POSE_LABELS));
+    classifyPose = async (buf) => {
+      const image = await RawImage.fromBlob(new Blob([buf]));
+      return { three: await clf(image, Object.values(POSE_LABELS)), binary: await clf(image, Object.values(BINARY_LABELS)) };
+    };
     console.log("姿勢の分類モデルを読み込みました");
   } catch (e) {
     console.warn(`姿勢の分類モデルを使えません（題名の語だけで除きます）: ${e.message}`);
@@ -115,7 +118,7 @@ async function main() {
     console.log(`${s.name_ja}: 候補${measured.length}件 / 基準 ${f(d.baseline?.ratio)} → ${d.action}${d.best ? ` ${f(d.best.ratio)}` : ""}`);
     // 姿勢の判定の確認用（飛ぶ確度。今の画像と、候補ごと）
     const now = existingMeasure ?? wikipediaMeasure;
-    console.log(`  今の姿: ${now?.pose ?? "—"}（飛ぶ確度 ${f(now?.flyingScore)}） / 候補の飛ぶ確度: ${measured.map((m) => f(m.flyingScore)).join(", ")}`);
+    console.log(`  今の姿: ${now?.pose ?? "—"}（飛ぶ確度 3択 ${f(now?.flyingScore)} / 2択 ${f(now?.binaryScore)}） / 候補の飛ぶ確度（2択）: ${measured.map((m) => f(m.binaryScore)).join(", ")}`);
   }
 
   const f = (v) => (v == null || !Number.isFinite(v) ? "—" : v.toFixed(2));
@@ -129,9 +132,9 @@ async function main() {
     "",
     "「今の姿」は、今の画像を分類した姿。「飛ぶ」の写真は、候補から除く・基準にしない（#157）。",
     "",
-    "| 鳥 | 今の画像 | 今の姿（飛ぶ確度） | 選んだ画像 | 基準→選択の比 | 結果 | 候補数（うち飛ぶ） |",
+    "| 鳥 | 今の画像 | 今の姿（飛ぶ確度 3択 / 2択） | 選んだ画像 | 基準→選択の比 | 結果 | 候補数（うち飛ぶ） |",
     "|---|---|---|---|---|---|---|",
-    ...rows.map((r) => `| ${r.s.name_ja} | ${img(r.existing?.thumbnail ?? r.baseUrl)} | ${r.nowMeasure?.pose ?? "—"}（${f(r.nowMeasure?.flyingScore)}） | ${r.best ? img(r.best.thumbnail) : "—"} | ${f(r.baseline?.ratio)} → ${f(r.best?.ratio)} | ${label[r.action]} | ${r.count}（${r.excludedFlying ?? 0}） |`),
+    ...rows.map((r) => `| ${r.s.name_ja} | ${img(r.existing?.thumbnail ?? r.baseUrl)} | ${r.nowMeasure?.pose ?? "—"}（${f(r.nowMeasure?.flyingScore)} / ${f(r.nowMeasure?.binaryScore)}） | ${r.best ? img(r.best.thumbnail) : "—"} | ${f(r.baseline?.ratio)} → ${f(r.best?.ratio)} | ${label[r.action]} | ${r.count}（${r.excludedFlying ?? 0}） |`),
   ];
   fs.writeFileSync(REPORT, lines.join("\n") + "\n");
 
