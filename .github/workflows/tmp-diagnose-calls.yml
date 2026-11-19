@@ -21,6 +21,7 @@ jobs:
           node-version: 26
       - name: 全種の音源候補を取得する
         run: |
+          status=0
           node --input-type=module -e '
             import fs from "node:fs";
             const species = JSON.parse(fs.readFileSync("frontend/src/data/species.json", "utf-8"));
@@ -29,15 +30,27 @@ jobs:
               gsrsearch: mode === "category" ? `filetype:audio incategory:"${sci}"` : `filetype:audio "${sci}"`,
               prop: "videoinfo|categories", cllimit: "max", viprop: "url|mime|derivatives|extmetadata|duration",
             });
+            // Wikimediaの利用規約（User-Agentに連絡先を含める）に沿う。間隔を空け、制限されたら待って再試行する
+            const UA = "bird-finder-diagnose/1.0 (https://github.com/uchi-stock/bird-finder; GitHub Actions one-off)";
+            const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+            const getJson = async (u) => {
+              for (let attempt = 1; attempt <= 4; attempt++) {
+                const res = await fetch(u, { headers: { "User-Agent": UA, "Accept": "application/json" } });
+                const text = await res.text();
+                try { return JSON.parse(text); } catch { await sleep(attempt * 5000); }
+              }
+              throw new Error("JSONを取得できません（制限の可能性）");
+            };
+            let failures = 0;
             const strip = (s) => (s ?? "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
             const lines = ["| 鳥 | 検索 | 順位 | ファイル | 秒 | ライセンス | カテゴリ | 説明 |", "|---|---|---|---|---|---|---|---|"];
             for (const s of species) {
               for (const mode of ["category", "text"]) {
                 let json;
                 try {
-                  const res = await fetch(url(s.scientific_name, mode), { headers: { "User-Agent": "bird-finder-diagnose/1.0 (GitHub Actions)" } });
-                  json = await res.json();
+                  json = await getJson(url(s.scientific_name, mode));
                 } catch (e) {
+                  failures++;
                   lines.push(`| ${s.name_ja} | ${mode} | - | 取得失敗: ${e.message} | | | | |`);
                   continue;
                 }
@@ -49,10 +62,13 @@ jobs:
                   const cats = (p.categories ?? []).map((c) => c.title.replace(/^Category:/, "")).slice(0, 6).join(" / ");
                   lines.push(`| ${s.name_ja} | ${mode} | ${p.index} | ${p.title.replace(/^File:/, "")} | ${Math.round(i.duration ?? 0)} | ${m.LicenseShortName?.value ?? ""} | ${cats} | ${strip(m.ImageDescription?.value).slice(0, 70)} |`);
                 }
-                await new Promise((r) => setTimeout(r, 300));
+                await sleep(1500);
               }
             }
             fs.writeFileSync("/tmp/calls.md", lines.join("\n") + "\n");
-          '
+            // 取得失敗が多いときは、成功にせず失敗にする（空の結果を「成功」と誤認しないため）
+            if (failures > species.length / 2) { console.error(`取得失敗: ${failures}件`); process.exitCode = 1; }
+          ' || status=$?
           # Job Summaryの内容はAPIから取得できないため、ジョブログにも同じ内容を出す
           tee -a "$GITHUB_STEP_SUMMARY" < /tmp/calls.md
+          exit "$status"
