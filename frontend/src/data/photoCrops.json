@@ -66,12 +66,6 @@
     "w": 0.7,
     "h": 0.884
   },
-  "Black-headed_Gull_by_Tisha_Mukherjee_02.jpg": {
-    "x": 0.24,
-    "y": 0.184,
-    "w": 0.527,
-    "h": 0.791
-  },
   "Blue_Rock-Thrush_by_Tisha_Mukherjee_05.jpg": {
     "x": 0.288,
     "y": 0.295,
@@ -185,9 +179,9 @@
     "w": 0.796,
     "h": 0.796
   },
-  "Ine_to_Agave_Brewery_(1).jpg": null,
   "Japanese_tit_in_Suita,_Osaka,_November_2016_-_683.jpg": null,
   "Japanese_white-eye_at_Tennōji_Park_in_Osaka,_January_2016_II.jpg": null,
+  "Lachmöwe_Chroicocephalus_ridibundus.jpg": null,
   "Landing_(5541929066).jpg": null,
   "Lanius_bucephalus_(15502062162).jpg": {
     "x": 0.294,
@@ -228,6 +222,7 @@
     "w": 0.485,
     "h": 0.728
   },
+  "Northern_Goshawk_ad_M2.jpg": null,
   "Oriental_Turtle_Dove_(Streptopelia_orientalis)_(52502770215).jpg": {
     "x": 0.374,
     "y": 0.169,
@@ -246,6 +241,13 @@
     "w": 0.306,
     "h": 0.46
   },
+  "Phalacrocorax_carbo_(39763297602).jpg": {
+    "x": 0.27,
+    "y": 0.156,
+    "w": 0.515,
+    "h": 0.755
+  },
+  "Pipistrellus_abramus.jpg": null,
   "Rock_doves_in_flight.jpg": {
     "x": 0.197,
     "y": 0.246,
@@ -253,12 +255,6 @@
     "h": 0.45
   },
   "Rose-ringed_parakeet_(Psittacula_krameri_borealis)_male_Jaipur_2.jpg": null,
-  "Schreibers_kleiner_Atlas_der_einheimischen_Vögel_(10572859893).jpg": {
-    "x": 0.087,
-    "y": 0.468,
-    "w": 0.791,
-    "h": 0.522
-  },
   "Spodiopsar_cineraceus_Higashi-hagoromo_station.jpg": null,
   "Tachybaptus_ruficollis_iraquensis,_Al_Jahra_Governorate,_Kuwait_1.jpg": {
     "x": 0.251,
@@ -266,7 +262,6 @@
     "w": 0.559,
     "h": 0.837
   },
-  "The_great_cormorant_with_silver_carp_fish.jpg": null,
   "The_Rose_Ringed_Parakeet_in_flight.jpg": {
     "x": 0.183,
     "y": 0.145,
