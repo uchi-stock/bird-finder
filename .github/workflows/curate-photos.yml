@@ -19,6 +19,9 @@ on:
       - ".github/workflows/curate-photos.yml"
       - "frontend/scripts/photoScore.js"
       - "frontend/scripts/poseScore.js"
+      - "frontend/scripts/qualityScore.js"
+      # 人が固定した写真を変えたとき
+      - "frontend/src/data/photoPins.json"
       - "frontend/scripts/curatePhotos.js"
   workflow_dispatch:
     inputs:

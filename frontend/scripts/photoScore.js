@@ -140,7 +140,8 @@ export function tooManyFailures(failed) {
 export function decide({ existing, existingMeasure, wikipediaMeasure, candidates }) {
   // 飛んでいる写真（画像の姿勢の判定。poseScore.js）は、1枚目（立ち姿・浮かぶ姿）に使わない（#157）。
   // 空を背景にした飛んでいる写真は、背景が単純で有利になるため、候補から外す。基準としても使わない
-  const notFlying = (m) => !m?.flying;
+  // 使えない写真（#171）: 飛んでいる写真に加えて、図版・動物がいない画像・獲物をくわえた姿（qualityScore.js）。同じく、候補から外し、基準にしない
+  const notFlying = (m) => !m?.flying && !m?.unsuitable;
   // 選び直し済みの写真も、いまの条件（ライセンス・題名・姿勢）を満たさなくなったら、使えないものとして扱う（条件を厳しくしたとき、自動で直る）
   const existingOk = isAllowedEntry(existing) && Boolean(existingMeasure) && existingMeasure.center >= MIN_CENTER && Number.isFinite(existingMeasure.ratio) && notFlying(existingMeasure);
   // Wikipediaの代表画像が飛んでいるなら、基準にしない（立ち姿の候補があれば、無条件で選ぶ）

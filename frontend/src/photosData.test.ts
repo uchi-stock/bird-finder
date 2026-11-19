@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import photosJson from "./data/photos.json";
+import pinsJson from "./data/photoPins.json";
 import speciesJson from "./data/species.json";
 
 // 写真の選び直しは、自動でPRになり、CIが通れば反映される。人が見なくても壊れたデータが入らないよう、中身を検査する
@@ -28,5 +29,26 @@ describe("photos.json（選び直した写真）", () => {
   });
   it("キーが重複していない（JSONとして読めている）", () => {
     expect(Object.keys(photos).length).toBe(new Set(Object.keys(photos)).size);
+  });
+});
+
+// 人が目で選んで固定した写真（frontend/scripts/curatePhotos.jsは、これを上書きしない）。photos.jsonへ反映され、同じ条件を満たす
+const pins = pinsJson as Record<string, { thumbnail?: string; pageUrl?: string; credit?: string; license?: string }>;
+
+describe("photoPins.json（固定した写真）", () => {
+  it("鳥の名前は実在し、photos.jsonの同じ鳥の写真と、同じ内容", () => {
+    for (const [name, p] of Object.entries(pins)) {
+      expect(names.has(name), name).toBe(true);
+      expect(photos[name], `${name}: photos.jsonへ反映されている`).toEqual(p);
+    }
+  });
+  it("Wikimediaの画像・説明ページのURLと、使えるライセンスを持ち、標本・図版・飛翔の題名ではない", () => {
+    for (const [name, p] of Object.entries(pins)) {
+      expect(p.thumbnail, `${name}: thumbnail`).toMatch(/^https:\/\/(upload|thumb)\.wikimedia\.org\//);
+      expect(p.pageUrl, `${name}: pageUrl`).toMatch(/^https:\/\/commons\.wikimedia\.org\//);
+      expect(p.license, `${name}: license`).toMatch(LICENSE);
+      const title = decodeURIComponent((p.pageUrl ?? "").split("/").pop() ?? "");
+      expect(title, `${name}: ${title}`).not.toMatch(EXCLUDED);
+    }
   });
 });
