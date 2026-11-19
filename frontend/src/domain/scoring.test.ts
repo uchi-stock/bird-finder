@@ -131,6 +131,18 @@ describe("表示する候補の絞り込み（pickTop）", () => {
     const r = pickTop(identify({ ...empty, onomatopoeia: "ゾゾゾゾ" }, species));
     expect(r).toEqual([]);
   });
+  it("大きさ7を指定すると、小さい鳥（スズメ）は、時間帯・季節・環境が一致しても出ない（#189）", () => {
+    const obs: Observation = { ...empty, sizeLevel: 7, month: 6, time: "morning", habitats: ["urban", "open"] };
+    const names = show(obs);
+    expect(names).not.toContain("スズメ");
+    const sizeOf = (n: string) => species.find((s) => s.name_ja === n)!.size_level;
+    for (const n of names) expect(Math.abs(sizeOf(n) - 7), n).toBeLessThan(3);
+    // スコア計算は変えない: スズメは、候補の並びには残る（矛盾として減点される）
+    expect(identify(obs, species).find((c) => c.species.name_ja === "スズメ")?.conflicting).toContain("大きさ");
+  });
+  it("大きさの指定が無ければ、小さい鳥も出る", () => {
+    expect(show({ ...empty, month: 6, time: "morning", habitats: ["urban"] })).toContain("スズメ");
+  });
   it("典型入力では期待する鳥が3件に入る（アオサギ）", () => {
     expect(show({ ...empty, sizeLevel: 7, colors: ["gray"], place: "water" })).toContain("アオサギ");
   });

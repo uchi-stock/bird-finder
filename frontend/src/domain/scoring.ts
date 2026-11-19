@@ -244,7 +244,13 @@ export function hasAnyInput(obs: Observation): boolean {
 export const MAX_SHOWN = 4;
 export const MIN_FIT = 0.5;
 
-/** 当てはまりが弱い鳥は表示せず、上位MAX_SHOWN件まで返す（0〜4件）。除外は表示上のみで、スコア計算には影響しない */
+/**
+ * 当てはまりが弱い鳥は表示せず、上位MAX_SHOWN件まで返す（0〜4件）。除外は表示上のみで、スコア計算には影響しない。
+ * 大きさが3段階以上違う鳥（矛盾）は、ほかの項目（季節・時間帯など、自動で入るもの）が一致しても、表示しない（#189）。
+ * 大きさは、見た目で最も確かな手がかりであり、減点だけでは、ほかの一致に打ち消されるため
+ */
 export function pickTop(sorted: Candidate[]): Candidate[] {
-  return sorted.filter((c) => c.fit >= MIN_FIT && c.matching.some((m) => m !== "地域でよく見られる")).slice(0, MAX_SHOWN);
+  return sorted
+    .filter((c) => c.fit >= MIN_FIT && !c.conflicting.includes("大きさ") && c.matching.some((m) => m !== "地域でよく見られる"))
+    .slice(0, MAX_SHOWN);
 }
