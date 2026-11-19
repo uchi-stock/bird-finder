@@ -2,6 +2,7 @@ import { act, fireEvent, screen, waitFor, within } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getCoords, detail, openDetail, renderApp, setupAppTests } from "./testApp";
 import { saveHome } from "./storage";
+import { HELP_NOTES } from "./components/HelpNotes";
 
 vi.mock("./callAudio", async () => (await import("./testApp")).callAudioMock);
 vi.mock("./location", async () => (await import("./testApp")).locationMock);
@@ -28,16 +29,15 @@ async function catchUguisu() {
 }
 
 describe("App: 捕まえたら必ずみんなに共有する（#46・#160）", () => {
-  it("共有のチェックボックスは無い。捕まえる前から、ぼかし・自宅の除外・取り消せない・期限なく保存を、常に明示する", async () => {
+  it("共有のチェックボックスは無い。長い注意文は詳細に出さず、使い方と注意に集約する（#174）", async () => {
     await renderApp();
     fireEvent.change(screen.getByPlaceholderText(/ホーホケキョ/), { target: { value: "ホーホケキョ" } });
     await openDetail();
     expect(within(detail()).queryByRole("checkbox")).toBeNull();
-    const note = within(detail()).getByText(/あとから取り消せません/);
-    expect(note).toHaveTextContent("捕まえると");
-    expect(note).toHaveTextContent("約1kmにぼかした位置");
-    expect(note).toHaveTextContent("自宅の周辺（約2km）は共有しません");
-    expect(note).toHaveTextContent("期限なく保存されます");
+    expect(within(detail()).queryByText(/あとから取り消せません/)).toBeNull();
+    expect(HELP_NOTES.join("")).toContain("約1kmにぼかし");
+    expect(HELP_NOTES.join("")).toContain("自宅の周辺（約2km）は共有しません");
+    expect(HELP_NOTES.join("")).toContain("期限なく保存されます");
   });
   it("捕まえると、種・日付・ぼかした位置だけを必ず送る（正確な位置は送らない）", async () => {
     getCoords.mockResolvedValue(EXACT);
