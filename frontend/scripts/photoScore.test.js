@@ -177,6 +177,29 @@ describe("decide: 飛んでいる写真を、1枚目に使わない（#157。ユ
   });
 });
 
+describe("decide: 図版・動物がいない画像・獲物をくわえた姿も、使えない写真として、1枚目に使わない（#171）", () => {
+  const m = (ratio, unsuitable = false) => ({ ratio, center: 20, unsuitable });
+  const cand = (id, ratio, unsuitable = false) => ({ id, ratio, center: 20, width: 1000, unsuitable });
+  const existing = { thumbnail: "https://u/old.jpg", pageUrl: "https://commons.wikimedia.org/wiki/File:Plate.jpg", license: "CC BY-SA 4.0" };
+
+  it("選び直し済みの写真が、使えない写真（図版など）なら、外すか、使える候補へ差し替える", () => {
+    expect(decide({ existing, existingMeasure: m(0.2, true), wikipediaMeasure: m(1.0), candidates: [] }).action).toBe("drop");
+    const d = decide({ existing, existingMeasure: m(0.2, true), wikipediaMeasure: m(1.0), candidates: [cand("good", 0.5)] });
+    expect(d.action).toBe("replace");
+    expect(d.best.id).toBe("good");
+  });
+  it("使えない候補は、背景がどれだけ単純でも、選ばない", () => {
+    const d = decide({ existing: undefined, existingMeasure: null, wikipediaMeasure: m(1.0), candidates: [cand("plate", 0.05, true), cand("photo", 0.6)] });
+    expect(d.best.id).toBe("photo");
+    expect(decide({ existing: undefined, existingMeasure: null, wikipediaMeasure: m(1.0), candidates: [cand("plate", 0.05, true)] }).action).toBe("none");
+  });
+  it("Wikipediaの代表画像が使えない写真（建物など）なら、基準にしない。使える候補があれば、無条件で選ぶ", () => {
+    expect(decide({ existing: undefined, existingMeasure: null, wikipediaMeasure: m(0.5), candidates: [cand("a", 0.6)] }).action).toBe("none");
+    const d = decide({ existing: undefined, existingMeasure: null, wikipediaMeasure: m(0.5, true), candidates: [cand("a", 0.6)] });
+    expect(d.action).toBe("replace");
+  });
+});
+
 describe("tooManyFailures（障害時に書き換えない）", () => {
   it("検索に失敗した鳥が、上限を超えたら true", () => {
     expect(tooManyFailures(0)).toBe(false);

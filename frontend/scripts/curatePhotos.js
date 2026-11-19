@@ -9,10 +9,13 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { backgroundRatio, decide, filterCandidates, tooManyFailures } from "./photoScore.js";
 import { binaryFlyingScore, BINARY_LABELS, isFlying, flyingScore, poseName, POSE_LABELS } from "./poseScore.js";
+import { isUnsuitable, QUALITY_LABELS, scoreOf, unsuitableReason } from "./qualityScore.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const SPECIES_FILE = path.resolve(here, "../src/data/species.json");
 const PHOTOS_FILE = path.resolve(here, "../src/data/photos.json");
+// 人が目で選んで固定した写真（鳥の和名 → 写真）。自動の選び直しで、上書きしない
+const PINS_FILE = path.resolve(here, "../src/data/photoPins.json");
 const REPORT = process.env.REPORT ?? "curate-report.md";
 // 外部サービスへ負荷をかけないよう、連絡先を含まない一般的な名前で、間隔を空けて取得する
 const UA = "bird-finder-photo-curation/1.0 (+https://github.com/uchi-stock/bird-finder)";
@@ -61,7 +64,10 @@ async function measure(sharp, url) {
   try {
     const { data } = await sharp(buf).resize(SIZE, SIZE, { fit: "fill" }).greyscale().raw().toBuffer({ resolveWithObject: true });
     const pose = await classifyPose(buf);
-    return { ...backgroundRatio(new Uint8Array(data), SIZE, SIZE), flying: isFlying(pose), flyingScore: flyingScore(pose?.three), binaryScore: binaryFlyingScore(pose?.binary), pose: poseName(pose) };
+    const quality = pose?.quality
+      ? { photo: scoreOf(pose.quality.photo, QUALITY_LABELS.photo[0]), animal: scoreOf(pose.quality.animal, QUALITY_LABELS.animal[0]), prey: scoreOf(pose.quality.prey, QUALITY_LABELS.prey[0]) }
+      : null;
+    return { ...backgroundRatio(new Uint8Array(data), SIZE, SIZE), flying: isFlying(pose), flyingScore: flyingScore(pose?.three), binaryScore: binaryFlyingScore(pose?.binary), pose: poseName(pose), quality, unsuitable: isUnsuitable(quality), unsuitableReason: unsuitableReason(quality) };
   } catch {
     return null;
   }
@@ -75,7 +81,9 @@ async function main() {
     const clf = await pipeline("zero-shot-image-classification", "Xenova/clip-vit-base-patch32");
     classifyPose = async (buf) => {
       const image = await RawImage.fromBlob(new Blob([buf]));
-      return { three: await clf(image, Object.values(POSE_LABELS)), binary: await clf(image, Object.values(BINARY_LABELS)) };
+      const quality = {};
+      for (const [k, labels] of Object.entries(QUALITY_LABELS)) quality[k] = await clf(image, labels);
+      return { three: await clf(image, Object.values(POSE_LABELS)), binary: await clf(image, Object.values(BINARY_LABELS)), quality };
     };
     console.log("姿勢の分類モデルを読み込みました");
   } catch (e) {
@@ -86,9 +94,17 @@ async function main() {
   const targets = only.length ? species.filter((s) => only.includes(s.species_id)) : species;
   const photos = fs.existsSync(PHOTOS_FILE) ? JSON.parse(fs.readFileSync(PHOTOS_FILE, "utf8")) : {};
   const rows = [];
+  const pins = fs.existsSync(PINS_FILE) ? JSON.parse(fs.readFileSync(PINS_FILE, "utf8")) : {};
 
   let failed = 0;
   for (const s of targets) {
+    // 人が目で選んで固定した写真は、自動の選び直しで、上書きしない（#171）
+    if (pins[s.name_ja]) {
+      photos[s.name_ja] = pins[s.name_ja];
+      rows.push({ s, baseUrl: null, existing: pins[s.name_ja], action: "pinned", baseline: null, best: null, count: 0 });
+      console.log(`${s.name_ja}: 固定した写真（選び直さない）`);
+      continue;
+    }
     const summary = await get(`https://ja.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(s.name_ja)}`);
     const baseUrl = summary?.thumbnail?.source;
     const wikipediaMeasure = baseUrl ? await measure(sharp, baseUrl) : null;
@@ -118,12 +134,13 @@ async function main() {
     console.log(`${s.name_ja}: 候補${measured.length}件 / 基準 ${f(d.baseline?.ratio)} → ${d.action}${d.best ? ` ${f(d.best.ratio)}` : ""}`);
     // 姿勢の判定の確認用（飛ぶ確度。今の画像と、候補ごと）
     const now = existingMeasure ?? wikipediaMeasure;
+    console.log(`  写真の質（今の画像）: 写真か ${f(now?.quality?.photo)} / 動物か ${f(now?.quality?.animal)} / 獲物 ${f(now?.quality?.prey)}${now?.unsuitableReason ? ` → ${now.unsuitableReason}` : ""}`);
     console.log(`  今の姿: ${now?.pose ?? "—"}（飛ぶ確度 3択 ${f(now?.flyingScore)} / 2択 ${f(now?.binaryScore)}） / 候補の飛ぶ確度（2択）: ${measured.map((m) => f(m.binaryScore)).join(", ")}`);
   }
 
   const f = (v) => (v == null || !Number.isFinite(v) ? "—" : v.toFixed(2));
   const img = (u) => (u ? `<img src="${u}" width="110">` : "—");
-  const label = { replace: "差し替え", keep: "選び直し済みのまま", drop: "選び直しを外した（Wikipediaの画像へ戻る）", none: "今のまま", failed: "検索に失敗（今のまま）" };
+  const label = { replace: "差し替え", keep: "選び直し済みのまま", drop: "選び直しを外した（Wikipediaの画像へ戻る）", none: "今のまま", failed: "検索に失敗（今のまま）", pinned: "固定した写真（選び直さない）" };
   const changed = rows.filter((r) => r.action === "replace" || r.action === "drop").length;
   const lines = [
     "### 写真の選び直し（背景が単純な写真）",
@@ -134,7 +151,7 @@ async function main() {
     "",
     "| 鳥 | 今の画像 | 今の姿（飛ぶ確度 3択 / 2択） | 選んだ画像 | 基準→選択の比 | 結果 | 候補数（うち飛ぶ） |",
     "|---|---|---|---|---|---|---|",
-    ...rows.map((r) => `| ${r.s.name_ja} | ${img(r.existing?.thumbnail ?? r.baseUrl)} | ${r.nowMeasure?.pose ?? "—"}（${f(r.nowMeasure?.flyingScore)} / ${f(r.nowMeasure?.binaryScore)}） | ${r.best ? img(r.best.thumbnail) : "—"} | ${f(r.baseline?.ratio)} → ${f(r.best?.ratio)} | ${label[r.action]} | ${r.count}（${r.excludedFlying ?? 0}） |`),
+    ...rows.map((r) => `| ${r.s.name_ja} | ${img(r.existing?.thumbnail ?? r.baseUrl)} | ${r.nowMeasure?.pose ?? "—"}（${f(r.nowMeasure?.flyingScore)} / ${f(r.nowMeasure?.binaryScore)}）${r.nowMeasure?.unsuitableReason ? ` ⚠${r.nowMeasure.unsuitableReason}` : ""} | ${r.best ? img(r.best.thumbnail) : "—"} | ${f(r.baseline?.ratio)} → ${f(r.best?.ratio)} | ${label[r.action]} | ${r.count}（${r.excludedFlying ?? 0}） |`),
   ];
   fs.writeFileSync(REPORT, lines.join("\n") + "\n");
 
