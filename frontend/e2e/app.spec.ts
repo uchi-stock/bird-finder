@@ -38,6 +38,10 @@ for (const size of SIZES) {
       if (size.height >= 800) expect(fit).toBe(true);
       expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(0);
       expect(await page.locator(".results li").count()).toBe(4);
+      // サムネイルは、画像を欠けさせずに全体を収める（#137）
+      const fits = await page.locator(".results li .photo img").evaluateAll((els) => els.map((el) => getComputedStyle(el).objectFit));
+      expect(fits.length).toBeGreaterThan(0);
+      expect(fits.every((f) => f === "contain")).toBe(true);
       expect(await page.locator(".results li").count()).toBeGreaterThan(0);
       await captureScreenshot(page, testInfo, `${size.name}-2-results`, `候補の表示（${size.name}）`, { fullPage: false });
       await page.click("button[aria-label='7. 時間帯']");
@@ -128,6 +132,8 @@ for (const size of SIZES) {
         const box = await b.boundingBox();
         expect(box && box.width >= 44 && box.height >= 44).toBe(true);
       }
+      // クイズの選択肢の写真も、欠けさせずに全体を収める（#137）
+      expect(await group.locator("img").first().evaluate((el) => getComputedStyle(el).objectFit)).toBe("contain");
       expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBe(0);
       await captureScreenshot(page, testInfo, `${size.name}-9-quiz-situation`, `状況のクイズ（${size.name}）`, { fullPage: false });
       for (let i = 0; i < 10; i++) {
