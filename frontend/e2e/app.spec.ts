@@ -114,6 +114,31 @@ for (const size of SIZES) {
       expect(errors).toEqual([]);
     });
 
+    test("クイズ（状況）: 手がかりと4枚の写真が出て、1ラウンド（10問）遊べる。横スクロールは出ない", async ({ page }, testInfo) => {
+      const errors: string[] = [];
+      page.on("pageerror", (e) => errors.push(e.message));
+      await openApp(page);
+      await page.getByRole("button", { name: /クイズ/ }).click();
+      await page.getByRole("button", { name: /状況を読んで、写真から選ぶ/ }).click();
+      await expect(page.getByRole("heading", { name: "この状況にあてはまる鳥は？" })).toBeVisible();
+      await expect(page.locator(".quiz-clues li")).toHaveCount(3);
+      const group = page.getByRole("group", { name: "写真の選択肢" });
+      await expect(group.getByRole("button")).toHaveCount(4);
+      for (const b of await group.getByRole("button").all()) {
+        const box = await b.boundingBox();
+        expect(box && box.width >= 44 && box.height >= 44).toBe(true);
+      }
+      expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBe(0);
+      await captureScreenshot(page, testInfo, `${size.name}-9-quiz-situation`, `状況のクイズ（${size.name}）`, { fullPage: false });
+      for (let i = 0; i < 10; i++) {
+        await group.getByRole("button").first().tap();
+        if (i === 0) await captureScreenshot(page, testInfo, `${size.name}-9-quiz-situation-answer`, `状況のクイズの回答後（${size.name}）`, { fullPage: false });
+        await page.getByRole("button", { name: i < 9 ? "次へ" : "結果を見る" }).tap();
+      }
+      await expect(page.getByRole("heading", { name: "結果" })).toBeVisible();
+      expect(errors).toEqual([]);
+    });
+
     test("クイズ（鳴き声）: 名前は出ず、鳴き声は自動で再生され、再生ボタンで聞き直せて、1ラウンド（10問）遊べる", async ({ page }, testInfo) => {
       const errors: string[] = [];
       page.on("pageerror", (e) => errors.push(e.message));

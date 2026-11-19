@@ -251,3 +251,33 @@ describe("App: クイズ（鳴き声を聞いて、写真から選ぶ）", () =>
     expect(typeof stored.bestCall).toBe("number");
   });
 });
+
+describe("App: クイズ（状況を読んで、写真から選ぶ）（#128）", () => {
+  beforeEach(() => {
+    vi.useRealTimers();
+  });
+  const startSituation = async () => {
+    await openQuiz();
+    await userEvent.click(screen.getByRole("button", { name: /状況を読んで、写真から選ぶ/ }));
+    await screen.findByRole("group", { name: "写真の選択肢" });
+  };
+  it("名前は出さず、手がかり3つと4枚の写真が出る。回答後に決め手と正解が出る。音は使わない", async () => {
+    await startSituation();
+    expect(screen.getByRole("heading", { level: 2 }).textContent).toBe("この状況にあてはまる鳥は？");
+    expect(document.querySelectorAll(".quiz-clues li")).toHaveLength(3);
+    expect(choices()).toHaveLength(4);
+    expect(playAudio).not.toHaveBeenCalled();
+    await answerFirst();
+    expect(screen.getByText(/決め手:/)).toBeInTheDocument();
+    expect(screen.getByText(/すべてにあてはまります/)).toBeInTheDocument();
+  });
+  it("1ラウンド（10問）遊べて、状況の成績が保存される", async () => {
+    await startSituation();
+    for (let i = 0; i < 10; i++) {
+      await answerFirst();
+      await userEvent.click(screen.getByRole("button", { name: nextLabel(i) }));
+    }
+    expect(screen.getByText(/\/ 10 問正解/)).toBeInTheDocument();
+    expect(JSON.parse(localStorage.getItem("bird-finder:quiz:v1") ?? "{}")).toHaveProperty("bestSituation");
+  });
+});

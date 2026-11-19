@@ -2,8 +2,8 @@ import type { Species } from "./types";
 
 // クイズの出題と選択肢の生成（UI非依存の純粋関数）。乱数は、シードを渡せる形にして、テストで再現できるようにする
 
-/** 問題の種類: 名前を見て写真から選ぶ／鳴き声を聞いて写真から選ぶ */
-export type QuizKind = "name" | "call";
+/** 問題の種類: 名前を見て写真から選ぶ／鳴き声を聞いて写真から選ぶ／状況を読んで写真から選ぶ */
+export type QuizKind = "name" | "call" | "situation";
 
 export interface QuizQuestion {
   kind: QuizKind;
@@ -11,6 +11,8 @@ export interface QuizQuestion {
   answerId: string;
   /** 選択肢の鳥のID（正解を1つ含む。並びはシャッフル済み） */
   choiceIds: string[];
+  /** 状況の問題で出す手がかり（例「季節: 冬」）。正解の鳥は、すべてにあてはまる */
+  clues?: string[];
 }
 
 export type Rng = () => number;
@@ -27,7 +29,7 @@ export function seededRng(seed: number): Rng {
   };
 }
 
-function shuffle<T>(items: readonly T[], rng: Rng): T[] {
+export function shuffle<T>(items: readonly T[], rng: Rng): T[] {
   const a = [...items];
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(rng() * (i + 1));
