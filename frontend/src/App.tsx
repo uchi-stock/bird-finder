@@ -30,7 +30,7 @@ export function App() {
   const { collection, sightings, mapPoints, onCatch, shareSighting } = useCollection();
   const shared = useSharedSightings();
   const o = useObservation();
-  const { now, onPlay, isActive } = useCallPlayer();
+  const { now, onPlay, isActive, stop } = useCallPlayer();
   const online = useOnline();
 
   return (
@@ -54,7 +54,7 @@ export function App() {
       ) : (
         <>
           <StepCards o={o} />
-          <ResultList results={o.results} inputForResults={o.inputForResults} flying={o.flying} reset={o.reset} now={now} onPlay={onPlay} isActive={isActive} collection={collection} onCatch={onCatch} onShare={shareSighting} />
+          <ResultList results={o.results} inputForResults={o.inputForResults} flying={o.flying} reset={o.reset} now={now} onPlay={onPlay} onStop={stop} isActive={isActive} collection={collection} onCatch={onCatch} onShare={shareSighting} />
         </>
       )}
       <nav className="tabbar" aria-label="画面の切り替え">

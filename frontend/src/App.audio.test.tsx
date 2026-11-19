@@ -1,7 +1,7 @@
 import { act, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { detectHabitats, usePhoto, fetchCallAudio, playAudio, stopAudio, unlockAudio, chip, firstCard, renderApp, renderAppNoWait, setupAppTests } from "./testApp";
+import { detectHabitats, usePhoto, fetchCallAudio, playAudio, stopAudio, unlockAudio, chip, detail, firstCard, renderApp, renderAppNoWait, setupAppTests } from "./testApp";
 
 vi.mock("./callAudio", async () => (await import("./testApp")).callAudioMock);
 vi.mock("./location", async () => (await import("./testApp")).locationMock);
@@ -28,6 +28,29 @@ describe("App: 鳥をタップで鳴き声を再生", () => {
     fireEvent.click(firstCard());
     expect((await screen.findAllByText(/音源を探しています/))[0]).toBeInTheDocument();
     await act(async () => resolve(null));
+  });
+  it("詳細を閉じると、再生が止まる（#133）", async () => {
+    await renderApp();
+    fireEvent.click(firstCard()); // 鳥をタップすると、詳細が開き、鳴き声が再生される
+    await waitFor(() => expect(detail()).not.toBeNull());
+    await waitFor(() => expect(playAudio).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(within(detail()).getAllByText(/もう一度タップで停止/).length).toBeGreaterThan(0));
+    stopAudio.mockClear();
+    fireEvent.click(within(detail()).getByRole("button", { name: "閉じる" }));
+    expect(detail()).toBeNull();
+    expect(stopAudio).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(screen.queryAllByText(/もう一度タップで停止/)).toHaveLength(0));
+  });
+  it("音源を探している最中に詳細を閉じると、あとから再生が始まらない（#133）", async () => {
+    let resolve!: (v: unknown) => void;
+    fetchCallAudio.mockReturnValue(new Promise((r) => (resolve = r)));
+    await renderApp();
+    fireEvent.click(firstCard());
+    await waitFor(() => expect(detail()).not.toBeNull());
+    expect((await screen.findAllByText(/音源を探しています/))[0]).toBeInTheDocument();
+    fireEvent.click(within(detail()).getByRole("button", { name: "閉じる" }));
+    await act(async () => resolve({ src: "https://u/late.mp3", pageUrl: "https://c/File:late", title: "late.ogg" }));
+    expect(playAudio).not.toHaveBeenCalled();
   });
   it("もう一度タップすると停止する", async () => {
     await renderApp();
@@ -103,25 +126,27 @@ describe("App: タップで再生と同時に画像を拡大", () => {
     await waitFor(() => expect(within(document.querySelector(".lightbox") as HTMLElement).getAllByText(/もう一度タップで停止/).length).toBeGreaterThan(0));
     expect(within(document.querySelector(".lightbox") as HTMLElement).getByText("写真なし")).toBeInTheDocument();
   });
-  it("拡大表示をタップすると閉じるが、音声は再生を続ける", async () => {
+  it("拡大表示を閉じると、再生も止まる（背景のタップでも）（#133）", async () => {
     usePhoto.mockReturnValue(photo);
     await renderApp();
     fireEvent.click(firstCard());
     await waitFor(() => expect(document.querySelector(".lightbox")).not.toBeNull());
+    await waitFor(() => expect(playAudio).toHaveBeenCalledTimes(1));
+    stopAudio.mockClear();
     fireEvent.click(document.querySelector(".lightbox") as HTMLElement);
     expect(document.querySelector(".lightbox")).toBeNull();
-    expect(stopAudio).not.toHaveBeenCalled();
-    expect(screen.getAllByText(/もう一度タップで停止/).length).toBeGreaterThan(0);
+    expect(stopAudio).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(screen.queryAllByText(/もう一度タップで停止/)).toHaveLength(0));
   });
-  it("再生中の鳥をもう一度タップすると、停止するだけで拡大しない", async () => {
+  it("閉じたあとに同じ鳥をもう一度タップすると、また再生して拡大する", async () => {
     usePhoto.mockReturnValue(photo);
     await renderApp();
     fireEvent.click(firstCard());
     await waitFor(() => expect(document.querySelector(".lightbox")).not.toBeNull());
     fireEvent.click(document.querySelector(".lightbox") as HTMLElement);
     fireEvent.click(firstCard());
-    expect(stopAudio).toHaveBeenCalled();
-    expect(document.querySelector(".lightbox")).toBeNull();
+    await waitFor(() => expect(document.querySelector(".lightbox")).not.toBeNull());
+    await waitFor(() => expect(playAudio).toHaveBeenCalledTimes(2));
   });
   it("別の鳥をタップすると、拡大も再生もそちらに切り替わる", async () => {
     usePhoto.mockReturnValue(photo);
