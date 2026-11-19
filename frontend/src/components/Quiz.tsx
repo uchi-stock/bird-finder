@@ -169,6 +169,25 @@ export function Quiz() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- 問題が変わったときだけ取得する（questionはindexとroundから決まる）
   }, [phase, kind, index, round, loadAudio]);
 
+  // 名前・状況のクイズ: 正解の鳥の音源を先読みし、正解したら鳴き声を再生する（#173）。問題が変わったら、再生を止める
+  useEffect(() => {
+    if (phase !== "playing" || kind === "call" || !question) return;
+    let alive = true;
+    setAudio(undefined);
+    setPlaying(false);
+    setPlayFailed(false);
+    setAutoplayed(false);
+    void loadAudio(question.answerId).then((a) => {
+      if (alive) setAudio(a); // 見つからなければnull（鳴き声なしで、正解の表示はそのまま）
+    });
+    for (const q of round.slice(index + 1, index + 3)) void loadAudio(q.answerId);
+    return () => {
+      alive = false;
+      stopAudio();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- 問題が変わったときだけ取得する（questionはindexとroundから決まる）
+  }, [phase, kind, index, round, loadAudio]);
+
   // 名前のクイズ: 次の問題の写真を先読みして、表示のちらつき・待ち時間を抑える
   useEffect(() => {
     if (phase !== "playing") return;
@@ -202,11 +221,38 @@ export function Quiz() {
     setPicked(id);
     setNote("");
     setAnswered((n) => n + 1);
-    if (id === question.answerId) setScore((n) => n + 1);
-    else setMissed((m) => [...m, question.answerId]);
+    if (id === question.answerId) {
+      setScore((n) => n + 1);
+      // 名前・状況のクイズは、正解したら、その鳥の鳴き声を再生する（#173）。
+      // iOS対策: 解錠は、回答のタップの同期処理内で行い、音源の取得（awaitのあと）で再生する。
+      // 鳴き声のクイズは、問題で再生しているため、ここでは再生しない
+      if (kind !== "call") {
+        unlockAudio();
+        void playCorrect(question.answerId);
+      }
+    } else setMissed((m) => [...m, question.answerId]);
+  };
+
+  // 正解した鳥の鳴き声を再生する。音源が無い・再生できない環境でも、例外を投げず、クイズの進行を妨げない。
+  // 問題が変わった（次へ）あとに、遅れて始まらないよう、問題ごとの番号で確かめる
+  const playToken = useRef(0);
+  const playCorrect = async (id: string) => {
+    const token = ++playToken.current;
+    const a = await loadAudio(id);
+    if (!a || token !== playToken.current) return;
+    setPlaying(true);
+    try {
+      await playAudio(a.src, () => {
+        if (token === playToken.current) setPlaying(false);
+      });
+      if (token === playToken.current) setAutoplayed(true);
+    } catch {
+      if (token === playToken.current) setPlaying(false); // 自動再生の制限など。ボタンで聞ける
+    }
   };
 
   const next = () => {
+    playToken.current++; // 正解の鳴き声の再生が、次の問題へ遅れて始まらないようにする
     // 次の問題の自動再生のため、このタップで改めて解錠する
     if (kind === "call") unlockAudio();
     if (answered < limit && index + 1 < round.length) {
@@ -375,7 +421,12 @@ export function Quiz() {
           <button type="button" className="primary quiz-next" onClick={next}>
             {answered < limit && index + 1 < round.length ? "次へ" : "結果を見る"}
           </button>
-          {isCall && audio && (
+          {!isCall && audio && (
+            <button type="button" className="quiz-play" onClick={() => void play()} aria-pressed={playing}>
+              {playing ? "⏹ 止める" : autoplayed ? "🔊 もう一度聞く" : "🔊 鳴き声を聞く"}
+            </button>
+          )}
+          {audio && (
             <a className="quiz-credit" href={audio.pageUrl} target="_blank" rel="noreferrer">
               音源: Wikimedia Commons（録音: {audio.credit ?? "不明"} ／ {audio.license ?? "ライセンスはリンク先を参照"}）
             </a>

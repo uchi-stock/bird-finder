@@ -281,3 +281,87 @@ describe("App: クイズ（状況を読んで、写真から選ぶ）（#128）"
     expect(JSON.parse(localStorage.getItem("bird-finder:quiz:v1") ?? "{}")).toHaveProperty("bestSituation");
   });
 });
+
+describe("App: クイズで正解したら、鳴き声を再生する（#173）", () => {
+  beforeEach(() => {
+    vi.useRealTimers();
+  });
+  // 名前のクイズ・状況のクイズの両方で、同じ動き
+  const kinds: [string, RegExp][] = [
+    ["名前", /名前を見て、写真から選ぶ/],
+    ["状況", /状況を読んで、写真から選ぶ/],
+  ];
+  for (const [label, button] of kinds) {
+    it(`${label}のクイズ: 正解のときだけ、その鳥の鳴き声を再生する。解錠は、回答のタップの中で行う`, async () => {
+      await openQuiz();
+      await userEvent.click(screen.getByRole("button", { name: button }));
+      await screen.findByRole("group", { name: "写真の選択肢" });
+      expect(playAudio).not.toHaveBeenCalled(); // 問題が出ただけでは、再生しない（鳴き声のクイズとは違う）
+      let correct = 0;
+      for (let i = 0; i < 10; i++) {
+        const unlocks = unlockAudio.mock.calls.length;
+        const plays = playAudio.mock.calls.length;
+        const ok = await answerFirst();
+        if (ok) {
+          correct++;
+          expect(unlockAudio.mock.calls.length).toBe(unlocks + 1); // 正解のタップで解錠する
+          await waitFor(() => expect(playAudio.mock.calls.length).toBe(plays + 1));
+          expect(playAudio).toHaveBeenLastCalledWith("https://u/a.mp3", expect.any(Function));
+        } else {
+          await new Promise((r) => setTimeout(r, 30)); // 不正解では、遅れても再生されないことを確かめる
+          expect(playAudio.mock.calls.length).toBe(plays);
+        }
+        await userEvent.click(screen.getByRole("button", { name: nextLabel(i) }));
+      }
+      expect(playAudio).toHaveBeenCalledTimes(correct);
+      expect(screen.getByText(/\/ 10 問正解/)).toBeInTheDocument();
+    });
+  }
+  it("回答後に、鳴き声を聞くボタンと出典が出る。不正解でも、聞ける", async () => {
+    await openQuiz();
+    await userEvent.click(screen.getByRole("button", { name: /名前を見て、写真から選ぶ/ }));
+    await screen.findByRole("group", { name: "写真の選択肢" });
+    await answerFirst();
+    const listen = await screen.findByRole("button", { name: /鳴き声を聞く|もう一度聞く|止める/ });
+    expect(screen.getByRole("link", { name: /音源: Wikimedia Commons/ })).toBeInTheDocument();
+    stopAudio.mockClear();
+    const plays = playAudio.mock.calls.length;
+    if (/止める/.test(listen.textContent ?? "")) {
+      await userEvent.click(listen); // 再生中なら、止められる
+      expect(stopAudio).toHaveBeenCalled();
+    } else {
+      await userEvent.click(listen); // 再生していなければ、聞ける
+      expect(playAudio.mock.calls.length).toBe(plays + 1);
+    }
+  });
+  it("次へ進むと、再生を止める。次の問題へ、遅れて再生が始まらない", async () => {
+    let resolveAudio!: (v: unknown) => void;
+    fetchCallAudio.mockReset().mockReturnValue(new Promise((r) => (resolveAudio = r)));
+    await openQuiz();
+    await userEvent.click(screen.getByRole("button", { name: /名前を見て、写真から選ぶ/ }));
+    await screen.findByRole("group", { name: "写真の選択肢" });
+    // 正解するまで進める（音源の取得が終わっていない間に、次へ進む）
+    for (let i = 0; i < 9; i++) {
+      const ok = await answerFirst();
+      await userEvent.click(screen.getByRole("button", { name: nextLabel(i) }));
+      if (ok) break;
+    }
+    resolveAudio({ src: "https://u/late.mp3", pageUrl: "https://c/File:late", title: "late.ogg" });
+    await new Promise((r) => setTimeout(r, 30));
+    expect(playAudio).not.toHaveBeenCalledWith("https://u/late.mp3", expect.any(Function)); // 次の問題へ進んだあとに、遅れて再生されない
+  });
+  it("音源が見つからなくても、正解の表示と、クイズの進行は崩れない", async () => {
+    fetchCallAudio.mockReset().mockResolvedValue(null);
+    await openQuiz();
+    await userEvent.click(screen.getByRole("button", { name: /名前を見て、写真から選ぶ/ }));
+    await screen.findByRole("group", { name: "写真の選択肢" });
+    for (let i = 0; i < 10; i++) {
+      await answerFirst();
+      expect(screen.queryByRole("button", { name: /鳴き声を聞く|もう一度聞く/ })).toBeNull();
+      await userEvent.click(screen.getByRole("button", { name: nextLabel(i) }));
+    }
+    expect(playAudio).not.toHaveBeenCalled();
+    expect(screen.getByText(/\/ 10 問正解/)).toBeInTheDocument();
+  });
+});
+
