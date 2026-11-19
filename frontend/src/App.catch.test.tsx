@@ -41,6 +41,33 @@ describe("App: 捕まえる・図鑑", () => {
       vi.useRealTimers();
     }
   });
+  it("捕まえる演出は、飛ぶ → 吸い込まれる → 揺れる → ゲットの順に進む（#129）", async () => {
+    vi.useRealTimers();
+    vi.useFakeTimers({ shouldAdvanceTime: true, now: new Date(2026, 10, 15, 7, 0, 0) });
+    try {
+      await renderApp();
+      fireEvent.change(screen.getByPlaceholderText(/ホーホケキョ/), { target: { value: "ホーホケキョ" } });
+      await openDetail();
+      fireEvent.click(within(detail()).getByRole("button", { name: "捕まえる" }));
+      expect(detail().querySelector(".ball.throw")).not.toBeNull();
+      await act(async () => {
+        vi.advanceTimersByTime(600);
+      });
+      expect(detail().querySelector(".ball.absorb")).not.toBeNull();
+      await act(async () => {
+        vi.advanceTimersByTime(500);
+      });
+      expect(detail().querySelector(".ball.shake")).not.toBeNull();
+      expect(within(detail()).queryByText(/ゲット！/)).toBeNull(); // 揺れている間は、まだ結果を出さない
+      await act(async () => {
+        vi.advanceTimersByTime(900);
+      });
+      expect(detail().querySelector(".ball")).toBeNull();
+      expect(within(detail()).getByText(/ゲット！/)).toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
   it("写真が無い鳥でも、拡大表示を開いて捕まえられる", async () => {
     usePhoto.mockReturnValue(null);
     await renderApp();

@@ -2,7 +2,8 @@ import { useState } from "react";
 import type { Collection } from "../domain/collection";
 import { Emoji } from "./Emoji";
 
-type CatchPhase = "idle" | "throw" | "shake" | "done";
+// throw: ボールが飛ぶ → absorb: 鳥の画像が縮んでボールへ吸い込まれる → shake: ボールが揺れる → done。合計1900ms
+type CatchPhase = "idle" | "throw" | "absorb" | "shake" | "done";
 
 interface Props {
   speciesId: string;
@@ -12,6 +13,8 @@ interface Props {
   onShare?: (id: string) => Promise<string>;
 }
 
+const busyPhase = (p: CatchPhase) => p === "throw" || p === "absorb" || p === "shake";
+
 export function CatchButton({ speciesId, collection, onCatch, onShare }: Props) {
   const [phase, setPhase] = useState<CatchPhase>("idle");
   const [result, setResult] = useState<{ isNew: boolean; count: number } | null>(null);
@@ -19,11 +22,12 @@ export function CatchButton({ speciesId, collection, onCatch, onShare }: Props) 
   const [share, setShare] = useState(false);
   const [shareMsg, setShareMsg] = useState("");
   const start = () => {
-    if (phase === "throw" || phase === "shake") return;
+    if (busyPhase(phase)) return;
     setResult(null);
     setShareMsg("");
     setPhase("throw");
-    setTimeout(() => setPhase("shake"), 600);
+    setTimeout(() => setPhase("absorb"), 500);
+    setTimeout(() => setPhase("shake"), 1000);
     setTimeout(() => {
       setResult(onCatch(speciesId));
       setPhase("done");
@@ -31,7 +35,7 @@ export function CatchButton({ speciesId, collection, onCatch, onShare }: Props) 
     }, 1900);
   };
   const owned = collection[speciesId]?.count ?? 0;
-  const busy = phase === "throw" || phase === "shake";
+  const busy = busyPhase(phase);
   return (
     <div className="catch">
       <button className="catch-btn" onClick={start} disabled={busy}>

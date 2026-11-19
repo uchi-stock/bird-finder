@@ -250,20 +250,26 @@ footer {
 }
 
 .ball {
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  background: linear-gradient(#e8453c 0 46%, #222 46% 54%, #fff 54% 100%);
+  background:
+    radial-gradient(circle at 50% 50%, #fff 0 16%, #222 17% 24%, transparent 25%),
+    linear-gradient(#e8453c 0 46%, #222 46% 54%, #fff 54% 100%);
   border: 2px solid #222;
   display: inline-block;
 }
 
 .ball.throw {
-  animation: toss 0.6s ease-out;
+  animation: toss 0.5s ease-out;
+}
+
+.ball.absorb {
+  animation: glow 0.5s ease-in-out;
 }
 
 .ball.shake {
-  animation: wobble 0.5s ease-in-out 3;
+  animation: wobble 0.3s ease-in-out 3;
 }
 
 @keyframes toss {
@@ -275,6 +281,17 @@ footer {
   to {
     transform: translate(0, 0) scale(1);
     opacity: 1;
+  }
+}
+
+@keyframes glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 rgb(255 255 255 / 0%);
+  }
+
+  50% {
+    box-shadow: 0 0 18px 6px rgb(255 255 255 / 90%);
   }
 }
 
@@ -290,6 +307,47 @@ footer {
 
   75% {
     transform: rotate(25deg);
+  }
+}
+
+/* 捕まえる演出: 吸い込み中は、鳥の画像（画像なしの枠も）が縮んでボールへ向かい、揺れの間は隠れ、ゲット後に戻る */
+.lightbox-inner:has(.ball.absorb) :is(.lb-photo, .photo-empty-large) {
+  animation: absorb 0.5s ease-in forwards;
+  transform-origin: 50% 100%;
+}
+
+.lightbox-inner:has(.ball.shake) :is(.lb-photo, .photo-empty-large) {
+  opacity: 0;
+  transform: translateY(40%) scale(0.05);
+}
+
+.lightbox-inner:has(.got) :is(.lb-photo, .photo-empty-large) {
+  animation: restore 0.4s ease-out;
+}
+
+@keyframes absorb {
+  from {
+    transform: none;
+    opacity: 1;
+    filter: none;
+  }
+
+  to {
+    transform: translateY(40%) scale(0.05);
+    opacity: 0;
+    filter: brightness(2) saturate(0);
+  }
+}
+
+@keyframes restore {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+
+  to {
+    transform: none;
+    opacity: 1;
   }
 }
 
@@ -378,6 +436,16 @@ footer {
   .ball,
   .got {
     animation: none;
+  }
+
+  /* 動きを減らす設定では、縮む動きをやめ、画像をフェードで隠す */
+  .lightbox-inner:has(.ball.absorb) :is(.lb-photo, .photo-empty-large),
+  .lightbox-inner:has(.got) :is(.lb-photo, .photo-empty-large) {
+    animation: none;
+  }
+
+  .lightbox-inner:has(.ball.shake) :is(.lb-photo, .photo-empty-large) {
+    transform: none;
   }
 }
 
