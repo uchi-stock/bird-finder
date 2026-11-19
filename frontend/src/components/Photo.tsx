@@ -54,6 +54,8 @@ export function Photo({ name, scientificName, flying = false, zoomed, onZoomChan
         <button type="button" className="lb-close" onClick={() => setOpen(false)}>
           閉じる
         </button>
+      {/* 捕まえる演出のボールは、この枠（画像の位置）に重ねて出す（CatchButtonが入れる） */}
+      <div className="lb-stage">
       {photo ? (
         // 読み込み済みの小さい版を、開いた瞬間に拡大して出す。大きい版は、読み込み完了後に上へ重ねて切り替える
         <div className="lb-photo">
@@ -71,6 +73,7 @@ export function Photo({ name, scientificName, flying = false, zoomed, onZoomChan
       ) : (
         <div className="photo-empty-large">写真なし</div>
       )}
+      </div>
       <strong className="lightbox-name">{name}</strong>
       {caption}
       {photo && (
