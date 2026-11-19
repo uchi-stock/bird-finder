@@ -35,7 +35,7 @@ export function useCollection() {
   // 地図に出す点。位置は必ずぼかしを通す（正確な位置は地図に渡さない）
   const mapPoints = useMemo(() => toMapPoints(sightings, getPrivacySecret()), [sightings]);
 
-  // みんなに共有する（捕まえるときに本人が選んだ場合だけ）。自宅の周辺は共有せず、位置は必ずぼかしてから送る。結果の文言を返す
+  // みんなに共有する（捕まえたら必ず。#160）。自宅の周辺は共有せず、位置は必ずぼかしてから送る。結果の文言を返す
   const shareSighting = async (id: string): Promise<string> => {
     let pos: LatLon | null = null;
     try {

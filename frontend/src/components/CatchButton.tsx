@@ -10,7 +10,7 @@ interface Props {
   speciesId: string;
   collection: Collection;
   onCatch: (id: string) => { isNew: boolean; count: number };
-  /** みんなに共有する。結果の文言を返す（省略時は共有の選択肢を出さない） */
+  /** 捕まえたら、必ずみんなに共有する（選択制は廃止。#160）。結果の文言を返す（省略時は、共有しない） */
   onShare?: (id: string) => Promise<string>;
 }
 
@@ -25,8 +25,6 @@ export function CatchButton({ speciesId, collection, onCatch, onShare }: Props) 
     setStage(rootRef.current?.closest(".lightbox-inner")?.querySelector(".lb-stage") ?? null);
   }, []);
   const [result, setResult] = useState<{ isNew: boolean; count: number } | null>(null);
-  // 共有は、捕まえるたびに本人が選ぶ（初期はオフ）
-  const [share, setShare] = useState(false);
   const [shareMsg, setShareMsg] = useState("");
   const start = () => {
     if (busyPhase(phase)) return;
@@ -38,7 +36,8 @@ export function CatchButton({ speciesId, collection, onCatch, onShare }: Props) 
     setTimeout(() => {
       setResult(onCatch(speciesId));
       setPhase("done");
-      if (share && onShare) void onShare(speciesId).then(setShareMsg);
+      // 捕まえたら、必ず共有する。位置が取れない・自宅の周辺・通信失敗でも、捕まえる（図鑑への記録）は成功し、共有されなかった理由を出す
+      if (onShare) void onShare(speciesId).then(setShareMsg);
     }, 1900);
   };
   const owned = collection[speciesId]?.count ?? 0;
@@ -55,14 +54,9 @@ export function CatchButton({ speciesId, collection, onCatch, onShare }: Props) 
           {result.isNew ? <b className="new">NEW! </b> : null}ゲット！{result.isNew ? "" : `（${result.count}回目）`}
         </span>
       )}
+      {/* 捕まえると必ず共有するため、捕まえる前に分かるよう、常に明示する */}
       {onShare && (
-        <label className="share-opt">
-          <input type="checkbox" checked={share} disabled={busy} onChange={(e) => setShare(e.target.checked)} />
-          みんなに共有する
-        </label>
-      )}
-      {onShare && share && (
-        <p className="share-note">約1kmにぼかした位置が、みんなの地図に出ます。自宅の周辺（約2km）は共有しません。あとから取り消せません。記録は期限なく保存されます。</p>
+        <p className="share-note">捕まえると、約1kmにぼかした位置が、みんなの地図に出ます。自宅の周辺（約2km）は共有しません。あとから取り消せません。記録は期限なく保存されます。</p>
       )}
       {shareMsg && (
         <p className="share-note" role="status">
