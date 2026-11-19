@@ -259,6 +259,62 @@ for (const size of SIZES) {
       expect(errors).toEqual([]);
     });
 
+    test("クイズ（写真→鳴き声）: 写真と4つの鳴き声が出て、1画面に収まり、1ラウンド（10問）遊べる", async ({ page }, testInfo) => {
+      const errors: string[] = [];
+      page.on("pageerror", (e) => errors.push(e.message));
+      await openApp(page);
+      // 音源は偽物（Wikimedia Commonsの検索結果とMP3）
+      await page.route("https://commons.wikimedia.org/w/api.php**", (r) =>
+        r.fulfill({
+          status: 200,
+          contentType: "application/json",
+          headers: { "access-control-allow-origin": "*" },
+          body: JSON.stringify({
+            query: {
+              pages: {
+                "1": {
+                  index: 1,
+                  title: "File:Call.ogg",
+                  videoinfo: [
+                    {
+                      url: "https://upload.wikimedia.org/call.ogg",
+                      mime: "audio/ogg",
+                      descriptionurl: "https://commons.wikimedia.org/wiki/File:Call.ogg",
+                      derivatives: [{ src: "https://upload.wikimedia.org/call.mp3", type: "audio/mpeg" }],
+                      extmetadata: { Artist: { value: "録音者" }, LicenseShortName: { value: "CC BY 4.0" } },
+                    },
+                  ],
+                },
+              },
+            },
+          }),
+        }),
+      );
+      await page.route("https://upload.wikimedia.org/**/*.mp3", (r) => r.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.alloc(64) }));
+      await page.getByRole("button", { name: /クイズ/ }).click();
+      await page.getByRole("button", { name: /写真を見て、鳴き声から選ぶ/ }).click();
+      await expect(page.getByRole("heading", { name: "この鳥の鳴き声は？" })).toBeVisible();
+      const list = page.getByRole("list", { name: "鳴き声の選択肢" });
+      await expect(list.getByRole("listitem")).toHaveCount(4);
+      await expect(list.getByRole("button", { name: /鳴き声1を聞く/ })).toBeEnabled();
+      // 各ボタンは44px以上で、4つの選択肢が1画面に収まる（iPhone SEでも）
+      for (const b of await list.getByRole("button").all()) {
+        const box = await b.boundingBox();
+        expect(box && box.height >= 44).toBe(true);
+      }
+      const last = await list.getByRole("listitem").last().boundingBox();
+      expect(last && last.y + last.height <= (page.viewportSize()?.height ?? 0)).toBe(true);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBe(0);
+      await captureScreenshot(page, testInfo, `${size.name}-9-quiz-photo-call`, `写真→鳴き声のクイズ（${size.name}）`, { fullPage: false });
+      for (let i = 0; i < 10; i++) {
+        await expect(list.getByRole("button", { name: /鳴き声1を選ぶ/ })).toBeEnabled();
+        await list.getByRole("button", { name: /鳴き声1を選ぶ/ }).tap();
+        await page.getByRole("button", { name: i < 9 ? "次へ" : "結果を見る" }).tap();
+      }
+      await expect(page.getByRole("heading", { name: "結果" })).toBeVisible();
+      expect(errors).toEqual([]);
+    });
+
     test("地図: 「ダミー（バトル用）」で、ダミーと分かる表示で、鳥が出る", async ({ page }, testInfo) => {
       const errors: string[] = [];
       page.on("pageerror", (e) => errors.push(e.message));

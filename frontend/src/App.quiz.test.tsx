@@ -365,3 +365,82 @@ describe("App: クイズで正解したら、鳴き声を再生する（#173）"
   });
 });
 
+
+describe("App: クイズ（写真を見て、鳴き声から選ぶ）（#175）", () => {
+  const AUDIO = { src: "https://u/a.mp3", pageUrl: "https://c/File:a", title: "a.ogg", credit: "録音者A", license: "CC BY 4.0" };
+  const startPhotoCall = async () => {
+    await openQuiz();
+    await userEvent.click(screen.getByRole("button", { name: /写真を見て、鳴き声から選ぶ/ }));
+    await screen.findByRole("list", { name: "鳴き声の選択肢" });
+  };
+  const rows = () => within(screen.getByRole("list", { name: "鳴き声の選択肢" })).getAllByRole("listitem");
+  const ready = () => waitFor(() => expect(within(rows()[0]).getByRole("button", { name: /鳴き声1を聞く/ })).toBeEnabled());
+
+  beforeEach(() => {
+    vi.useRealTimers();
+    fetchCallAudio.mockReset().mockResolvedValue(AUDIO);
+  });
+
+  it("写真と4つの鳴き声の選択肢が出る。回答前は、鳥の名前が出ない", async () => {
+    await startPhotoCall();
+    await ready();
+    expect(rows()).toHaveLength(4);
+    for (const s of SPECIES) expect(within(screen.getByRole("list", { name: "鳴き声の選択肢" })).queryByText(s.name_ja)).toBeNull();
+    expect(screen.getByRole("heading", { level: 2 }).textContent).toBe("この鳥の鳴き声は？");
+  });
+
+  it("鳴き声を押すと再生し、解錠はタップの中で行う。もう一度押すと止める。自動では再生しない", async () => {
+    await startPhotoCall();
+    await ready();
+    expect(playAudio).not.toHaveBeenCalled();
+    await userEvent.click(within(rows()[1]).getByRole("button", { name: /鳴き声2を聞く/ }));
+    expect(unlockAudio).toHaveBeenCalled();
+    expect(playAudio).toHaveBeenCalledWith(AUDIO.src, expect.any(Function));
+    stopAudio.mockClear();
+    await userEvent.click(within(rows()[1]).getByRole("button", { name: /鳴き声2を止める/ }));
+    expect(stopAudio).toHaveBeenCalled();
+  });
+
+  it("選ぶと、正解・不正解と、各鳴き声の鳥の名前、音源の出典が出る。次へで進む", async () => {
+    await startPhotoCall();
+    await ready();
+    await userEvent.click(within(rows()[0]).getByRole("button", { name: /鳴き声1を選ぶ/ }));
+    expect(screen.getByText(/正解！|ざんねん/)).toBeInTheDocument();
+    expect(screen.getAllByText(/の音源: Wikimedia Commons（録音: 録音者A ／ CC BY 4\.0）/)).toHaveLength(4);
+    expect(within(screen.getByRole("list", { name: "鳴き声の選択肢" })).getAllByText(/./).length).toBeGreaterThan(0);
+    await userEvent.click(screen.getByRole("button", { name: "次へ" }));
+    expect(screen.getByText(/2 \/ 10 問/)).toBeInTheDocument();
+  });
+
+  it("1つでも音源が見つからない問題は飛ばして別の問題にし、10問遊べる。成績は別に保存される", async () => {
+    fetchCallAudio.mockResolvedValueOnce(null);
+    await startPhotoCall();
+    for (let i = 0; i < 10; i++) {
+      await ready();
+      await userEvent.click(within(rows()[0]).getByRole("button", { name: /鳴き声1を選ぶ/ }));
+      await userEvent.click(screen.getByRole("button", { name: nextLabel(i) }));
+    }
+    expect(screen.getByText(/\/ 10 問正解/)).toBeInTheDocument();
+    const stored = JSON.parse(localStorage.getItem("bird-finder:quiz:v1") ?? "{}");
+    expect(stored.best).toBe(0);
+    expect(typeof stored.bestPhotoCall).toBe("number");
+  });
+
+  it("すべての音源が見つからなければ、止まらずに案内を出す", async () => {
+    fetchCallAudio.mockResolvedValue(null);
+    await openQuiz();
+    await userEvent.click(screen.getByRole("button", { name: /写真を見て、鳴き声から選ぶ/ }));
+    expect(await screen.findByText(/問題を作れませんでした/, undefined, { timeout: 4000 })).toBeInTheDocument();
+  });
+
+  it("オフラインでは選べない", async () => {
+    const onLine = vi.spyOn(window.navigator, "onLine", "get").mockReturnValue(false);
+    try {
+      await renderAppNoWait();
+      await userEvent.click(screen.getByRole("button", { name: /クイズ/ }));
+      expect(screen.getByRole("button", { name: /写真を見て、鳴き声から選ぶ/ })).toBeDisabled();
+    } finally {
+      onLine.mockRestore();
+    }
+  });
+});

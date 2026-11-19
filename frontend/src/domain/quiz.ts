@@ -2,8 +2,8 @@ import type { Species } from "./types";
 
 // クイズの出題と選択肢の生成（UI非依存の純粋関数）。乱数は、シードを渡せる形にして、テストで再現できるようにする
 
-/** 問題の種類: 名前を見て写真から選ぶ／鳴き声を聞いて写真から選ぶ／状況を読んで写真から選ぶ */
-export type QuizKind = "name" | "call" | "situation";
+/** 問題の種類: 名前を見て写真から選ぶ／鳴き声を聞いて写真から選ぶ／状況を読んで写真から選ぶ／写真を見て鳴き声から選ぶ */
+export type QuizKind = "name" | "call" | "situation" | "photoCall";
 
 export interface QuizQuestion {
   kind: QuizKind;

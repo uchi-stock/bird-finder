@@ -120,6 +120,8 @@ export interface QuizStats {
   bestCall: number;
   /** 最高の正答数（状況を読んで写真から選ぶ） */
   bestSituation: number;
+  /** 最高の正答数（写真を見て鳴き声から選ぶ） */
+  bestPhotoCall: number;
   /** 鳥ごとの、間違えた回数（復習で優先して出題する）。正解すると消える */
   wrong: Record<string, number>;
 }
@@ -133,13 +135,14 @@ export function loadQuizStats(): QuizStats {
         best: parsed.best,
         bestCall: typeof parsed.bestCall === "number" ? parsed.bestCall : 0,
         bestSituation: typeof parsed.bestSituation === "number" ? parsed.bestSituation : 0,
+        bestPhotoCall: typeof parsed.bestPhotoCall === "number" ? parsed.bestPhotoCall : 0,
         wrong: parsed.wrong as Record<string, number>,
       };
     }
   } catch {
     /* 初期値を返す */
   }
-  return { best: 0, bestCall: 0, bestSituation: 0, wrong: {} };
+  return { best: 0, bestCall: 0, bestSituation: 0, bestPhotoCall: 0, wrong: {} };
 }
 
 export function saveQuizStats(stats: QuizStats): void {

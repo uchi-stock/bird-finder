@@ -12,12 +12,15 @@ import { ThumbImg } from "./ThumbImg";
 const ROUND_SIZE = 10;
 // 鳴き声のクイズは、音源が見つからない鳥を飛ばして別の問題に差し替えるため、予備の問題を多めに作る
 const CALL_RESERVE = 6;
+// 写真→鳴き声は、4つの選択肢すべての音源が必要なため、飛ばす問題が増える。予備をさらに多めに作る
+const PHOTO_CALL_RESERVE = 12;
 const byId = new Map(SPECIES.map((s) => [s.species_id, s]));
 
 type Phase = "intro" | "loading" | "playing" | "result" | "unavailable";
 
 /**
- * 写真から選ぶクイズ。「名前を見て選ぶ」「鳴き声を聞いて選ぶ」「状況を読んで選ぶ」の3種類。
+ * 写真から選ぶクイズ。「名前を見て選ぶ」「鳴き声を聞いて選ぶ」「状況を読んで選ぶ」と、
+ * 逆向きの「写真を見て、鳴き声から選ぶ」の4種類。
  * 写真を取得できた鳥だけを出題する（問題の途中で破綻しない）。
  * 鳴き声の問題は、音源が見つからない・失敗したときに、その問題を飛ばして別の問題に差し替える
  */
@@ -40,6 +43,9 @@ export function Quiz() {
   const [playFailed, setPlayFailed] = useState(false);
   // 自動再生が始まった問題は、ボタンを「もう一度聞く」にする
   const [autoplayed, setAutoplayed] = useState(false);
+  // 写真→鳴き声: 現在の問題の選択肢ごとの音源（undefined=取得中）と、いま再生中の選択肢
+  const [choiceAudio, setChoiceAudio] = useState<Map<string, CallAudio> | undefined>(undefined);
+  const [playingId, setPlayingId] = useState<string | null>(null);
   const audioCache = useRef(new Map<string, Promise<CallAudio | null>>());
 
   const loadAudio = useCallback((id: string) => {
@@ -54,7 +60,7 @@ export function Quiz() {
   const start = useCallback(
     async (mode: QuizKind, review: boolean) => {
       // iOS対策: 音声の解錠は、タップの同期処理内（最初のawaitより前）で行う。自動再生はしない
-      if (mode === "call") unlockAudio();
+      if (mode === "call" || mode === "photoCall") unlockAudio();
       setKind(mode);
       setPhase("loading");
       // 写真を取得できた鳥だけを、出題の対象にする（取得済みの写真はキャッシュされる）
@@ -73,7 +79,7 @@ export function Quiz() {
           ? buildSituationRound(candidates, { rng: seededRng(Date.now()), count: ROUND_SIZE, prefer })
           : buildRound(candidates, {
               rng: seededRng(Date.now()),
-              count: mode === "call" ? ROUND_SIZE + CALL_RESERVE : ROUND_SIZE,
+              count: mode === "call" ? ROUND_SIZE + CALL_RESERVE : mode === "photoCall" ? ROUND_SIZE + PHOTO_CALL_RESERVE : ROUND_SIZE,
               prefer,
               kind: mode,
             });
@@ -89,6 +95,8 @@ export function Quiz() {
       setMissed([]);
       setNote("");
       setAudio(undefined);
+      setChoiceAudio(undefined);
+      setPlayingId(null);
       setPhase("playing");
     },
     [stats.wrong],
@@ -108,11 +116,14 @@ export function Quiz() {
         ? { ...stats, bestCall: Math.max(stats.bestCall, finalScore), wrong }
         : kind === "situation"
           ? { ...stats, bestSituation: Math.max(stats.bestSituation, finalScore), wrong }
-          : { ...stats, best: Math.max(stats.best, finalScore), wrong };
+          : kind === "photoCall"
+            ? { ...stats, bestPhotoCall: Math.max(stats.bestPhotoCall, finalScore), wrong }
+            : { ...stats, best: Math.max(stats.best, finalScore), wrong };
     saveQuizStats(updated);
     setStats(updated);
     stopAudio();
     setPlaying(false);
+    setPlayingId(null);
     setPhase("result");
   };
 
@@ -171,7 +182,7 @@ export function Quiz() {
 
   // 名前・状況のクイズ: 正解の鳥の音源を先読みし、正解したら鳴き声を再生する（#173）。問題が変わったら、再生を止める
   useEffect(() => {
-    if (phase !== "playing" || kind === "call" || !question) return;
+    if (phase !== "playing" || kind === "call" || kind === "photoCall" || !question) return;
     let alive = true;
     setAudio(undefined);
     setPlaying(false);
@@ -187,6 +198,49 @@ export function Quiz() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- 問題が変わったときだけ取得する（questionはindexとroundから決まる）
   }, [phase, kind, index, round, loadAudio]);
+
+  // 写真→鳴き声: 選択肢すべての音源を取得する。1つでも見つからない問題は、飛ばして別の問題にする。次の問題の分も先読みする
+  useEffect(() => {
+    if (phase !== "playing" || kind !== "photoCall" || !question) return;
+    let alive = true;
+    setChoiceAudio(undefined);
+    setPlayingId(null);
+    void Promise.all(question.choiceIds.map((id) => loadAudio(id))).then((list) => {
+      if (!alive) return;
+      if (list.some((a) => !a)) {
+        skipRef.current();
+        return;
+      }
+      setChoiceAudio(new Map(question.choiceIds.map((id, i) => [id, list[i] as CallAudio])));
+    });
+    for (const q of round.slice(index + 1, index + 2)) for (const id of q.choiceIds) void loadAudio(id);
+    return () => {
+      alive = false;
+      stopAudio();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- 問題が変わったときだけ取得する
+  }, [phase, kind, index, round, loadAudio]);
+
+  // 写真→鳴き声: 選択肢の鳴き声を再生する。同時に鳴らすのは1つだけ（共有の<audio>）。もう一度押すと止める
+  const playChoice = async (id: string) => {
+    const a = choiceAudio?.get(id);
+    if (!a) return;
+    if (playingId === id) {
+      stopAudio();
+      setPlayingId(null);
+      return;
+    }
+    // iOS対策: タップの同期処理内で解錠してから再生する
+    unlockAudio();
+    setPlayFailed(false);
+    setPlayingId(id);
+    try {
+      await playAudio(a.src, () => setPlayingId((cur) => (cur === id ? null : cur)));
+    } catch {
+      setPlayingId(null);
+      setPlayFailed(true);
+    }
+  };
 
   // 名前のクイズ: 次の問題の写真を先読みして、表示のちらつき・待ち時間を抑える
   useEffect(() => {
@@ -226,7 +280,7 @@ export function Quiz() {
       // 名前・状況のクイズは、正解したら、その鳥の鳴き声を再生する（#173）。
       // iOS対策: 解錠は、回答のタップの同期処理内で行い、音源の取得（awaitのあと）で再生する。
       // 鳴き声のクイズは、問題で再生しているため、ここでは再生しない
-      if (kind !== "call") {
+      if (kind === "name" || kind === "situation") {
         unlockAudio();
         void playCorrect(question.answerId);
       }
@@ -255,6 +309,8 @@ export function Quiz() {
     playToken.current++; // 正解の鳴き声の再生が、次の問題へ遅れて始まらないようにする
     // 次の問題の自動再生のため、このタップで改めて解錠する
     if (kind === "call") unlockAudio();
+    stopAudio();
+    setPlayingId(null);
     if (answered < limit && index + 1 < round.length) {
       setIndex(index + 1);
       setPicked(null);
@@ -264,16 +320,16 @@ export function Quiz() {
   };
 
   const wrongCount = useMemo(() => Object.keys(stats.wrong).length, [stats.wrong]);
-  const best = kind === "call" ? stats.bestCall : kind === "situation" ? stats.bestSituation : stats.best;
+  const best = kind === "call" ? stats.bestCall : kind === "situation" ? stats.bestSituation : kind === "photoCall" ? stats.bestPhotoCall : stats.best;
 
   if (phase === "intro" || phase === "unavailable") {
     return (
       <section className="quiz">
         <h2>クイズ</h2>
         <p>種類を選んで、はじめます（{ROUND_SIZE}問）。</p>
-        {(stats.best > 0 || stats.bestCall > 0 || stats.bestSituation > 0) && (
+        {(stats.best > 0 || stats.bestCall > 0 || stats.bestSituation > 0 || stats.bestPhotoCall > 0) && (
           <p className="hint">
-            最高: 名前 {stats.best}問正解 ・ 鳴き声 {stats.bestCall}問正解 ・ 状況 {stats.bestSituation}問正解
+            最高: 名前 {stats.best}問正解 ・ 鳴き声 {stats.bestCall}問正解 ・ 状況 {stats.bestSituation}問正解 ・ 写真→鳴き声 {stats.bestPhotoCall}問正解
           </p>
         )}
         {phase === "unavailable" && <p className="hint warn">問題を作れませんでした。通信を確認して、もう一度お試しください。</p>}
@@ -286,6 +342,9 @@ export function Quiz() {
           </button>
           <button type="button" className="primary" onClick={() => void start("situation", false)}>
             状況を読んで、写真から選ぶ
+          </button>
+          <button type="button" className="primary" disabled={!online} onClick={() => void start("photoCall", false)}>
+            写真を見て、鳴き声から選ぶ
           </button>
           {!online && <p className="hint">鳴き声のクイズは、オフラインでは使えません（音源を通信で取得するため）。</p>}
           {wrongCount > 0 && (
@@ -352,6 +411,71 @@ export function Quiz() {
   const size = SIZES.find((s) => s.level === answer.size_level);
   const isCall = kind === "call";
   const isSituation = kind === "situation";
+  if (kind === "photoCall") {
+    // 正解の鳥の写真を見せ、鳴き声を4つ聞き比べて選ぶ。回答前は、どの鳴き声がどの鳥か分からない（名前を出さない）
+    const answered_ = picked !== null;
+    return (
+      <section className="quiz">
+        <p className="hint quiz-progress">
+          {Math.min(answered + (picked === null ? 1 : 0), limit)} / {limit} 問 ・ {score}問正解
+        </p>
+        <h2 className="quiz-name">この鳥の鳴き声は？</h2>
+        <div className="quiz-pc-photo">
+          <ThumbImg src={photos.get(question.answerId)?.thumbnail ?? ""} alt="" />
+        </div>
+        {!answered_ && <p className="hint">鳴き声を聞いて、この鳥だと思うものを選んでください</p>}
+        {playFailed && <p className="hint warn">再生できませんでした。音が出ないときは、音量とマナーモードを確認してください。</p>}
+        {note && <p className="hint">{note}</p>}
+        <ul className="quiz-pc-list" aria-label="鳴き声の選択肢">
+          {question.choiceIds.map((id, i) => {
+            const state = picked === null ? "" : id === question.answerId ? "correct" : id === picked ? "wrong" : "";
+            const a = choiceAudio?.get(id);
+            const c = byId.get(id);
+            return (
+              <li key={id} className={`quiz-pc-row ${state}`}>
+                <button type="button" className="quiz-play" disabled={!a} aria-pressed={playingId === id} aria-label={`鳴き声${i + 1}を${playingId === id ? "止める" : "聞く"}`} onClick={() => void playChoice(id)}>
+                  {!a ? "探しています…" : playingId === id ? `⏹ 鳴き声${i + 1}` : `🔊 鳴き声${i + 1}`}
+                </button>
+                {answered_ ? (
+                  <span className="quiz-pc-name">
+                    {state === "correct" ? "✓ " : state === "wrong" ? "✗ " : ""}
+                    {c?.name_ja}
+                  </span>
+                ) : (
+                  <button type="button" disabled={!a} aria-label={`鳴き声${i + 1}を選ぶ`} onClick={() => choose(id)}>
+                    これ
+                  </button>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+        {answered_ && (
+          <>
+            <div className="quiz-feedback" role="status">
+              <div className="quiz-result-text">
+                <strong>{picked === question.answerId ? "⭕ 正解！" : "❌ ざんねん"}</strong>
+                <span>
+                  {answer.name_ja}（{answer.scientific_name}）{size ? ` ・ ${size.cm}` : ""}
+                </span>
+              </div>
+            </div>
+            <button type="button" className="primary quiz-next" onClick={next}>
+              {answered < limit && index + 1 < round.length ? "次へ" : "結果を見る"}
+            </button>
+            {question.choiceIds.map((id) => {
+              const a = choiceAudio?.get(id);
+              return a ? (
+                <a key={id} className="quiz-credit" href={a.pageUrl} target="_blank" rel="noreferrer">
+                  {byId.get(id)?.name_ja}の音源: Wikimedia Commons（録音: {a.credit ?? "不明"} ／ {a.license ?? "ライセンスはリンク先を参照"}）
+                </a>
+              ) : null;
+            })}
+          </>
+        )}
+      </section>
+    );
+  }
   return (
     <section className="quiz">
       <p className="hint quiz-progress">
