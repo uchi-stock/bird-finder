@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from "@testing-library/react";
+import { act, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fetchCallAudio, fetchPhoto, playAudio, renderApp, renderAppNoWait, setupAppTests, stopAudio, unlockAudio } from "./testApp";
@@ -144,30 +144,41 @@ describe("App: クイズ（鳴き声を聞いて、写真から選ぶ）", () =>
     await userEvent.click(screen.getByRole("button", { name: /鳴き声を聞いて、写真から選ぶ/ }));
     await screen.findByRole("group", { name: "写真の選択肢" });
   };
-  const playButton = () => screen.getByRole("button", { name: /鳴き声を聞く|止める|音源を探しています/ });
+  const playButton = () => screen.getByRole("button", { name: /鳴き声を聞く|もう一度聞く|止める|音源を探しています/ });
 
   beforeEach(() => {
     vi.useRealTimers();
   });
 
-  it("名前は出さず、再生ボタンで鳴き声を聞ける。再生はタップの中で解錠してから行う", async () => {
+  it("名前は出さず、問題が出たら自動で鳴き声が再生される。解錠はタップの中で、音源を探すより前に行う（#123）", async () => {
     await openQuiz();
     await userEvent.click(screen.getByRole("button", { name: /鳴き声を聞いて、写真から選ぶ/ }));
-    // 解錠は、タップの同期処理内（音源を探すより前）で行う。自動再生はしない
     expect(unlockAudio).toHaveBeenCalledTimes(1);
     await screen.findByRole("group", { name: "写真の選択肢" });
     expect(unlockAudio.mock.invocationCallOrder[0]).toBeLessThan(fetchCallAudio.mock.invocationCallOrder[0]);
-    expect(playAudio).not.toHaveBeenCalled();
     expect(screen.getByRole("heading", { level: 2 }).textContent).toBe("この鳴き声の鳥は？");
-    await waitFor(() => expect(playButton()).toBeEnabled());
-    await userEvent.click(playButton());
-    expect(unlockAudio.mock.invocationCallOrder.at(-1)!).toBeLessThan(playAudio.mock.invocationCallOrder[0]);
-    expect(playAudio).toHaveBeenCalledWith("https://u/a.mp3", expect.any(Function));
-    // 再生中は「止める」になり、押すと停止する。聞き直せる
+    // ボタンを押さなくても、再生が始まる
+    await waitFor(() => expect(playAudio).toHaveBeenCalledWith("https://u/a.mp3", expect.any(Function)));
+    expect(playAudio).toHaveBeenCalledTimes(1);
+    expect(unlockAudio.mock.invocationCallOrder[0]).toBeLessThan(playAudio.mock.invocationCallOrder[0]);
+    // 再生中は「止める」になり、押すと停止する。終わると「もう一度聞く」になり、聞き直せる
     await userEvent.click(screen.getByRole("button", { name: /止める/ }));
     expect(stopAudio).toHaveBeenCalled();
+    await waitFor(() => expect(playButton()).toBeEnabled());
     await userEvent.click(playButton());
     expect(playAudio).toHaveBeenCalledTimes(2);
+  });
+
+  it("再生が終わると、ボタンは「もう一度聞く」になる。次の問題でも、自動で再生される", async () => {
+    await startCall();
+    await waitFor(() => expect(playAudio).toHaveBeenCalledTimes(1));
+    act(() => (playAudio.mock.calls[0][1] as () => void)()); // 再生の終了
+    expect(await screen.findByRole("button", { name: /もう一度聞く/ })).toBeEnabled();
+    await answerFirst();
+    const unlocks = unlockAudio.mock.calls.length;
+    await userEvent.click(screen.getByRole("button", { name: nextLabel(0) }));
+    expect(unlockAudio.mock.calls.length).toBeGreaterThan(unlocks); // 「次へ」のタップで解錠する
+    await waitFor(() => expect(playAudio).toHaveBeenCalledTimes(2));
   });
 
   it("音源が見つからない鳥は飛ばして別の問題にし、10問遊べる。回答後に音源の出典が出る", async () => {
@@ -203,13 +214,15 @@ describe("App: クイズ（鳴き声を聞いて、写真から選ぶ）", () =>
     expect(screen.getByRole("group", { name: "写真の選択肢" })).toBeInTheDocument();
   });
 
-  it("再生に失敗したら、案内を出す（音量・マナーモード）", async () => {
+  it("自動再生できなかったら、案内を出してボタン再生へ戻す（音量・マナーモード）", async () => {
     playAudio.mockRejectedValueOnce(new Error("NotAllowedError"));
     await startCall();
+    expect(await screen.findByText(/自動で再生できませんでした/)).toBeInTheDocument();
     await waitFor(() => expect(playButton()).toBeEnabled());
-    await userEvent.click(playButton());
-    expect(await screen.findByText(/再生できませんでした/)).toBeInTheDocument();
     expect(playButton()).toHaveTextContent("鳴き声を聞く");
+    await userEvent.click(playButton()); // ボタンなら、再生できる
+    expect(playAudio).toHaveBeenCalledTimes(2);
+    expect(screen.queryByText(/自動で再生できませんでした/)).toBeNull();
   });
 
   it("オフラインでは、鳴き声のクイズを選べず、理由を出す", async () => {
