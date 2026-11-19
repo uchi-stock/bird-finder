@@ -1415,7 +1415,8 @@ footer {
 }
 
 /* 外枠（回答後の正誤の色を含む）は、セルではなく画像そのものの周囲につける。縦横比を保ち、セルの中央に置く */
-.quiz-choice img {
+.quiz-choice img,
+.quiz-pc-photo img {
   position: absolute;
   inset: 0;
   box-sizing: border-box;
@@ -1432,7 +1433,8 @@ footer {
 
 /* 切り出した画像は、正方形のセルの中に、切り出し範囲がいっぱいになる大きさと位置で置く（大きさと位置はstyleで指定）。外枠は、囲みの正方形につける */
 .photo .thumb-sq img,
-.quiz-choice .thumb-sq img {
+.quiz-choice .thumb-sq img,
+.quiz-pc-photo .thumb-sq img {
   position: absolute;
   max-width: none;
   max-height: none;
@@ -1442,7 +1444,8 @@ footer {
   inset: auto;
 }
 
-.quiz-choice .thumb-sq {
+.quiz-choice .thumb-sq,
+.quiz-pc-photo .thumb-sq {
   border-width: 3px;
   border-radius: 12px;
   background: var(--card);
@@ -1567,6 +1570,50 @@ footer {
   background: var(--acc);
   color: var(--accfg);
   font-size: 16px;
+  font-weight: bold;
+}
+
+/* 写真→鳴き声: 写真を小さめにし、4つの鳴き声の行が、iPhone SEでも1画面に近く収まるようにする */
+.quiz-pc-photo {
+  position: relative;
+  width: 132px;
+  margin: 4px auto;
+  aspect-ratio: 1;
+}
+
+.quiz-pc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 6px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.quiz-pc-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.quiz-pc-row .quiz-play {
+  flex: 1;
+  min-height: 44px;
+  padding: 6px 12px;
+}
+
+.quiz-pc-row > button:not(.quiz-play) {
+  min-width: 64px;
+  min-height: 44px;
+}
+
+.quiz-pc-name {
+  flex: 1;
+  text-align: right;
+}
+
+.quiz-pc-row.correct .quiz-pc-name {
   font-weight: bold;
 }
 
