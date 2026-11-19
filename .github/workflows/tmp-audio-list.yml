@@ -16,20 +16,14 @@ jobs:
       - name: 候補を一覧する
         run: |
           cat > /tmp/l.mjs <<'JS'
-          const sci = "Mareca penelope";
-          const modes = { category: `filetype:audio incategory:"${sci}"`, text: `filetype:audio "${sci}"`, ja: `filetype:audio Eurasian wigeon` };
-          for (const [m, q] of Object.entries(modes)) {
-            const p = new URLSearchParams({ action: "query", format: "json", generator: "search", gsrnamespace: "6", gsrlimit: "30", gsrsearch: q, prop: "videoinfo|categories", cllimit: "max", viprop: "url|mime|derivatives|extmetadata|duration" });
+          const titles = ["File:Eurasian Wigeon (Anas penelope) (W1CDR0001386 BD2).ogg", "File:Hvizdak256.ogg"];
+          for (const t of titles) {
+            const p = new URLSearchParams({ action: "query", format: "json", titles: t, prop: "videoinfo", viprop: "url|mime|derivatives|extmetadata|duration" });
             const r = await fetch(`https://commons.wikimedia.org/w/api.php?${p}`, { headers: { "User-Agent": "bird-finder-audio-check/1.0" } });
-            const j = await r.json();
-            const pages = Object.values(j?.query?.pages ?? {}).sort((a, b) => (a.index ?? 99) - (b.index ?? 99));
-            console.log(`## ${m} (${pages.length}件)`);
-            for (const pg of pages) {
-              const i = pg.videoinfo?.[0];
-              const d = (i?.extmetadata?.ImageDescription?.value ?? "").replace(/<[^>]*>/g, " ").slice(0, 100);
-              const mp3 = i?.derivatives?.some((x) => x.type?.startsWith("audio/mpeg")) || i?.mime === "audio/mpeg";
-              console.log(`#${pg.index} ${pg.title} | ${Math.round(i?.duration ?? 0)}秒 | mp3=${mp3} | ${i?.extmetadata?.LicenseShortName?.value} | cats: ${(pg.categories ?? []).map((c) => c.title.replace("Category:", "")).join("; ").slice(0, 160)} | ${d}`);
-            }
+            const pg = Object.values((await r.json()).query.pages)[0];
+            const i = pg.videoinfo[0];
+            const mp3 = i.derivatives?.find((d) => d.type?.startsWith("audio/mpeg"))?.src;
+            console.log("RESULT " + JSON.stringify({ src: mp3, pageUrl: i.descriptionurl, title: pg.title.replace(/^File:/, ""), credit: (i.extmetadata?.Artist?.value ?? "").replace(/<[^>]*>/g, "").trim(), license: i.extmetadata?.LicenseShortName?.value, duration: i.duration }));
           }
           JS
           node /tmp/l.mjs
