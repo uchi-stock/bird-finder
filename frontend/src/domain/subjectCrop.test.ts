@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cropStyle, subjectCrop } from "./subjectCrop";
+import { cropFromBox, cropStyle, subjectCrop } from "./subjectCrop";
 import { seededRng } from "./quiz";
 
 const BG = 200;
@@ -84,5 +84,32 @@ describe("cropStyle: 切り出し範囲を、正方形のセルいっぱいに�
     expect(s.width).toBe("200%");
     expect(s.height).toBe("400%");
     expect(s.top).toBe("-80%");
+  });
+});
+
+describe("cropFromBox: 被写体の範囲（物体検出の結果など）から、切り出す正方形を決める（#150）", () => {
+  it("被写体の周囲に余白（12%）を足した正方形で、被写体の中心に合わせる", () => {
+    // 100x100の画像で、中央の40x40の被写体 → 一辺は 40 * 1.24 = 49.6 だが、下限（半分）の50
+    const c = cropFromBox({ x0: 30, y0: 30, x1: 70, y1: 70 }, 100, 100)!;
+    expect(c.w).toBeCloseTo(0.5, 5);
+    expect(c.x).toBeCloseTo(0.25, 5);
+    const d = cropFromBox({ x0: 25, y0: 25, x1: 70, y1: 70 }, 100, 100)!; // 45 * 1.24 = 55.8
+    expect(d.w).toBeCloseTo(0.558, 3);
+  });
+  it("被写体が隅にあれば、画像の中に収める", () => {
+    const c = cropFromBox({ x0: 0, y0: 0, x1: 20, y1: 20 }, 100, 100)!;
+    expect(c.x).toBe(0);
+    expect(c.y).toBe(0);
+  });
+  it("縦長・横長の画像でも、画素では正方形", () => {
+    const c = cropFromBox({ x0: 80, y0: 120, x1: 130, y1: 170 }, 200, 300)!;
+    expect(c.w * 200).toBeCloseTo(c.h * 300, 5);
+  });
+  it("被写体が大きい（余白が少ない）・正方形に収まらないときは、null", () => {
+    expect(cropFromBox({ x0: 5, y0: 5, x1: 95, y1: 95 }, 100, 100)).toBeNull();
+    expect(cropFromBox({ x0: 5, y0: 20, x1: 95, y1: 40 }, 100, 60)).toBeNull();
+  });
+  it("被写体が点（大きさ0）でも、下限の大きさで切り出す", () => {
+    expect(cropFromBox({ x0: 10, y0: 10, x1: 10, y1: 10 }, 100, 100)?.w).toBeCloseTo(0.5, 5);
   });
 });

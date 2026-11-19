@@ -51,6 +51,30 @@ function trimmedRange(mass: ArrayLike<number>, total: number): [number, number] 
   return [lo, hi];
 }
 
+/** 被写体の範囲（画素。x1・y1は含まない端） */
+export interface Box {
+  x0: number;
+  y0: number;
+  x1: number;
+  y1: number;
+}
+
+/**
+ * 被写体の範囲から、切り出す正方形を決める（輝度による推定と、物体検出の結果の、どちらからも使う）。
+ * 被写体の周囲に余白を足し、寄りすぎないようにして、画像の中に収める。余白が少ない・正方形に収まらないときは、null
+ */
+export function cropFromBox(box: Box, w: number, h: number): Crop | null {
+  const short = Math.min(w, h);
+  const subject = Math.max(box.x1 - box.x0, box.y1 - box.y0);
+  const side = Math.max(subject * (1 + 2 * MARGIN), short * MIN_SIDE);
+  if (!(side > 0) || side > short * MAX_SIDE) return null;
+  const cx = (box.x0 + box.x1) / 2;
+  const cy = (box.y0 + box.y1) / 2;
+  const left = Math.min(Math.max(cx - side / 2, 0), w - side);
+  const top = Math.min(Math.max(cy - side / 2, 0), h - side);
+  return { x: left / w, y: top / h, w: side / w, h: side / h };
+}
+
 /**
  * 被写体を含む正方形の範囲を返す。切り出さないほうがよいとき（余白が少ない・被写体が正方形に収まらない・
  * 背景が複雑で被写体の範囲を決められない・被写体が見つからない）は、nullを返す。
@@ -78,16 +102,7 @@ export function subjectCrop(gray: ArrayLike<number>, w: number, h: number): Crop
   if (total < w * h * MIN_SUBJECT) return null;
   const [x0, x1] = trimmedRange(colMass, total);
   const [y0, y1] = trimmedRange(rowMass, total);
-  const short = Math.min(w, h);
-  const subject = Math.max(x1 - x0 + 1, y1 - y0 + 1);
-  // 被写体の周囲に余白を残し、寄りすぎないようにする
-  const side = Math.max(subject * (1 + 2 * MARGIN), short * MIN_SIDE);
-  if (side > short * MAX_SIDE) return null;
-  const cx = (x0 + x1 + 1) / 2;
-  const cy = (y0 + y1 + 1) / 2;
-  const left = Math.min(Math.max(cx - side / 2, 0), w - side);
-  const top = Math.min(Math.max(cy - side / 2, 0), h - side);
-  return { x: left / w, y: top / h, w: side / w, h: side / h };
+  return cropFromBox({ x0, y0, x1: x1 + 1, y1: y1 + 1 }, w, h);
 }
 
 /** 切り出し範囲を、正方形のセルの中で、画像を置くためのCSS（セルの一辺に対する割合）。画像全体を、切り出し範囲がセルいっぱいになる大きさと位置にする */
