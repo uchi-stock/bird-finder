@@ -27,6 +27,42 @@ for (const size of SIZES) {
       expect(errors).toEqual([]);
     });
 
+    test("余白が多い画像は、被写体に寄せて正方形で切り出され、余白が少ない画像は、切り出されない（#148）", async ({ page }, testInfo) => {
+      // 被写体が小さい画像（切り出す）と、大きい画像（切り出さない）を、模擬の画像で用意する
+      const dims: [number, number, number][] = [[330, 330, 0.12], [330, 220, 0.46], [330, 200, 0.1], [200, 330, 0.12]];
+      let n = 0;
+      const index = new Map<string, number>();
+      await page.route("https://thumb.wikimedia.org/**", (r) => {
+        const u = r.request().url();
+        if (!index.has(u)) index.set(u, n++ % 4);
+        const [w, h, k] = dims[index.get(u) ?? 0];
+        const rad = Math.min(w, h) * k;
+        r.fulfill({
+          status: 200,
+          contentType: "image/svg+xml",
+          headers: { "access-control-allow-origin": "*" },
+          body: `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><defs><pattern id="p" width="24" height="24" patternUnits="userSpaceOnUse"><rect width="12" height="24" fill="#222"/><rect x="12" width="12" height="24" fill="#eee"/></pattern></defs><rect width="100%" height="100%" fill="#9bd"/><ellipse cx="${w * 0.55}" cy="${h * 0.45}" rx="${rad}" ry="${rad * 0.8}" fill="url(#p)"/></svg>`,
+        });
+      });
+      await page.route("https://ja.wikipedia.org/api/rest_v1/page/summary/**", (r) => {
+        const t = decodeURIComponent(r.request().url().split("/summary/")[1]);
+        r.fulfill({
+          status: 200,
+          contentType: "application/json",
+          headers: { "access-control-allow-origin": "*" },
+          body: JSON.stringify({ type: "standard", thumbnail: { source: `https://thumb.wikimedia.org/${encodeURIComponent(t)}.svg` }, content_urls: { desktop: { page: "https://w/x" } } }),
+        });
+      });
+      await openApp(page);
+      await showResults(page);
+      await expect(page.locator(".results .thumb-sq").first()).toBeVisible();
+      expect(await page.locator(".results .thumb-plain").count()).toBeGreaterThan(0);
+      // 切り出した画像は、セルの中の正方形
+      const box = await page.locator(".results .thumb-sq").first().boundingBox();
+      expect(box && Math.abs(box.width - box.height) <= 1).toBe(true);
+      await captureScreenshot(page, testInfo, `${size.name}-2-thumb-crop`, `余白の多い画像の切り出し（${size.name}）`, { fullPage: false });
+    });
+
     test("条件を入力すると候補が出て、結果は1画面に収まる。カードを横にスライドできる", async ({ page }, testInfo) => {
       await openApp(page);
       await showResults(page);

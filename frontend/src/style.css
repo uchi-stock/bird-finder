@@ -205,6 +205,25 @@ footer {
   object-fit: contain;
 }
 
+/* 切り出さない画像は、囲みの要素が、レイアウトに影響しない */
+.thumb-plain {
+  display: contents;
+}
+
+/* 余白が多い画像は、被写体に寄せて、正方形のセルいっぱいに切り出す（#148）。外枠と角丸は、切り出した正方形につける */
+.thumb-sq {
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  max-width: 100%;
+  height: 100%;
+  margin: auto;
+  overflow: hidden;
+  aspect-ratio: 1;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
 .lightbox img {
   max-width: 100%;
   max-height: 75vh;
@@ -1377,7 +1396,26 @@ footer {
   object-fit: contain;
 }
 
-.quiz-choice.correct img {
+/* 切り出した画像は、正方形のセルの中に、切り出し範囲がいっぱいになる大きさと位置で置く（大きさと位置はstyleで指定）。外枠は、囲みの正方形につける */
+.photo .thumb-sq img,
+.quiz-choice .thumb-sq img {
+  position: absolute;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  inset: auto;
+}
+
+.quiz-choice .thumb-sq {
+  border-width: 3px;
+  border-radius: 12px;
+  background: var(--card);
+}
+
+.quiz-choice.correct img,
+.quiz-choice.correct .thumb-sq {
   border-color: #2e8b57;
 }
 
@@ -1385,7 +1423,8 @@ footer {
   opacity: 0.8;
 }
 
-.quiz-choice.wrong img {
+.quiz-choice.wrong img,
+.quiz-choice.wrong .thumb-sq {
   border-color: #c0392b;
 }
 

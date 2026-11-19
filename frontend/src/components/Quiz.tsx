@@ -7,6 +7,7 @@ import { SPECIES, SIZES } from "../options";
 import { fetchPhoto, type BirdPhoto } from "../photo";
 import { loadQuizStats, saveQuizStats, type QuizStats } from "../storage";
 import { Photo } from "./Photo";
+import { ThumbImg } from "./ThumbImg";
 
 const ROUND_SIZE = 10;
 // 鳴き声のクイズは、音源が見つからない鳥を飛ばして別の問題に差し替えるため、予備の問題を多めに作る
@@ -342,7 +343,7 @@ export function Quiz() {
           const label = `選択肢${i + 1}${state === "correct" ? "（正解）" : state === "wrong" ? "（不正解）" : ""}`;
           return (
             <button key={id} type="button" className={`quiz-choice ${state}`} aria-label={label} disabled={(isCall && audio === undefined) || (picked !== null && state === "")} onClick={() => choose(id)}>
-              <img src={photo?.thumbnail} alt="" crossOrigin="anonymous" />
+              <ThumbImg src={photo?.thumbnail ?? ""} alt="" />
               {state === "correct" && (
                 <span className="quiz-mark" aria-hidden="true">
                   ✓
