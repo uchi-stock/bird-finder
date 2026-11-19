@@ -1192,14 +1192,6 @@ footer {
 }
 
 /* みんなに共有・みんなの観察 */
-.share-opt {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 8px;
-  font-size: 0.85rem;
-}
-
 .share-note {
   margin: 4px 0 0;
   font-size: 0.72rem;
