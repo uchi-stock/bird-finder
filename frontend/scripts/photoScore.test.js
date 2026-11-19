@@ -144,6 +144,39 @@ describe("decide（安定させる）", () => {
   });
 });
 
+describe("decide: 飛んでいる写真を、1枚目に使わない（#157。ユリカモメの1枚目が飛んでいた）", () => {
+  const m = (ratio, flying = false) => ({ ratio, center: 20, flying });
+  const cand = (id, ratio, flying = false) => ({ id, ratio, center: 20, width: 1000, flying });
+  const existing = { thumbnail: "https://u/old.jpg", pageUrl: "https://commons.wikimedia.org/wiki/File:Black-headed_Gull_02.jpg", license: "CC BY-SA 4.0" };
+
+  it("選び直し済みの写真が、飛んでいると判定されたら、使えないものとして扱い、飛んでいない候補へ差し替える", () => {
+    const d = decide({ existing, existingMeasure: m(0.2, true), wikipediaMeasure: m(1.0), candidates: [cand("perched", 0.5)] });
+    expect(d.action).toBe("replace");
+    expect(d.best.id).toBe("perched");
+  });
+  it("選び直し済みが飛んでいて、飛んでいない候補が無ければ、外す（Wikipediaの画像へ戻る）", () => {
+    expect(decide({ existing, existingMeasure: m(0.2, true), wikipediaMeasure: m(1.0), candidates: [] }).action).toBe("drop");
+  });
+  it("飛んでいる候補は、背景がどれだけ単純でも、選ばない", () => {
+    const d = decide({ existing: undefined, existingMeasure: null, wikipediaMeasure: m(1.0), candidates: [cand("flying", 0.1, true), cand("perched", 0.6)] });
+    expect(d.action).toBe("replace");
+    expect(d.best.id).toBe("perched");
+    expect(decide({ existing: undefined, existingMeasure: null, wikipediaMeasure: m(1.0), candidates: [cand("flying", 0.1, true)] }).action).toBe("none");
+  });
+  it("Wikipediaの代表画像が飛んでいるなら、基準にしない。飛んでいない候補があれば、無条件で選ぶ", () => {
+    // 基準が飛んでいない（0.5）なら、0.6は明らかには良くないため、入れ替えない
+    expect(decide({ existing: undefined, existingMeasure: null, wikipediaMeasure: m(0.5), candidates: [cand("a", 0.6)] }).action).toBe("none");
+    // 基準が飛んでいる（0.5）なら、0.6でも選ぶ
+    const d = decide({ existing: undefined, existingMeasure: null, wikipediaMeasure: m(0.5, true), candidates: [cand("a", 0.6)] });
+    expect(d.action).toBe("replace");
+    expect(d.best.id).toBe("a");
+  });
+  it("姿勢を判定できていない（flyingが無い）写真は、飛んでいないものとして扱う（今の動作を壊さない）", () => {
+    const d = decide({ existing, existingMeasure: { ratio: 0.3, center: 20 }, wikipediaMeasure: { ratio: 1.0, center: 20 }, candidates: [{ id: "x", ratio: 0.29, center: 20, width: 1000 }] });
+    expect(d.action).toBe("keep");
+  });
+});
+
 describe("tooManyFailures（障害時に書き換えない）", () => {
   it("検索に失敗した鳥が、上限を超えたら true", () => {
     expect(tooManyFailures(0)).toBe(false);

@@ -18,6 +18,7 @@ on:
       # 仕組み自体を変えたとき（初回の導入を含む）にも、結果を作り直す
       - ".github/workflows/curate-photos.yml"
       - "frontend/scripts/photoScore.js"
+      - "frontend/scripts/poseScore.js"
       - "frontend/scripts/curatePhotos.js"
   workflow_dispatch:
     inputs:
@@ -52,10 +53,10 @@ jobs:
       - name: 依存パッケージをインストールする
         working-directory: frontend
         run: npm ci
-      # 画像の読み取りにだけsharpを使う。依存には加えない（アプリや通常のCIに影響しない）
-      - name: sharpをインストールする
+      # 画像の読み取りにsharp、飛んでいる写真の判定（画像分類）にtransformers.jsを使う。依存には加えない（アプリや通常のCIに影響しない）
+      - name: sharpと画像分類のパッケージをインストールする
         working-directory: frontend
-        run: npm install --no-save sharp
+        run: npm install --no-save sharp @huggingface/transformers
       - name: 写真を選び直す
         working-directory: frontend
         env:
