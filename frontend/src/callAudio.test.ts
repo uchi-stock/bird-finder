@@ -228,3 +228,18 @@ describe("共有<audio>（iOS Safari対策）", () => {
     await expect(playAudio("https://u/a.mp3", () => {})).rejects.toThrow("NotAllowedError");
   });
 });
+
+describe("fetchCallAudio: 選び直した音源（#184）", () => {
+  it("ヒドリガモは、固定した音源を、通信せずに返す（音楽が選ばれた）", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    const a = await fetchCallAudio("Mareca penelope");
+    expect(a?.title).toMatch(/Eurasian Wigeon/);
+    expect(a?.src).toMatch(/^https:\/\/upload\.wikimedia\.org\/.*\.mp3$/);
+    expect(a?.pageUrl).toMatch(/^https:\/\/commons\.wikimedia\.org\/wiki\/File:/);
+    expect(a?.credit).toBeTruthy();
+    expect(a?.license).toBeTruthy();
+    expect(fetchMock).not.toHaveBeenCalled();
+    vi.unstubAllGlobals();
+  });
+});
