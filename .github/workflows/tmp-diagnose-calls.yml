@@ -1,0 +1,58 @@
+name: tmp-diagnose-calls
+
+# 一時的な調査用workflow（issue #139、2026-11-19作成）。
+# サンドボックスからWikimedia Commonsへ到達できないため、全種の鳴き声の音源候補
+# （検索の順位・ファイル名・長さ・ライセンス・カテゴリ・説明）をGitHub Actionsから取得し、
+# ジョブログとJob Summaryへ出す。結果をもとに、音源の選び直し（frontend/src/data/calls.json）を決める。
+# 調査が終わったら、このファイルを削除する。
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 26
+      - name: 全種の音源候補を取得する
+        run: |
+          node --input-type=module -e '
+            import fs from "node:fs";
+            const species = JSON.parse(fs.readFileSync("frontend/src/data/species.json", "utf-8"));
+            const url = (sci, mode) => "https://commons.wikimedia.org/w/api.php?" + new URLSearchParams({
+              action: "query", format: "json", generator: "search", gsrnamespace: "6", gsrlimit: "8",
+              gsrsearch: mode === "category" ? `filetype:audio incategory:"${sci}"` : `filetype:audio "${sci}"`,
+              prop: "videoinfo|categories", cllimit: "max", viprop: "url|mime|derivatives|extmetadata|duration",
+            });
+            const strip = (s) => (s ?? "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+            const lines = ["| 鳥 | 検索 | 順位 | ファイル | 秒 | ライセンス | カテゴリ | 説明 |", "|---|---|---|---|---|---|---|---|"];
+            for (const s of species) {
+              for (const mode of ["category", "text"]) {
+                let json;
+                try {
+                  const res = await fetch(url(s.scientific_name, mode), { headers: { "User-Agent": "bird-finder-diagnose/1.0 (GitHub Actions)" } });
+                  json = await res.json();
+                } catch (e) {
+                  lines.push(`| ${s.name_ja} | ${mode} | - | 取得失敗: ${e.message} | | | | |`);
+                  continue;
+                }
+                const pages = Object.values(json?.query?.pages ?? {}).sort((a, b) => (a.index ?? 99) - (b.index ?? 99));
+                if (pages.length === 0) lines.push(`| ${s.name_ja} | ${mode} | - | 該当なし | | | | |`);
+                for (const p of pages) {
+                  const i = p.videoinfo?.[0] ?? {};
+                  const m = i.extmetadata ?? {};
+                  const cats = (p.categories ?? []).map((c) => c.title.replace(/^Category:/, "")).slice(0, 6).join(" / ");
+                  lines.push(`| ${s.name_ja} | ${mode} | ${p.index} | ${p.title.replace(/^File:/, "")} | ${Math.round(i.duration ?? 0)} | ${m.LicenseShortName?.value ?? ""} | ${cats} | ${strip(m.ImageDescription?.value).slice(0, 70)} |`);
+                }
+                await new Promise((r) => setTimeout(r, 300));
+              }
+            }
+            fs.writeFileSync("/tmp/calls.md", lines.join("\n") + "\n");
+          '
+          # Job Summaryの内容はAPIから取得できないため、ジョブログにも同じ内容を出す
+          tee -a "$GITHUB_STEP_SUMMARY" < /tmp/calls.md

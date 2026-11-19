@@ -3,6 +3,8 @@
 // そのため単一の<audio>要素（シングルトン）をタップの同期処理内で解錠し、以降はsrcを差し替えて再生する
 // （dev-standards docs/ios-safari-audio-unlock-pattern.md）。
 
+import curatedJson from "./data/calls.json";
+
 export interface CallAudio {
   src: string;
   pageUrl: string;
@@ -18,9 +20,29 @@ interface Derivative {
 interface CommonsPage {
   index?: number;
   title: string;
-  videoinfo?: { url?: string; mime?: string; descriptionurl?: string; derivatives?: Derivative[]; extmetadata?: Record<string, { value?: string }> }[];
+  /** 所属するカテゴリ（例「Category:Operas by Leoš Janáček」）。音楽作品など、鳥の録音でないものを見分ける手がかり */
+  categories?: { title: string }[];
+  videoinfo?: { duration?: number; url?: string; mime?: string; descriptionurl?: string; derivatives?: Derivative[]; extmetadata?: Record<string, { value?: string }> }[];
 }
 export type CommonsResponse = { query?: { pages?: Record<string, CommonsPage> } };
+
+// 選び直した音源（鳥の学名をキーにする。写真の選び直し photos.json と同じ考え方）。あれば、検索より優先し、通信しない。
+// 検索で、合唱・環境音など、単独の鳴き声でない音源が選ばれる鳥の音源を、確認したうえで固定する
+const curated = curatedJson as Record<string, CallAudio>;
+
+// 単独の鳴き声でない録音らしいファイル（合唱・群れ・環境音）の手がかり。ファイル名と説明文で見る
+const NOT_SOLO = /chorus|choir|dawn|flock|colony|ambient|ambience|soundscape|atmosphere|background|ensemble|habitat|合唱|群れ|環境音/i;
+// 音楽作品・合唱など、鳥の録音でないものの手がかり（Commonsでは、鳥の名前を題にした音楽作品が、学名のカテゴリに入っていることがある。例: ヤナーチェクのオペラ「野鴨」）
+const NOT_BIRD_CATEGORY = /music|opera|orchestra|symphon|compos|choir|chorus|song|singer|vocal ensemble|ambient|soundscape/i;
+// これより長い録音は、環境音などの可能性が高い（秒）
+const LONG_SECONDS = 180;
+
+/** 単独の鳴き声らしくない録音か。該当しても使えなくはないため、除外はせず、後回しにする */
+function suspicious(pg: CommonsPage, info: NonNullable<CommonsPage["videoinfo"]>[number]): boolean {
+  const desc = (info.extmetadata?.ImageDescription?.value ?? "").replace(/<[^>]*>/g, " ");
+  const cats = (pg.categories ?? []).map((c) => c.title).join(" ");
+  return NOT_SOLO.test(`${pg.title} ${desc}`) || NOT_BIRD_CATEGORY.test(cats) || (info.duration ?? 0) > LONG_SECONDS;
+}
 
 const normalize = (s: string) => s.toLowerCase().replace(/[-_.]+/g, " ");
 
@@ -43,15 +65,20 @@ function playableSrc(info: NonNullable<CommonsPage["videoinfo"]>[number]): strin
 
 /**
  * 検索結果から音源を選ぶ。
- * strict=trueのときは、ファイル名に学名を含むものだけを採用する（別の鳥の音源を再生しないため）
+ * strict=trueのときは、ファイル名に学名を含むものだけを採用する（別の鳥の音源を再生しないため）。
+ * 合唱・環境音らしい録音は後回しにする（単独の鳴き声がほかにあれば、そちらを選ぶ）
  */
 export function pickAudio(json: CommonsResponse, scientificName: string, strict: boolean): CallAudio | null {
   const pages = Object.values(json?.query?.pages ?? {}).sort((a, b) => (a.index ?? 99) - (b.index ?? 99));
-  for (const pg of pages) {
+  const usable = pages.flatMap((pg) => {
     const info = pg.videoinfo?.[0];
-    if (!info || (strict && !titleMatches(pg.title, scientificName))) continue;
+    if (!info || (strict && !titleMatches(pg.title, scientificName))) return [];
     const src = playableSrc(info);
-    if (!src) continue;
+    return src ? [{ pg, info, src, bad: suspicious(pg, info) }] : [];
+  });
+  // 単独らしい録音を先に（同じ区分の中では、検索の順位のまま）
+  usable.sort((a, b) => Number(a.bad) - Number(b.bad));
+  for (const { pg, info, src } of usable.slice(0, 1)) {
     const meta = info.extmetadata ?? {};
     return {
       src,
@@ -73,7 +100,8 @@ export function commonsAudioUrl(scientificName: string, mode: "category" | "text
     gsrnamespace: "6",
     gsrlimit: "8",
     gsrsearch: mode === "category" ? `filetype:audio incategory:"${scientificName}"` : `filetype:audio "${scientificName}"`,
-    prop: "videoinfo",
+    prop: "videoinfo|categories",
+    cllimit: "max",
     viprop: "url|mime|derivatives|extmetadata|duration",
   });
   return `https://commons.wikimedia.org/w/api.php?${q.toString()}`;
@@ -89,6 +117,8 @@ const audioCache = new Map<string, Promise<CallAudio | null>>();
 
 /** 学名で音源を探す。まずカテゴリで探し、無ければ学名を含むファイル名に限って全文検索する。失敗・該当なしはnull */
 export function fetchCallAudio(scientificName: string): Promise<CallAudio | null> {
+  const fixed = curated[scientificName];
+  if (fixed?.src) return Promise.resolve(fixed); // 選び直した音源があれば、通信しない
   let p = audioCache.get(scientificName);
   if (!p) {
     p = (async () => (await search(scientificName, "category")) ?? (await search(scientificName, "text")))().catch(() => null);

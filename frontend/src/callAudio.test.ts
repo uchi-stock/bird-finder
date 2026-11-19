@@ -9,6 +9,39 @@ const page = (title: string, index: number, info: Record<string, unknown> = {}) 
 const resp = (...pages: ReturnType<typeof page>[]): CommonsResponse => ({ query: { pages: Object.fromEntries(pages.map((p, i) => [String(i), p])) } });
 const json = (body: unknown, ok = true) => Promise.resolve({ ok, json: () => Promise.resolve(body) } as Response);
 
+describe("pickAudio: 単独の鳴き声らしい録音を選ぶ（#139）", () => {
+  const mp3 = (n: string) => [{ type: "audio/mpeg", src: `https://u/${n}.mp3` }];
+  it("ファイル名・説明に合唱・環境音の手がかりがある録音は、後回しにする", () => {
+    const r = resp(
+      page("File:Anas platyrhynchos dawn chorus.ogg", 1, { derivatives: mp3("chorus") }),
+      page("File:Anas platyrhynchos - Mallard.ogg", 2, { derivatives: mp3("solo") }),
+    );
+    expect(pickAudio(r, "Anas platyrhynchos", true)?.src).toBe("https://u/solo.mp3");
+    const desc = resp(
+      page("File:Anas platyrhynchos 1.ogg", 1, { derivatives: mp3("amb"), extmetadata: { ImageDescription: { value: "<p>Ambient sound of a lake</p>" } } }),
+      page("File:Anas platyrhynchos 2.ogg", 2, { derivatives: mp3("solo2") }),
+    );
+    expect(pickAudio(desc, "Anas platyrhynchos", true)?.src).toBe("https://u/solo2.mp3");
+  });
+  it("音楽作品のカテゴリに入っているファイルは、後回しにする（例: マガモの学名カテゴリにある、ヤナーチェクのオペラ）", () => {
+    const opera = { ...page("File:Janacek - kacena divoka.ogg", 1, { derivatives: mp3("opera") }), categories: [{ title: "Category:Anas platyrhynchos" }, { title: "Category:Operas by Leoš Janáček" }] };
+    const solo = { ...page("File:Anas platyrhynchos XC123.ogg", 2, { derivatives: mp3("solo") }), categories: [{ title: "Category:Anas platyrhynchos" }] };
+    expect(pickAudio(resp(opera, solo), "Anas platyrhynchos", false)?.src).toBe("https://u/solo.mp3"); // 非厳密（カテゴリ検索）でも
+  });
+  it("長い録音（3分超）は後回しにする", () => {
+    const r = resp(page("File:Anas platyrhynchos long.ogg", 1, { duration: 600, derivatives: mp3("long") }), page("File:Anas platyrhynchos short.ogg", 2, { duration: 20, derivatives: mp3("short") }));
+    expect(pickAudio(r, "Anas platyrhynchos", true)?.src).toBe("https://u/short.mp3");
+  });
+  it("単独らしい録音がほかに無ければ、後回しにした録音を使う（音源なしにしない）", () => {
+    const r = resp(page("File:Anas platyrhynchos chorus.ogg", 1, { derivatives: mp3("only") }));
+    expect(pickAudio(r, "Anas platyrhynchos", true)?.src).toBe("https://u/only.mp3");
+  });
+  it("同じ区分の中では、検索の順位のまま選ぶ", () => {
+    const r = resp(page("File:Anas platyrhynchos b.ogg", 2, { derivatives: mp3("b") }), page("File:Anas platyrhynchos a.ogg", 1, { derivatives: mp3("a") }));
+    expect(pickAudio(r, "Anas platyrhynchos", true)?.src).toBe("https://u/a.mp3");
+  });
+});
+
 describe("pickAudio", () => {
   it("OggにはCommonsのMP3版（iPhoneで再生できる）を使う", () => {
     expect(pickAudio(resp(page("File:Hypsipetes amaurotis 1.ogg", 1)), "Hypsipetes amaurotis", true)?.src).toBe("https://u/t/orig.ogg.mp3");
