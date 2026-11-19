@@ -187,10 +187,11 @@ footer {
   min-width: 0;
 }
 
+/* サムネイルは、画像を欠けさせずに全体を収める（coverだと、上下が切れて顔が見えないことがある）。余白は枠の背景色 */
 .photo img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
 }
 
@@ -1355,7 +1356,7 @@ footer {
 .quiz-choice img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .quiz-choice.correct {
