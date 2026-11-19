@@ -1,0 +1,35 @@
+name: tmp-audio-list
+# 一時調査用（#184）。調査が終わったら削除する
+on:
+  push:
+    branches: [claude/brave-goodall-y1e0n1]
+    paths: [".github/workflows/tmp-audio-list.yml"]
+permissions:
+  contents: read
+jobs:
+  list:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: 候補を一覧する
+        run: |
+          cat > /tmp/l.mjs <<'JS'
+          const sci = "Mareca penelope";
+          const modes = { category: `filetype:audio incategory:"${sci}"`, text: `filetype:audio "${sci}"`, ja: `filetype:audio Eurasian wigeon` };
+          for (const [m, q] of Object.entries(modes)) {
+            const p = new URLSearchParams({ action: "query", format: "json", generator: "search", gsrnamespace: "6", gsrlimit: "30", gsrsearch: q, prop: "videoinfo|categories", cllimit: "max", viprop: "url|mime|derivatives|extmetadata|duration" });
+            const r = await fetch(`https://commons.wikimedia.org/w/api.php?${p}`, { headers: { "User-Agent": "bird-finder-audio-check/1.0" } });
+            const j = await r.json();
+            const pages = Object.values(j?.query?.pages ?? {}).sort((a, b) => (a.index ?? 99) - (b.index ?? 99));
+            console.log(`## ${m} (${pages.length}件)`);
+            for (const pg of pages) {
+              const i = pg.videoinfo?.[0];
+              const d = (i?.extmetadata?.ImageDescription?.value ?? "").replace(/<[^>]*>/g, " ").slice(0, 100);
+              const mp3 = i?.derivatives?.some((x) => x.type?.startsWith("audio/mpeg")) || i?.mime === "audio/mpeg";
+              console.log(`#${pg.index} ${pg.title} | ${Math.round(i?.duration ?? 0)}秒 | mp3=${mp3} | ${i?.extmetadata?.LicenseShortName?.value} | cats: ${(pg.categories ?? []).map((c) => c.title.replace("Category:", "")).join("; ").slice(0, 160)} | ${d}`);
+            }
+          }
+          JS
+          node /tmp/l.mjs
