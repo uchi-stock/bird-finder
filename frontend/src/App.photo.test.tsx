@@ -1,7 +1,8 @@
-import { fireEvent, screen, within } from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { usePhoto, usePhotoFailed, retryPhoto, fetchCallAudio, useFlightPhoto, chip, firstCard, renderApp, setupAppTests } from "./testApp";
+import { poseLabel } from "./components/Photo";
 
 vi.mock("./callAudio", async () => (await import("./testApp")).callAudioMock);
 vi.mock("./location", async () => (await import("./testApp")).locationMock);
@@ -59,13 +60,19 @@ describe("App: 拡大表示で、先に画像を出す", () => {
     expect(document.querySelector(".lightbox .lb-thumb")).not.toBeNull();
     expect(document.querySelector(".lightbox .lb-large")).not.toHaveClass("on");
   });
-  it("飛翔の写真は、大きい版が無いため、同じ画像を使う", async () => {
+  it("詳細の1枚目は立ち姿、2枚目は飛ぶ姿。飛翔の写真は、大きい版が無いため、同じ画像を使う（#154）", async () => {
+    usePhoto.mockReturnValue({ thumbnail: "https://u/330px-stand.jpg", pageUrl: "https://w/stand" });
     useFlightPhoto.mockReturnValue({ thumbnail: "https://c/500px-fly.jpg", pageUrl: "https://c/x", flight: true });
     await renderApp();
     await userEvent.click(chip("どこで見たか", "空"));
     fireEvent.click(firstCard());
-    expect((document.querySelector(".lightbox .lb-large") as HTMLImageElement).src).toContain("/500px-fly.jpg");
-    expect((document.querySelector(".lightbox .lb-thumb") as HTMLImageElement).src).toContain("/500px-fly.jpg");
+    // 1枚目（ベース）は、飛んでいる状況でも、立ち姿の写真
+    expect((document.querySelector(".lightbox .lb-thumb") as HTMLImageElement).src).toContain("/330px-stand.jpg");
+    // 2枚目は、飛ぶ姿（見つかった飛翔の画像）
+    const flightImg = document.querySelector(".lightbox .lb-flight img") as HTMLImageElement;
+    expect(flightImg.src).toContain("/500px-fly.jpg");
+    expect(flightImg.alt).toMatch(/の飛ぶ姿$/);
+    expect(document.querySelector(".lightbox")).toHaveTextContent("飛ぶ姿");
   });
 });
 
@@ -143,5 +150,44 @@ describe("App: 外部サービスの失敗時の案内（#75）", () => {
   it("もともと写真が無い（失敗ではない）ときは、再読み込みを出さない", async () => {
     await renderApp();
     expect(screen.queryByRole("button", { name: "再読み込み" })).toBeNull();
+  });
+});
+
+describe("App: 詳細の2枚の写真（立ち姿・浮かぶ姿と飛ぶ姿）（#154）", () => {
+  const standing = { thumbnail: "https://u/330px-stand.jpg", pageUrl: "https://w/stand" };
+  const flightPhoto = { thumbnail: "https://c/500px-fly.jpg", pageUrl: "https://c/File:Fly.jpg", credit: "撮影者A", license: "CC BY 4.0", flight: true };
+  it("詳細を開いたときだけ、飛翔の画像を探す（一覧では探さない）", async () => {
+    usePhoto.mockReturnValue(standing);
+    await renderApp();
+    expect(useFlightPhoto).toHaveBeenLastCalledWith(expect.any(String), false);
+    fireEvent.click(firstCard());
+    await waitFor(() => expect(useFlightPhoto).toHaveBeenCalledWith(expect.any(String), true)); // 開いた1枚だけ。ほかの候補は、探さない
+  });
+  it("飛ぶ姿に、撮影者・ライセンス・出典のリンクが出る。1枚目にも、姿の名前が出る", async () => {
+    usePhoto.mockReturnValue(standing);
+    useFlightPhoto.mockReturnValue(flightPhoto);
+    await renderApp();
+    fireEvent.click(firstCard());
+    const box = document.querySelector(".lightbox") as HTMLElement;
+    expect(within(box).getByRole("link", { name: /撮影: 撮影者A ／ CC BY 4.0/ })).toHaveAttribute("href", flightPhoto.pageUrl);
+    expect(box.querySelectorAll(".lb-pose")).toHaveLength(2);
+    expect(box.querySelectorAll(".lb-pose")[0].textContent).toMatch(/立ち姿|浮かぶ姿/);
+    expect(box.querySelectorAll(".lb-pose")[1].textContent).toBe("飛ぶ姿");
+  });
+  it("飛ぶ姿が見つからない鳥は、2枚目を出さない（崩れない）", async () => {
+    usePhoto.mockReturnValue(standing);
+    useFlightPhoto.mockReturnValue(null);
+    await renderApp();
+    fireEvent.click(firstCard());
+    const box = document.querySelector(".lightbox") as HTMLElement;
+    expect(box.querySelector(".lb-flight")).toBeNull();
+    expect(box.querySelectorAll(".lb-pose")).toHaveLength(1);
+  });
+  it("水に浮かぶ鳥（行動に泳ぐがある）は「浮かぶ姿」、それ以外は「立ち姿」", () => {
+    expect(poseLabel("Anas platyrhynchos")).toBe("浮かぶ姿"); // マガモ
+    expect(poseLabel("Passer montanus")).toBe("立ち姿"); // スズメ
+    expect(poseLabel("Ardea cinerea")).toBe("立ち姿"); // アオサギ（水辺を歩く）
+    expect(poseLabel(undefined)).toBe("立ち姿");
+    expect(poseLabel("Unknown species")).toBe("立ち姿");
   });
 });
