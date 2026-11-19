@@ -114,7 +114,7 @@ describe("地域での出現しやすさ（事前情報）", () => {
 
 describe("表示する候補の絞り込み（pickTop）", () => {
   const show = (obs: Observation) => pickTop(identify(obs, species)).map((c) => c.species.name_ja);
-  it("最大3件まで", () => {
+  it("最大4件まで", () => {
     expect(show({ ...empty, sizeLevel: 2 }).length).toBeLessThanOrEqual(MAX_SHOWN);
     expect(show({ ...empty, sizeLevel: 2 }).length).toBe(MAX_SHOWN);
   });

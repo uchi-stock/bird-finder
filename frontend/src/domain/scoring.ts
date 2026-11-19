@@ -241,10 +241,10 @@ export function hasAnyInput(obs: Observation): boolean {
 }
 
 /** 表示する最大件数と、表示する最低ライン（入力項目の当てはまり具合） */
-export const MAX_SHOWN = 3;
+export const MAX_SHOWN = 4;
 export const MIN_FIT = 0.5;
 
-/** 当てはまりが弱い鳥は表示せず、上位MAX_SHOWN件まで返す（0〜3件）。除外は表示上のみで、スコア計算には影響しない */
+/** 当てはまりが弱い鳥は表示せず、上位MAX_SHOWN件まで返す（0〜4件）。除外は表示上のみで、スコア計算には影響しない */
 export function pickTop(sorted: Candidate[]): Candidate[] {
   return sorted.filter((c) => c.fit >= MIN_FIT && c.matching.some((m) => m !== "地域でよく見られる")).slice(0, MAX_SHOWN);
 }

@@ -23,7 +23,7 @@ export interface EvalResult {
   total: number;
   /** 正解が1番目に出た割合（0〜1） */
   top1: number;
-  /** 正解が表示される候補（最大3件）に入った割合（0〜1） */
+  /** 正解が表示される候補（最大4件）に入った割合（0〜1） */
   top3: number;
   /** 正解が候補に入らなかったシナリオ */
   misses: Miss[];

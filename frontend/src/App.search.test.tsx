@@ -17,9 +17,9 @@ describe("App: 基本表示", () => {
     await openMenu();
     expect(screen.getByText(/v0\.0\.0-test/)).toBeInTheDocument();
   });
-  it("開いた直後は、現在の時間帯（朝）に合う鳥を最大3件出す", async () => {
+  it("開いた直後は、現在の時間帯（朝）に合う鳥を最大4件出す", async () => {
     await renderApp();
-    expect(within(screen.getByRole("list")).getAllByRole("listitem").length).toBeLessThanOrEqual(3);
+    expect(within(screen.getByRole("list")).getAllByRole("listitem").length).toBeLessThanOrEqual(4);
     expect(chip("時間帯", "朝")).toHaveClass("on");
   });
   it("入力を全て外すと案内を出し、候補は出さない", async () => {
@@ -36,11 +36,11 @@ describe("App: 基本表示", () => {
 });
 
 describe("App: 候補の表示", () => {
-  it("大きさを選ぶと最大3件の候補を出し、検索結果は画像と近さの段階だけを表示する（詳細・理由は出さない）", async () => {
+  it("大きさを選ぶと最大4件の候補を出し、検索結果は画像と近さの段階だけを表示する（詳細・理由は出さない）", async () => {
     await renderApp();
     await userEvent.click(within(section("大きさ")).getByRole("button", { name: "2" }));
     const items = within(screen.getByRole("list")).queryAllByRole("listitem");
-    expect(items.length).toBeLessThanOrEqual(3);
+    expect(items.length).toBeLessThanOrEqual(4);
     expect(items.length).toBeGreaterThan(0);
     for (const li of items) {
       expect(li.querySelector(".badge")).toHaveTextContent(/かなり近い|近い|候補のひとつ/);
