@@ -6,19 +6,17 @@ import { cropFromBox } from "../src/domain/subjectCrop.ts";
 export const MIN_SCORE = 0.5;
 
 /**
- * 検出の結果（[{ label, score, box: { xmin, ymin, xmax, ymax } }]）から、鳥の範囲を返す。
- * 鳥が複数いるときは、すべてを含む範囲（群れが大きければ、あとで「切り出さない」になる）。鳥がいなければ、null
+ * 検出の結果（[{ label, score, box: { xmin, ymin, xmax, ymax } }]）から、主役の鳥の範囲を返す。
+ * 鳥が複数いるときは、最も大きい1羽を主役とする（全員を含めると、範囲が大きくなりすぎて、切り出せない）。
+ * 鳥がいなければ、null
  */
 export function pickBirdBox(detections, w, h, minScore = MIN_SCORE) {
   const birds = (detections ?? []).filter((d) => d?.label === "bird" && d.score >= minScore && d.box);
   if (birds.length === 0) return null;
+  const area = (d) => Math.max(0, d.box.xmax - d.box.xmin) * Math.max(0, d.box.ymax - d.box.ymin);
+  const main = birds.reduce((a, b) => (area(b) > area(a) ? b : a));
   const clamp = (v, max) => Math.min(Math.max(v, 0), max);
-  return {
-    x0: clamp(Math.min(...birds.map((d) => d.box.xmin)), w),
-    y0: clamp(Math.min(...birds.map((d) => d.box.ymin)), h),
-    x1: clamp(Math.max(...birds.map((d) => d.box.xmax)), w),
-    y1: clamp(Math.max(...birds.map((d) => d.box.ymax)), h),
-  };
+  return { x0: clamp(main.box.xmin, w), y0: clamp(main.box.ymin, h), x1: clamp(main.box.xmax, w), y1: clamp(main.box.ymax, h) };
 }
 
 const round = (v) => Math.round(v * 1000) / 1000;

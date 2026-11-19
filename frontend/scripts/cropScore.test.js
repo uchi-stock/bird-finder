@@ -8,8 +8,8 @@ describe("pickBirdBox: 検出の結果から、鳥の範囲を決める", () => 
     const b = pickBirdBox([det("person", 0.99, 0, 0, 100, 100), det("bird", 0.3, 10, 10, 20, 20), det("bird", 0.9, 40, 40, 60, 60)], 100, 100);
     expect(b).toEqual({ x0: 40, y0: 40, x1: 60, y1: 60 });
   });
-  it("鳥が複数なら、すべてを含む範囲", () => {
-    expect(pickBirdBox([det("bird", 0.9, 10, 20, 30, 40), det("bird", 0.8, 50, 30, 70, 60)], 100, 100)).toEqual({ x0: 10, y0: 20, x1: 70, y1: 60 });
+  it("鳥が複数なら、最も大きい1羽（主役）の範囲。全員を含めると、範囲が大きくなりすぎる", () => {
+    expect(pickBirdBox([det("bird", 0.9, 10, 20, 30, 40), det("bird", 0.8, 50, 30, 90, 80)], 100, 100)).toEqual({ x0: 50, y0: 30, x1: 90, y1: 80 });
   });
   it("鳥がいなければ、null。検出が無い・壊れた値でも、例外にしない", () => {
     expect(pickBirdBox([det("cat", 0.9, 0, 0, 10, 10)], 100, 100)).toBeNull();
