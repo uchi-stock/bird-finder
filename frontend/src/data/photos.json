@@ -29,12 +29,6 @@
   "credit": "Tisha Mukherjee",
   "license": "CC BY-SA 4.0"
  },
- "ハシボソガラス": {
-  "thumbnail": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/11/Carrion_Crow_in_Jersey.jpg/500px-Carrion_Crow_in_Jersey.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-  "pageUrl": "https://commons.wikimedia.org/wiki/File:Carrion_Crow_in_Jersey.jpg",
-  "credit": "Danrok",
-  "license": "CC BY-SA 3.0"
- },
  "メジロ": {
   "thumbnail": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/55/Japanese_white-eye_at_Tenn%C5%8Dji_Park_in_Osaka%2C_January_2016_II.jpg/500px-Japanese_white-eye_at_Tenn%C5%8Dji_Park_in_Osaka%2C_January_2016_II.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
   "pageUrl": "https://commons.wikimedia.org/wiki/File:Japanese_white-eye_at_Tenn%C5%8Dji_Park_in_Osaka,_January_2016_II.jpg",
@@ -185,23 +179,11 @@
   "credit": "Andreas Trepte",
   "license": "CC BY-SA 2.5"
  },
- "ミサゴ": {
-  "thumbnail": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fe/Osprey_oxbow_lake_3.30.19_DSC_0668.jpg/500px-Osprey_oxbow_lake_3.30.19_DSC_0668.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-  "pageUrl": "https://commons.wikimedia.org/wiki/File:Osprey_oxbow_lake_3.30.19_DSC_0668.jpg",
-  "credit": "lwolfartist",
-  "license": "CC BY 2.0"
- },
- "チョウゲンボウ": {
-  "thumbnail": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5d/Eurasian_Kestrel_by_Tisha_Mukherjee_01.jpg/500px-Eurasian_Kestrel_by_Tisha_Mukherjee_01.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-  "pageUrl": "https://commons.wikimedia.org/wiki/File:Eurasian_Kestrel_by_Tisha_Mukherjee_01.jpg",
-  "credit": "Tisha Mukherjee",
-  "license": "CC BY-SA 4.0"
- },
  "オオタカ": {
-  "thumbnail": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/62/Erlache_bei_Bensheim_DSC_0369-Habicht.jpg/500px-Erlache_bei_Bensheim_DSC_0369-Habicht.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-  "pageUrl": "https://commons.wikimedia.org/wiki/File:Erlache_bei_Bensheim_DSC_0369-Habicht.jpg",
-  "credit": "Bernd Herd",
-  "license": "CC BY-SA 4.0"
+  "thumbnail": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d8/Schreibers_kleiner_Atlas_der_einheimischen_V%C3%B6gel_%2810572859893%29.jpg/500px-Schreibers_kleiner_Atlas_der_einheimischen_V%C3%B6gel_%2810572859893%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "pageUrl": "https://commons.wikimedia.org/wiki/File:Schreibers_kleiner_Atlas_der_einheimischen_V%C3%B6gel_(10572859893).jpg",
+  "credit": "Unknown authorUnknown author",
+  "license": "CC BY 2.0"
  },
  "ホンセイインコ": {
   "thumbnail": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1f/Rose-ringed_parakeet_%28Psittacula_krameri_borealis%29_male_Jaipur_2.jpg/500px-Rose-ringed_parakeet_%28Psittacula_krameri_borealis%29_male_Jaipur_2.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
@@ -220,5 +202,11 @@
   "pageUrl": "https://commons.wikimedia.org/wiki/File:Garrulax_canorus_02.jpg",
   "credit": "Sun Jiao (Interaccoonale)",
   "license": "CC BY 4.0"
+ },
+ "アブラコウモリ": {
+  "thumbnail": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6e/Ine_to_Agave_Brewery_%281%29.jpg/500px-Ine_to_Agave_Brewery_%281%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "pageUrl": "https://commons.wikimedia.org/wiki/File:Ine_to_Agave_Brewery_(1).jpg",
+  "credit": "掬茶",
+  "license": "CC BY-SA 4.0"
  }
 }
