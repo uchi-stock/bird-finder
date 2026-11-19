@@ -1,0 +1,99 @@
+name: Detect crops (鳥を検出して、サムネイルの切り出し範囲を決める)
+
+# サムネイルの余白を詰めるため、鳥の写真から鳥の位置を検出して、切り出し範囲（割合）を決める。人の操作は要らない。
+# - 画像は、保存・加工しない（ライセンスの派生物にならない）。保存するのは、画像のファイル名をキーにした、切り出し範囲だけ（photoCrops.json）
+# - 月1回の定期実行と、写真・鳥種データ・この仕組み自体の変更時に動く（手動実行もできる）。写真の選び直し（curate-photos）の後に動く
+# - 結果が変わったときだけ、PRとして出す。PRは、CIを待たずに自動でマージされる（commit-via-prの仕様）。そのため、コミットの前に、結果の検査（単体テスト）を実行し、失敗したらPRを出さない
+# - 壊れた結果を出さないため、画像の取得・検出に失敗した鳥が多いときは、何も書かずに失敗する
+# - 結果は、実行のJob Summaryの表（鳥・画像・検出・切り出し）で、あとから確認できる。気になれば、そのPRを戻せる
+# 手動実行では、applyをfalseにすると、PRを出さずに、表の確認だけができる
+on:
+  schedule:
+    - cron: "41 19 1 * *"
+  push:
+    branches:
+      - main
+    paths:
+      - "frontend/src/data/species.json"
+      - "frontend/src/data/photos.json"
+      # 仕組み自体を変えたとき（初回の導入を含む）にも、結果を作り直す
+      - ".github/workflows/detect-crops.yml"
+      - "frontend/scripts/detectCrops.js"
+      - "frontend/scripts/cropScore.js"
+      - "frontend/src/domain/subjectCrop.ts"
+  workflow_dispatch:
+    inputs:
+      species_ids:
+        description: "試す鳥のID（任意。カンマ区切り。例: sparrow,mallard）。空なら全種"
+        required: false
+        type: string
+      apply:
+        description: "true にすると、結果をPRとして出す。false は確認のみ"
+        required: false
+        type: boolean
+        default: true
+
+concurrency:
+  group: detect-crops
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: true
+      # TypeScriptの共通ロジック（切り出し範囲の計算）を、そのまま読み込むため、型の除去を標準で行うNode 24を使う
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+      - name: 依存パッケージをインストールする
+        working-directory: frontend
+        run: npm ci
+      # 物体検出（transformers.js）と画像の読み取り（sharp）は、この仕組みでだけ使う。依存には加えない（アプリや通常のCIに影響しない）
+      - name: 検出に使うパッケージをインストールする
+        working-directory: frontend
+        run: npm install --no-save sharp @huggingface/transformers
+      - name: 鳥を検出して、切り出し範囲を決める
+        working-directory: frontend
+        env:
+          SPECIES_IDS: ${{ inputs.species_ids }}
+          REPORT: ${{ github.workspace }}/crops-report.md
+        run: node scripts/detectCrops.js
+      # 結果は、PRのCIを待たずにマージされる（commit-via-prの仕様）。そのため、壊れた結果を出さないよう、
+      # コミットの前に、photoCrops.jsonの検査と、計算ロジックの単体テストを実行する。失敗したらPRを出さない
+      - name: 結果を検査する（失敗したらPRを出さない）
+        working-directory: frontend
+        run: npx vitest run src/photoCrops.test.ts src/domain/subjectCrop.test.ts src/domain/photoKey.test.ts scripts/cropScore.test.js
+      - name: 結果をJob Summaryへ出す
+        if: always()
+        run: |
+          set -eu
+          if [ -f crops-report.md ]; then tee -a "$GITHUB_STEP_SUMMARY" < crops-report.md; fi
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: photo-crops
+          path: |
+            frontend/src/data/photoCrops.json
+            crops-report.md
+      - name: 結果をPRとして出す
+        # 定期・データの変更時は常にPRを出す。手動実行は、applyの指定に従う
+        if: github.event_name != 'workflow_dispatch' || inputs.apply
+        uses: ./dev-standards/.github/actions/commit-via-pr
+        with:
+          paths: frontend/src/data/photoCrops.json
+          commit-subject: "feat: 鳥を検出して、サムネイルの切り出し範囲を更新する"
+          commit-body: "鳥の写真から鳥の位置を物体検出し、サムネイルの切り出し範囲（割合）を決めた（frontend/scripts/detectCrops.js）。"
+          pr-title: "feat: 鳥を検出して、サムネイルの切り出し範囲を更新する"
+          pr-body: "サムネイルの切り出し範囲の更新の結果（自動）。鳥・画像・検出・切り出しの表は、実行のJob Summaryで確認できる: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          branch-prefix: chore/detect-crops
+          base-branch: main
+          push-token: ${{ secrets.BOT_TOKEN }}
+          github-token: ${{ secrets.BOT_TOKEN }}
