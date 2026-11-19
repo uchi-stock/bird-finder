@@ -1,4 +1,4 @@
-import type { Behavior, Habitat, Place } from "./types";
+import type { Behavior, Habitat, Place, Season, TimeSlot } from "./types";
 
 // 選択肢の表示名。画面（App.tsx）と、ドキュメントの図（choicesDiagram.ts）の両方で使い、ずれを防ぐ
 export const HABITAT_LABEL: Record<Habitat, string> = {
@@ -29,6 +29,10 @@ export const BEHAVIOR_LABEL: Record<Behavior, string> = {
   foraging: "採食する・つつく",
   preening: "羽繕いする",
 };
+
+export const SEASON_LABEL: Record<Season, string> = { spring: "春", summer: "夏", autumn: "秋", winter: "冬" };
+
+export const TIME_LABEL: Record<TimeSlot, string> = { morning: "朝", day: "日中", evening: "夕方", night: "夜" };
 
 /** 入口（何をもとに探すか）の表示名と絵文字 */
 export const ENTRY_MODE_LABEL = { voice: "鳴き声から", sight: "姿から", both: "両方" } as const;

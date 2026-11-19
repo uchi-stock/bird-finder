@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { fetchCallAudio, playAudio, stopAudio, unlockAudio, type CallAudio } from "../callAudio";
 import { buildRound, seededRng, type QuizKind, type QuizQuestion } from "../domain/quiz";
+import { buildSituationRound } from "../domain/situationQuiz";
 import { useOnline } from "../hooks/useOnline";
 import { SPECIES, SIZES } from "../options";
 import { fetchPhoto, type BirdPhoto } from "../photo";
@@ -15,7 +16,7 @@ const byId = new Map(SPECIES.map((s) => [s.species_id, s]));
 type Phase = "intro" | "loading" | "playing" | "result" | "unavailable";
 
 /**
- * 写真から選ぶクイズ。「名前を見て選ぶ」と「鳴き声を聞いて選ぶ」の2種類。
+ * 写真から選ぶクイズ。「名前を見て選ぶ」「鳴き声を聞いて選ぶ」「状況を読んで選ぶ」の3種類。
  * 写真を取得できた鳥だけを出題する（問題の途中で破綻しない）。
  * 鳴き声の問題は、音源が見つからない・失敗したときに、その問題を飛ばして別の問題に差し替える
  */
@@ -65,12 +66,16 @@ export function Quiz() {
       );
       setPhotos(got);
       const candidates = SPECIES.filter((s) => got.has(s.species_id));
-      const questions = buildRound(candidates, {
-        rng: seededRng(Date.now()),
-        count: mode === "call" ? ROUND_SIZE + CALL_RESERVE : ROUND_SIZE,
-        prefer: review ? Object.keys(stats.wrong) : [],
-        kind: mode,
-      });
+      const prefer = review ? Object.keys(stats.wrong) : [];
+      const questions =
+        mode === "situation"
+          ? buildSituationRound(candidates, { rng: seededRng(Date.now()), count: ROUND_SIZE, prefer })
+          : buildRound(candidates, {
+              rng: seededRng(Date.now()),
+              count: mode === "call" ? ROUND_SIZE + CALL_RESERVE : ROUND_SIZE,
+              prefer,
+              kind: mode,
+            });
       if (questions.length === 0) {
         setPhase("unavailable");
         return;
@@ -97,7 +102,12 @@ export function Quiz() {
     const wrong = { ...stats.wrong };
     for (const q of asked) delete wrong[q.answerId];
     for (const id of finalMissed) wrong[id] = (wrong[id] ?? 0) + 1;
-    const updated: QuizStats = kind === "call" ? { ...stats, bestCall: Math.max(stats.bestCall, finalScore), wrong } : { ...stats, best: Math.max(stats.best, finalScore), wrong };
+    const updated: QuizStats =
+      kind === "call"
+        ? { ...stats, bestCall: Math.max(stats.bestCall, finalScore), wrong }
+        : kind === "situation"
+          ? { ...stats, bestSituation: Math.max(stats.bestSituation, finalScore), wrong }
+          : { ...stats, best: Math.max(stats.best, finalScore), wrong };
     saveQuizStats(updated);
     setStats(updated);
     stopAudio();
@@ -207,16 +217,16 @@ export function Quiz() {
   };
 
   const wrongCount = useMemo(() => Object.keys(stats.wrong).length, [stats.wrong]);
-  const best = kind === "call" ? stats.bestCall : stats.best;
+  const best = kind === "call" ? stats.bestCall : kind === "situation" ? stats.bestSituation : stats.best;
 
   if (phase === "intro" || phase === "unavailable") {
     return (
       <section className="quiz">
         <h2>クイズ</h2>
         <p>種類を選んで、はじめます（{ROUND_SIZE}問）。</p>
-        {(stats.best > 0 || stats.bestCall > 0) && (
+        {(stats.best > 0 || stats.bestCall > 0 || stats.bestSituation > 0) && (
           <p className="hint">
-            最高: 名前 {stats.best}問正解 ・ 鳴き声 {stats.bestCall}問正解
+            最高: 名前 {stats.best}問正解 ・ 鳴き声 {stats.bestCall}問正解 ・ 状況 {stats.bestSituation}問正解
           </p>
         )}
         {phase === "unavailable" && <p className="hint warn">問題を作れませんでした。通信を確認して、もう一度お試しください。</p>}
@@ -226,6 +236,9 @@ export function Quiz() {
           </button>
           <button type="button" className="primary" disabled={!online} onClick={() => void start("call", false)}>
             鳴き声を聞いて、写真から選ぶ
+          </button>
+          <button type="button" className="primary" onClick={() => void start("situation", false)}>
+            状況を読んで、写真から選ぶ
           </button>
           {!online && <p className="hint">鳴き声のクイズは、オフラインでは使えません（音源を通信で取得するため）。</p>}
           {wrongCount > 0 && (
@@ -291,6 +304,7 @@ export function Quiz() {
   if (!question || !answer) return null;
   const size = SIZES.find((s) => s.level === answer.size_level);
   const isCall = kind === "call";
+  const isSituation = kind === "situation";
   return (
     <section className="quiz">
       <p className="hint quiz-progress">
@@ -306,10 +320,20 @@ export function Quiz() {
           {playFailed && <p className="hint warn">自動で再生できませんでした。ボタンを押してください。音が出ないときは、音量とマナーモードを確認してください。</p>}
           {note && <p className="hint">{note}</p>}
         </div>
+      ) : isSituation ? (
+        // 名前は出さない。状況の手がかりをすべて満たす鳥が、選択肢の中に1つだけある
+        <div className="quiz-situation">
+          <h2 className="quiz-name">この状況にあてはまる鳥は？</h2>
+          <ul className="quiz-clues">
+            {(question.clues ?? []).map((c) => (
+              <li key={c}>{c}</li>
+            ))}
+          </ul>
+        </div>
       ) : (
         <h2 className="quiz-name">{answer.name_ja}</h2>
       )}
-      {picked === null && <p className="hint">{isCall ? "聞こえた鳥の写真をタップしてください" : "この鳥の写真をタップしてください"}</p>}
+      {picked === null && <p className="hint">{isCall ? "聞こえた鳥の写真をタップしてください" : isSituation ? "すべてにあてはまる鳥の写真をタップしてください" : "この鳥の写真をタップしてください"}</p>}
       <div className="quiz-choices" role="group" aria-label="写真の選択肢">
         {question.choiceIds.map((id, i) => {
           const photo = photos.get(id);
@@ -344,6 +368,7 @@ export function Quiz() {
               <span>
                 {answer.name_ja}（{answer.scientific_name}）{size ? ` ・ ${size.cm}` : ""}
               </span>
+              {isSituation && <span className="hint">決め手: {(question.clues ?? []).join(" ／ ")}。{answer.name_ja}は、すべてにあてはまります（図鑑データは暫定値です）。</span>}
             </div>
           </div>
           <button type="button" className="primary quiz-next" onClick={next}>
