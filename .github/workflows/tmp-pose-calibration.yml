@@ -7,7 +7,7 @@ on:
   workflow_dispatch: {}
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   calibrate:
@@ -33,3 +33,15 @@ jobs:
         with:
           name: pose-calibration
           path: pose-calibration
+      # artifactの取得先（Azureのストレージ）は、サンドボックスから届かないため、結果を専用のブランチへも出す
+      # （GitHubのAPIで読める）。このブランチは、調査が終わったら削除する
+      - name: 結果を調査用のブランチへ出す
+        run: |
+          set -eu
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout --orphan calibration-output
+          git rm -rf --cached . -q
+          git add -f pose-calibration
+          git commit -q -m "調査用: 姿勢判定の一覧画像（一時）"
+          git push -f origin calibration-output
