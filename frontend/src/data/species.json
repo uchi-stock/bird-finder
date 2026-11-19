@@ -51,7 +51,12 @@
    "white",
    "gray"
   ],
-  "scientific_name": "Passer montanus"
+  "scientific_name": "Passer montanus",
+  "family": "スズメ科",
+  "similar": [
+   "oriental_greenfinch",
+   "meadow_bunting"
+  ]
  },
  {
   "species_id": "starling",
@@ -103,7 +108,11 @@
    "white",
    "red"
   ],
-  "scientific_name": "Spodiopsar cineraceus"
+  "scientific_name": "Spodiopsar cineraceus",
+  "family": "ムクドリ科",
+  "similar": [
+   "brown_eared_bulbul"
+  ]
  },
  {
   "species_id": "brown_eared_bulbul",
@@ -152,7 +161,11 @@
    "brown",
    "white"
   ],
-  "scientific_name": "Hypsipetes amaurotis"
+  "scientific_name": "Hypsipetes amaurotis",
+  "family": "ヒヨドリ科",
+  "similar": [
+   "starling"
+  ]
  },
  {
   "species_id": "rock_dove",
@@ -200,7 +213,11 @@
    "white",
    "black"
   ],
-  "scientific_name": "Columba livia"
+  "scientific_name": "Columba livia",
+  "family": "ハト科",
+  "similar": [
+   "oriental_turtle_dove"
+  ]
  },
  {
   "species_id": "oriental_turtle_dove",
@@ -249,7 +266,11 @@
   "colors_minor": [
    "black"
   ],
-  "scientific_name": "Streptopelia orientalis"
+  "scientific_name": "Streptopelia orientalis",
+  "family": "ハト科",
+  "similar": [
+   "rock_dove"
+  ]
  },
  {
   "species_id": "large_billed_crow",
@@ -297,7 +318,11 @@
   "abundance": "very_common",
   "silent": false,
   "colors_minor": [],
-  "scientific_name": "Corvus macrorhynchos"
+  "scientific_name": "Corvus macrorhynchos",
+  "family": "カラス科",
+  "similar": [
+   "carrion_crow"
+  ]
  },
  {
   "species_id": "carrion_crow",
@@ -345,7 +370,11 @@
   "abundance": "very_common",
   "silent": false,
   "colors_minor": [],
-  "scientific_name": "Corvus corone"
+  "scientific_name": "Corvus corone",
+  "family": "カラス科",
+  "similar": [
+   "large_billed_crow"
+  ]
  },
  {
   "species_id": "great_tit",
@@ -392,7 +421,11 @@
    "black",
    "green"
   ],
-  "scientific_name": "Parus minor"
+  "scientific_name": "Parus minor",
+  "family": "シジュウカラ科",
+  "similar": [
+   "japanese_white_eye"
+  ]
  },
  {
   "species_id": "japanese_white_eye",
@@ -439,7 +472,12 @@
    "white",
    "yellow"
   ],
-  "scientific_name": "Zosterops japonicus"
+  "scientific_name": "Zosterops japonicus",
+  "family": "メジロ科",
+  "similar": [
+   "japanese_bush_warbler",
+   "great_tit"
+  ]
  },
  {
   "species_id": "azure_winged_magpie",
@@ -487,7 +525,9 @@
    "black",
    "white"
   ],
-  "scientific_name": "Cyanopica cyanus"
+  "scientific_name": "Cyanopica cyanus",
+  "family": "カラス科",
+  "similar": []
  },
  {
   "species_id": "barn_swallow",
@@ -534,7 +574,9 @@
    "white",
    "red"
   ],
-  "scientific_name": "Hirundo rustica"
+  "scientific_name": "Hirundo rustica",
+  "family": "ツバメ科",
+  "similar": []
  },
  {
   "species_id": "blue_rock_thrush",
@@ -579,7 +621,11 @@
    "red",
    "brown"
   ],
-  "scientific_name": "Monticola solitarius"
+  "scientific_name": "Monticola solitarius",
+  "family": "ヒタキ科",
+  "similar": [
+   "dusky_thrush"
+  ]
  },
  {
   "species_id": "white_wagtail",
@@ -626,7 +672,12 @@
   "colors_minor": [
    "gray"
   ],
-  "scientific_name": "Motacilla alba"
+  "scientific_name": "Motacilla alba",
+  "family": "セキレイ科",
+  "similar": [
+   "japanese_wagtail",
+   "grey_wagtail"
+  ]
  },
  {
   "species_id": "japanese_wagtail",
@@ -672,7 +723,12 @@
   "colors_minor": [
    "gray"
   ],
-  "scientific_name": "Motacilla grandis"
+  "scientific_name": "Motacilla grandis",
+  "family": "セキレイ科",
+  "similar": [
+   "white_wagtail",
+   "grey_wagtail"
+  ]
  },
  {
   "species_id": "grey_wagtail",
@@ -720,7 +776,12 @@
    "black",
    "white"
   ],
-  "scientific_name": "Motacilla cinerea"
+  "scientific_name": "Motacilla cinerea",
+  "family": "セキレイ科",
+  "similar": [
+   "white_wagtail",
+   "japanese_wagtail"
+  ]
  },
  {
   "species_id": "oriental_greenfinch",
@@ -769,7 +830,11 @@
    "yellow",
    "green"
   ],
-  "scientific_name": "Chloris sinica"
+  "scientific_name": "Chloris sinica",
+  "family": "アトリ科",
+  "similar": [
+   "sparrow"
+  ]
  },
  {
   "species_id": "dusky_thrush",
@@ -812,7 +877,11 @@
    "white",
    "red"
   ],
-  "scientific_name": "Turdus eunomus"
+  "scientific_name": "Turdus eunomus",
+  "family": "ヒタキ科",
+  "similar": [
+   "blue_rock_thrush"
+  ]
  },
  {
   "species_id": "bull_headed_shrike",
@@ -861,7 +930,9 @@
    "white",
    "red"
   ],
-  "scientific_name": "Lanius bucephalus"
+  "scientific_name": "Lanius bucephalus",
+  "family": "モズ科",
+  "similar": []
  },
  {
   "species_id": "meadow_bunting",
@@ -909,7 +980,12 @@
    "black",
    "gray"
   ],
-  "scientific_name": "Emberiza cioides"
+  "scientific_name": "Emberiza cioides",
+  "family": "ホオジロ科",
+  "similar": [
+   "black_faced_bunting",
+   "sparrow"
+  ]
  },
  {
   "species_id": "black_faced_bunting",
@@ -954,7 +1030,11 @@
    "brown",
    "gray"
   ],
-  "scientific_name": "Emberiza spodocephala"
+  "scientific_name": "Emberiza spodocephala",
+  "family": "ホオジロ科",
+  "similar": [
+   "meadow_bunting"
+  ]
  },
  {
   "species_id": "daurian_redstart",
@@ -1001,7 +1081,9 @@
    "black",
    "white"
   ],
-  "scientific_name": "Phoenicurus auroreus"
+  "scientific_name": "Phoenicurus auroreus",
+  "family": "ヒタキ科",
+  "similar": []
  },
  {
   "species_id": "japanese_bush_warbler",
@@ -1044,7 +1126,12 @@
   "colors_minor": [
    "gray"
   ],
-  "scientific_name": "Horornis diphone"
+  "scientific_name": "Horornis diphone",
+  "family": "ウグイス科",
+  "similar": [
+   "japanese_white_eye",
+   "oriental_reed_warbler"
+  ]
  },
  {
   "species_id": "oriental_reed_warbler",
@@ -1085,7 +1172,11 @@
   "colors_minor": [
    "white"
   ],
-  "scientific_name": "Acrocephalus orientalis"
+  "scientific_name": "Acrocephalus orientalis",
+  "family": "ヨシキリ科",
+  "similar": [
+   "japanese_bush_warbler"
+  ]
  },
  {
   "species_id": "spot_billed_duck",
@@ -1135,7 +1226,11 @@
    "white",
    "yellow"
   ],
-  "scientific_name": "Anas zonorhyncha"
+  "scientific_name": "Anas zonorhyncha",
+  "family": "カモ科",
+  "similar": [
+   "mallard"
+  ]
  },
  {
   "species_id": "mallard",
@@ -1179,7 +1274,11 @@
   "colors_minor": [
    "white"
   ],
-  "scientific_name": "Anas platyrhynchos"
+  "scientific_name": "Anas platyrhynchos",
+  "family": "カモ科",
+  "similar": [
+   "spot_billed_duck"
+  ]
  },
  {
   "species_id": "eurasian_teal",
@@ -1222,7 +1321,11 @@
    "green",
    "white"
   ],
-  "scientific_name": "Anas crecca"
+  "scientific_name": "Anas crecca",
+  "family": "カモ科",
+  "similar": [
+   "eurasian_wigeon"
+  ]
  },
  {
   "species_id": "eurasian_wigeon",
@@ -1268,7 +1371,11 @@
    "white",
    "black"
   ],
-  "scientific_name": "Mareca penelope"
+  "scientific_name": "Mareca penelope",
+  "family": "カモ科",
+  "similar": [
+   "eurasian_teal"
+  ]
  },
  {
   "species_id": "great_cormorant",
@@ -1316,7 +1423,11 @@
   "colors_minor": [
    "white"
   ],
-  "scientific_name": "Phalacrocorax carbo"
+  "scientific_name": "Phalacrocorax carbo",
+  "family": "ウ科",
+  "similar": [
+   "grey_heron"
+  ]
  },
  {
   "species_id": "grey_heron",
@@ -1363,7 +1474,12 @@
    "white",
    "black"
   ],
-  "scientific_name": "Ardea cinerea"
+  "scientific_name": "Ardea cinerea",
+  "family": "サギ科",
+  "similar": [
+   "great_egret",
+   "great_cormorant"
+  ]
  },
  {
   "species_id": "great_egret",
@@ -1407,7 +1523,12 @@
   "abundance": "common",
   "silent": true,
   "colors_minor": [],
-  "scientific_name": "Ardea alba"
+  "scientific_name": "Ardea alba",
+  "family": "サギ科",
+  "similar": [
+   "little_egret",
+   "grey_heron"
+  ]
  },
  {
   "species_id": "little_egret",
@@ -1452,7 +1573,11 @@
    "black",
    "yellow"
   ],
-  "scientific_name": "Egretta garzetta"
+  "scientific_name": "Egretta garzetta",
+  "family": "サギ科",
+  "similar": [
+   "great_egret"
+  ]
  },
  {
   "species_id": "common_coot",
@@ -1495,7 +1620,9 @@
   "colors_minor": [
    "white"
   ],
-  "scientific_name": "Fulica atra"
+  "scientific_name": "Fulica atra",
+  "family": "クイナ科",
+  "similar": []
  },
  {
   "species_id": "little_grebe",
@@ -1539,7 +1666,9 @@
    "black",
    "white"
   ],
-  "scientific_name": "Tachybaptus ruficollis"
+  "scientific_name": "Tachybaptus ruficollis",
+  "family": "カイツブリ科",
+  "similar": []
  },
  {
   "species_id": "black_headed_gull",
@@ -1583,7 +1712,9 @@
    "black",
    "red"
   ],
-  "scientific_name": "Chroicocephalus ridibundus"
+  "scientific_name": "Chroicocephalus ridibundus",
+  "family": "カモメ科",
+  "similar": []
  },
  {
   "species_id": "common_sandpiper",
@@ -1630,7 +1761,11 @@
    "white",
    "gray"
   ],
-  "scientific_name": "Actitis hypoleucos"
+  "scientific_name": "Actitis hypoleucos",
+  "family": "シギ科",
+  "similar": [
+   "little_ringed_plover"
+  ]
  },
  {
   "species_id": "common_kingfisher",
@@ -1677,7 +1812,9 @@
    "red",
    "white"
   ],
-  "scientific_name": "Alcedo atthis"
+  "scientific_name": "Alcedo atthis",
+  "family": "カワセミ科",
+  "similar": []
  },
  {
   "species_id": "little_ringed_plover",
@@ -1722,7 +1859,11 @@
    "white",
    "black"
   ],
-  "scientific_name": "Charadrius dubius"
+  "scientific_name": "Charadrius dubius",
+  "family": "チドリ科",
+  "similar": [
+   "common_sandpiper"
+  ]
  },
  {
   "species_id": "black_kite",
@@ -1764,7 +1905,12 @@
   "abundance": "common",
   "silent": false,
   "colors_minor": [],
-  "scientific_name": "Milvus migrans"
+  "scientific_name": "Milvus migrans",
+  "family": "タカ科",
+  "similar": [
+   "osprey",
+   "northern_goshawk"
+  ]
  },
  {
   "species_id": "osprey",
@@ -1805,7 +1951,11 @@
   "abundance": "uncommon",
   "silent": false,
   "colors_minor": [],
-  "scientific_name": "Pandion haliaetus"
+  "scientific_name": "Pandion haliaetus",
+  "family": "ミサゴ科",
+  "similar": [
+   "black_kite"
+  ]
  },
  {
   "species_id": "common_kestrel",
@@ -1851,7 +2001,11 @@
    "black",
    "white"
   ],
-  "scientific_name": "Falco tinnunculus"
+  "scientific_name": "Falco tinnunculus",
+  "family": "ハヤブサ科",
+  "similar": [
+   "northern_goshawk"
+  ]
  },
  {
   "species_id": "northern_goshawk",
@@ -1895,7 +2049,12 @@
    "white",
    "brown"
   ],
-  "scientific_name": "Accipiter gentilis"
+  "scientific_name": "Accipiter gentilis",
+  "family": "タカ科",
+  "similar": [
+   "black_kite",
+   "common_kestrel"
+  ]
  },
  {
   "species_id": "rose_ringed_parakeet",
@@ -1939,7 +2098,9 @@
   "colors_minor": [
    "red"
   ],
-  "scientific_name": "Psittacula krameri"
+  "scientific_name": "Psittacula krameri",
+  "family": "インコ科",
+  "similar": []
  },
  {
   "species_id": "chinese_hwamei",
@@ -1984,7 +2145,9 @@
   "colors_minor": [
    "white"
   ],
-  "scientific_name": "Garrulax canorus"
+  "scientific_name": "Garrulax canorus",
+  "family": "チメドリ科",
+  "similar": []
  },
  {
   "species_id": "pipistrelle_bat",
@@ -2025,6 +2188,8 @@
    "black",
    "gray"
   ],
-  "scientific_name": "Pipistrellus abramus"
+  "scientific_name": "Pipistrellus abramus",
+  "family": "ヒナコウモリ科",
+  "similar": []
  }
 ]

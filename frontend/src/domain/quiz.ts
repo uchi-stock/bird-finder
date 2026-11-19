@@ -39,18 +39,20 @@ export function shuffle<T>(items: readonly T[], rng: Rng): T[] {
 }
 
 /**
- * 誤答の選び方で、難易度が決まる。大きさが近い鳥（size_levelの差が1以下）から選ぶ。
+ * 誤答の選び方で、難易度が決まる。見分けにくい鳥（similar）→同じ科→大きさが近い鳥（size_levelの差が1以下）の順に選ぶ。
  * 似た鳥どうしのほうが、覚える効果が高い。足りないときは、大きさの近い順に全体から補う
  */
 function pickDistractors(answer: Species, candidates: readonly Species[], count: number, rng: Rng): Species[] {
   const others = shuffle(candidates.filter((s) => s.species_id !== answer.species_id), rng);
-  const near = others.filter((s) => Math.abs(s.size_level - answer.size_level) <= 1);
-  const picked = near.slice(0, count);
+  const picked: Species[] = [];
+  const take = (list: readonly Species[]) => {
+    for (const s of list) if (picked.length < count && !picked.includes(s)) picked.push(s);
+  };
+  take(others.filter((s) => answer.similar?.includes(s.species_id)));
+  take(others.filter((s) => s.family && s.family === answer.family));
+  take(others.filter((s) => Math.abs(s.size_level - answer.size_level) <= 1));
   if (picked.length < count) {
-    const rest = others
-      .filter((s) => !picked.includes(s))
-      .sort((a, b) => Math.abs(a.size_level - answer.size_level) - Math.abs(b.size_level - answer.size_level));
-    picked.push(...rest.slice(0, count - picked.length));
+    take(others.sort((a, b) => Math.abs(a.size_level - answer.size_level) - Math.abs(b.size_level - answer.size_level)));
   }
   return picked;
 }

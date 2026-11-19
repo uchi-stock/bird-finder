@@ -69,3 +69,43 @@ describe("seededRng", () => {
     expect(Array.from({ length: 100 }, () => r2())).toEqual(values);
   });
 });
+
+describe("buildRound: 紛らわしい選択肢（#181）", () => {
+  const full = (id: string, size: number, family: string, similar: string[] = []) => ({ species_id: id, name_ja: id, size_level: size, family, similar }) as Species;
+  const POOL2 = [
+    full("rock_dove", 5, "ハト科", ["turtle"]),
+    full("turtle", 5, "ハト科", ["rock_dove"]),
+    full("crow1", 6, "カラス科", []),
+    full("crow2", 6, "カラス科", []),
+    full("crow3", 6, "カラス科", []),
+    full("sparrow", 2, "スズメ科"),
+    full("tit", 2, "シジュウカラ科"),
+    full("heron", 7, "サギ科"),
+    full("duck", 6, "カモ科"),
+  ];
+
+  it("似た鳥が、必ず選択肢に入る（ドバトの問題にキジバト、逆も同様）", () => {
+    for (let seed = 1; seed <= 20; seed++) {
+      for (const q of buildRound(POOL2, { rng: seededRng(seed), count: 9 })) {
+        if (q.answerId === "rock_dove") expect(q.choiceIds).toContain("turtle");
+        if (q.answerId === "turtle") expect(q.choiceIds).toContain("rock_dove");
+      }
+    }
+  });
+
+  it("似た鳥の次に、同じ科の鳥を選ぶ", () => {
+    for (let seed = 1; seed <= 20; seed++) {
+      for (const q of buildRound(POOL2, { rng: seededRng(seed), count: 9 })) {
+        if (q.answerId === "crow1") expect(q.choiceIds).toEqual(expect.arrayContaining(["crow2", "crow3"]));
+      }
+    }
+  });
+
+  it("似た鳥も同じ科もいない鳥は、これまでどおり、大きさの近い鳥から選ぶ", () => {
+    for (let seed = 1; seed <= 20; seed++) {
+      for (const q of buildRound(POOL2, { rng: seededRng(seed), count: 9 })) {
+        if (q.answerId === "sparrow") expect(q.choiceIds).toContain("tit");
+      }
+    }
+  });
+});
