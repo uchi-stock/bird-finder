@@ -1,4 +1,18 @@
 {
+  "078_Wild_Common_kestrel_in_flight_at_Pfyn-Finges_Photo_by_Giles_Laurent.jpg": null,
+  "088_Wild_Carrion_crow_in_flight_at_Lake_Geneva_Photo_by_Giles_Laurent.jpg": {
+    "x": 0.05,
+    "y": 0.143,
+    "w": 0.935,
+    "h": 0.748
+  },
+  "090_Wild_Black-headed_gull_in_flight_at_Lake_Geneva_during_sunset_Photo_by_Giles_Laurent.jpg": null,
+  "2_Eurasian_Tree_Sparrows_in_flight.jpg": {
+    "x": 0.218,
+    "y": 0.55,
+    "w": 0.302,
+    "h": 0.45
+  },
   "20180415_015_Winterswijk_Witte_kwikstaart_(40785272624).jpg": null,
   "2021-06-03_Azure-winged_Magpie,_Zhengzhou,_Henan,_China_2.jpg": {
     "x": 0.103,
@@ -6,6 +20,19 @@
     "w": 0.564,
     "h": 0.889
   },
+  "A_bird_in_flight_(7359714972).jpg": {
+    "x": 0.331,
+    "y": 0.167,
+    "w": 0.543,
+    "h": 0.833
+  },
+  "A_reflection_flight_of_barn_swallow.jpg": {
+    "x": 0.419,
+    "y": 0.127,
+    "w": 0.473,
+    "h": 0.756
+  },
+  "AccipterGentilisJuvenileFlight1.jpg": null,
   "Acrocephalus_orientalis_116491805.jpg": {
     "x": 0.36,
     "y": 0.125,
@@ -13,6 +40,13 @@
     "h": 0.846
   },
   "Actitis_hypoleucos_1_tb_(Marek_Szczepanek).jpg": null,
+  "Anas_in_flight.JPG": {
+    "x": 0.027,
+    "y": 0.163,
+    "w": 0.223,
+    "h": 0.52
+  },
+  "Ardea_cinerea_in_flight.jpg": null,
   "Barn_Swallow_in_Bakkhali_January_2025_by_Tisha_Mukherjee_01.jpg": {
     "x": 0.338,
     "y": 0.239,
@@ -20,6 +54,12 @@
     "h": 0.655
   },
   "Black_Kite_2364818940.jpg": null,
+  "Black_kite_in_flight_02.jpg": {
+    "x": 0.297,
+    "y": 0.287,
+    "w": 0.253,
+    "h": 0.45
+  },
   "Black-faced_bunting_in_Sakai,_Osaka,_February_2016.jpg": {
     "x": 0.024,
     "y": 0.058,
@@ -38,6 +78,12 @@
     "w": 0.38,
     "h": 0.571
   },
+  "Carduelis_sinica_bathing_and_flying_x40_slowmotion.webm": {
+    "x": 0.306,
+    "y": 0.417,
+    "w": 0.253,
+    "h": 0.45
+  },
   "Carduelis_sinica_minor.JPG": null,
   "Carrion_Crow_in_Jersey.jpg": {
     "x": 0.278,
@@ -46,11 +92,18 @@
     "h": 0.826
   },
   "Cettia_diphone_head.JPG": null,
+  "Cettia_diphone_in_flight.JPG": null,
   "Common_Kingfisher_2025_09_28_03.jpg": {
     "x": 0.153,
     "y": 0.197,
     "w": 0.448,
     "h": 0.672
+  },
+  "Common_kingfisher_in_flight.jpg": {
+    "x": 0.129,
+    "y": 0.138,
+    "w": 0.534,
+    "h": 0.801
   },
   "Common_pigeon_at_Waterlow_Park,_London,_United_Kingdom_01.jpg": null,
   "Daurian_redstart_at_Daisen_Park_in_Osaka,_January_2016_II.jpg": {
@@ -64,6 +117,18 @@
     "y": 0.219,
     "w": 0.338,
     "h": 0.45
+  },
+  "Eastern_great_egret_landing_at_Tennōji_Park_in_Osaka,_December_2016_-_753.jpg": {
+    "x": 0.323,
+    "y": 0.059,
+    "w": 0.626,
+    "h": 0.941
+  },
+  "Egretta_garzetta_flying,_Lido_de_Thau_01.jpg": {
+    "x": 0.292,
+    "y": 0.284,
+    "w": 0.299,
+    "h": 0.533
   },
   "Erlache_bei_Bensheim_DSC_0369-Habicht.jpg": {
     "x": 0.355,
@@ -97,9 +162,25 @@
     "h": 0.663
   },
   "Female_Mallard_Duck_Rest_3.jpg": null,
+  "Flickr_-_Rainbirder_-_EurasianTeal_in_flight.jpg": null,
   "Flussregenpfeifer_Little_ringed_plover.jpg": null,
+  "Flying_(12353127314).jpg": null,
+  "Flying_(24058332240).jpg": null,
+  "Flying_Common_sandpiper_bird_(India,_2017).jpg": {
+    "x": 0.255,
+    "y": 0.268,
+    "w": 0.338,
+    "h": 0.45
+  },
+  "Flying_Mallard_Duck_ABDS-DK-MD-5.jpg": {
+    "x": 0.142,
+    "y": 0.218,
+    "w": 0.434,
+    "h": 0.648
+  },
   "Garrulax_canorus_02.jpg": null,
   "Graureiher_Ardea_cinerea.jpg": null,
+  "Great_cormorant_landing.jpg": null,
   "Great_egret_in_GWC_(43539).jpg": null,
   "Grey_wagtail_at_Tennōji_Park_in_Osaka,_November_2016_-_890.jpg": {
     "x": 0.248,
@@ -108,6 +189,12 @@
     "h": 0.777
   },
   "Houjiro_male.JPG": null,
+  "Hypsipetes_amaurotis_(in_flight).JPG": {
+    "x": 0.64,
+    "y": 0.386,
+    "w": 0.36,
+    "h": 0.614
+  },
   "Hypsipetes_amaurotis_eating_Melia_azedarach.jpg": {
     "x": 0.083,
     "y": 0.116,
@@ -116,6 +203,7 @@
   },
   "Japanese_tit_in_Suita,_Osaka,_November_2016_-_683.jpg": null,
   "Japanese_white-eye_at_Tennōji_Park_in_Osaka,_January_2016_II.jpg": null,
+  "Landing_(5541929066).jpg": null,
   "Lanius_bucephalus_(15502062162).jpg": {
     "x": 0.294,
     "y": 0.238,
@@ -134,6 +222,15 @@
     "w": 0.559,
     "h": 0.838
   },
+  "Little_ringed_plover_and_barn_swallow_chasing_each_other_and_banking_right_in_flight.jpg": null,
+  "Mareca_penelope_in_flight.jpg": null,
+  "Monticola_solitarius_philippensis_(female_in_flight).jpg": {
+    "x": 0.138,
+    "y": 0.018,
+    "w": 0.786,
+    "h": 0.896
+  },
+  "Motacilla_cinerea_robusta_in_flight.JPG": null,
   "Motacilla_grandis_crying_a2.JPG": {
     "x": 0.194,
     "y": 0.032,
@@ -152,6 +249,12 @@
     "w": 0.564,
     "h": 0.75
   },
+  "Osprey_in_Flight_-_Pandion_haliaetus_(23785383926).jpg": {
+    "x": 0.223,
+    "y": 0.024,
+    "w": 0.306,
+    "h": 0.46
+  },
   "Osprey_oxbow_lake_3.30.19_DSC_0668.jpg": {
     "x": 0.195,
     "y": 0.291,
@@ -159,6 +262,12 @@
     "h": 0.45
   },
   "Pipistrellus_abramus_from_iNaturalist_photo_216005126.jpg": null,
+  "Rock_doves_in_flight.jpg": {
+    "x": 0.197,
+    "y": 0.246,
+    "w": 0.264,
+    "h": 0.45
+  },
   "Rose-ringed_parakeet_(Psittacula_krameri_borealis)_male_Jaipur_2.jpg": null,
   "Spodiopsar_cineraceus_Higashi-hagoromo_station.jpg": null,
   "Tachybaptus_ruficollis_iraquensis,_Al_Jahra_Governorate,_Kuwait_1.jpg": {
@@ -167,5 +276,17 @@
     "w": 0.559,
     "h": 0.837
   },
-  "The_great_cormorant_with_silver_carp_fish.jpg": null
+  "The_great_cormorant_with_silver_carp_fish.jpg": null,
+  "The_Rose_Ringed_Parakeet_in_flight.jpg": {
+    "x": 0.183,
+    "y": 0.145,
+    "w": 0.534,
+    "h": 0.855
+  },
+  "White_wagtail_in_flight.jpg": {
+    "x": 0.139,
+    "y": 0.132,
+    "w": 0.45,
+    "h": 0.676
+  }
 }
