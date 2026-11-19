@@ -5,13 +5,15 @@ export type EntryMode = "voice" | "sight" | "both";
 export const ENTRY_MODES: EntryMode[] = ["voice", "sight", "both"];
 
 /**
- * 入口ごとに出すカード（STEP_TITLESの添字）。0:環境 1:場所 2:行動 3:鳴き声 4:大きさ 5:羽の色 6:時間帯。
+ * 入口ごとに出すカード（STEP_TITLESの添字。数字は種類で、並びが画面の順序）。0:環境 1:場所 2:行動 3:鳴き声 4:大きさ 5:羽の色 6:時間帯。
+ * 順序は、現在地（環境）→時間帯→場所→行動→大きさ→羽の色→鳴き声（#186）。
+ * 環境と時間帯は、アプリを開くと自動で入るため、先頭に置く。鳴き声は、最後
  * 出さないカードの項目は、入力済みでも判定に使わない（未入力と同じ扱い。値は消さずに保持する）
  */
 export const ENTRY_STEPS: Record<EntryMode, number[]> = {
-  voice: [0, 1, 3, 6],
-  sight: [0, 1, 2, 4, 5, 6],
-  both: [0, 1, 2, 3, 4, 5, 6],
+  voice: [0, 6, 1, 3],
+  sight: [0, 6, 1, 2, 4, 5],
+  both: [0, 6, 1, 2, 4, 5, 3],
 };
 
 export const ALL_PLACES: Place[] = ["feeder", "ground", "tree", "wire", "roof", "water", "grass", "sky", "unseen"];

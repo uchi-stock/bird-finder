@@ -107,7 +107,7 @@ for (const size of SIZES) {
       expect(fits.every((f) => f === "contain")).toBe(true);
       expect(await page.locator(".results li").count()).toBeGreaterThan(0);
       await captureScreenshot(page, testInfo, `${size.name}-2-results`, `候補の表示（${size.name}）`, { fullPage: false });
-      await page.click("button[aria-label='7. 時間帯']");
+      await page.click("button[aria-label='7. 鳴き声']");
       await expect(page.locator(".step-title")).toContainText("7/7");
     });
 
@@ -140,9 +140,9 @@ for (const size of SIZES) {
 
     test("場所で「空」を選ぶと、行動は「飛ぶ」「鳴く」だけになる", async ({ page }) => {
       await openApp(page);
-      await page.click("button[aria-label='2. どこで見たか']");
+      await page.click("button[aria-label='3. どこで見たか']");
       await page.getByRole("button", { name: /空（飛んでいた）/ }).click();
-      await page.click("button[aria-label='3. 行動']");
+      await page.click("button[aria-label='4. 行動']");
       // 絵文字（aria-hidden）を除いた、ボタンの文字だけを比べる
       const labels = await page.locator("section.step:has(h2:text('行動')) .chip").evaluateAll((els) =>
         els.map((el) =>
