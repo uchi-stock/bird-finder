@@ -14,6 +14,8 @@ interface Props {
   reset: () => void;
   now: NowPlaying | null;
   onPlay: (sp: Species) => Promise<void>;
+  /** 詳細を閉じたとき、その鳥の再生を止める */
+  onStop: (speciesId: string) => void;
   isActive: (speciesId: string) => boolean;
   collection: Collection;
   onCatch: (id: string) => { isNew: boolean; count: number };
@@ -21,7 +23,7 @@ interface Props {
 }
 
 /** 候補の一覧。カードのタップで、鳴き声の再生と拡大表示を同時に行う */
-export function ResultList({ results, inputForResults, flying, reset, now, onPlay, isActive, collection, onCatch, onShare }: Props) {
+export function ResultList({ results, inputForResults, flying, reset, now, onPlay, onStop, isActive, collection, onCatch, onShare }: Props) {
   // 拡大表示中の候補
   const [zoomId, setZoomId] = useState<string | null>(null);
   return (
@@ -56,7 +58,10 @@ export function ResultList({ results, inputForResults, flying, reset, now, onPla
                           flying={flying}
                           showNameWhenEmpty
                           zoomed={zoomId === c.species.species_id}
-                          onZoomChange={(z) => setZoomId(z ? c.species.species_id : null)}
+                          onZoomChange={(z) => {
+                            setZoomId(z ? c.species.species_id : null);
+                            if (!z) onStop(c.species.species_id);
+                          }}
                           caption={
                             <>
                               <span className="badge">{closeness(c)}</span>

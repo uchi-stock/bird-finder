@@ -39,8 +39,16 @@ export function useCallPlayer() {
     }
   };
 
+  /** その鳥の再生を止める（詳細を閉じたとき）。音源を探している最中なら、取得後に再生しない。別の鳥の再生には影響しない */
+  const stop = (speciesId: string) => {
+    if (now?.id !== speciesId) return;
+    playToken.current++;
+    stopAudio();
+    setNow(null);
+  };
+
   /** その鳥が再生中（または音源を探している最中）か。再生中にもう一度タップされたら停止になる */
   const isActive = (speciesId: string) => now?.id === speciesId && (now.status === "playing" || now.status === "loading");
 
-  return { now, onPlay, isActive };
+  return { now, onPlay, isActive, stop };
 }
