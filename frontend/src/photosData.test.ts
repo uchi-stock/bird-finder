@@ -52,3 +52,23 @@ describe("photoPins.json（固定した写真）", () => {
     }
   });
 });
+
+describe("species.json: 科と似た鳥（#181）", () => {
+  const list = speciesJson as unknown as { species_id: string; family: string; similar: string[] }[];
+  const ids = new Set(list.map((s) => s.species_id));
+  it("全種に科がある", () => {
+    for (const s of list) expect(s.family, s.species_id).toMatch(/科$/);
+  });
+  it("似た鳥は、実在し、自分自身ではなく、相互になっている", () => {
+    for (const s of list) {
+      for (const o of s.similar) {
+        expect(ids.has(o), `${s.species_id}→${o}`).toBe(true);
+        expect(o).not.toBe(s.species_id);
+        expect(list.find((x) => x.species_id === o)?.similar, `${o}→${s.species_id}`).toContain(s.species_id);
+      }
+    }
+  });
+  it("ドバトとキジバトは、互いに似た鳥", () => {
+    expect(list.find((s) => s.species_id === "rock_dove")?.similar).toContain("oriental_turtle_dove");
+  });
+});

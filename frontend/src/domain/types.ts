@@ -27,6 +27,10 @@ export interface Species {
   abundance: Abundance;
   /** 生息・観察されやすい環境（暫定値） */
   habitats: Habitat[];
+  /** 分類上の科（クイズで、近縁の鳥を選択肢に混ぜるために使う） */
+  family: string;
+  /** 見分けにくい鳥のID（相互。クイズで、紛らわしい選択肢にする） */
+  similar: string[];
   onomatopoeia: string[];
   note: string;
   source: string;
