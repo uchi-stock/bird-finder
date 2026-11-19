@@ -4,6 +4,7 @@ import { largeImageUrl } from "../domain/habitat";
 import { retryPhoto, useFlightPhoto, usePhoto, usePhotoFailed } from "../photo";
 import { useModal } from "../hooks/useModal";
 import { Emoji } from "./Emoji";
+import { ThumbImg } from "./ThumbImg";
 
 interface PhotoProps {
   name: string;
@@ -109,7 +110,7 @@ export function Photo({ name, scientificName, flying = false, zoomed, onZoomChan
   return (
     <>
       <div className="photo">
-        <img src={photo.thumbnail} alt={name} loading="lazy" crossOrigin="anonymous" />
+        <ThumbImg src={photo.thumbnail} alt={name} loading="lazy" />
         {photo.flight && <span className="flight-badge">飛翔</span>}
         <button
           type="button"
