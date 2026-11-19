@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { caughtCount, type Collection } from "../domain/collection";
+import type { Species } from "../domain/types";
+import type { NowPlaying } from "../hooks/useCallPlayer";
 import { SPECIES } from "../options";
 import { canSaveToStorage } from "../storage";
 import { Photo } from "./Photo";
@@ -9,9 +11,14 @@ interface Props {
   collection: Collection;
   onCatch: (id: string) => { isNew: boolean; count: number };
   onShare: (id: string) => Promise<string>;
+  /** 全種の一覧で、行のタップから鳴き声を再生する（検索結果と同じ再生の状態を共有する） */
+  now: NowPlaying | null;
+  onPlay: (sp: Species) => Promise<void>;
+  onStop: (speciesId: string) => void;
+  isActive: (speciesId: string) => boolean;
 }
 
-export function Dex({ collection, onCatch, onShare }: Props) {
+export function Dex({ collection, onCatch, onShare, now, onPlay, onStop, isActive }: Props) {
   const total = SPECIES.length;
   const got = caughtCount(collection);
   // 集めた鳥（捕まえた順に埋まる）／全種の一覧（デバッグ・図鑑用）
@@ -35,7 +42,7 @@ export function Dex({ collection, onCatch, onShare }: Props) {
         </button>
       </div>
       {view === "all" ? (
-        <SpeciesList collection={collection} onCatch={onCatch} onShare={onShare} />
+        <SpeciesList collection={collection} onCatch={onCatch} onShare={onShare} now={now} onPlay={onPlay} onStop={onStop} isActive={isActive} />
       ) : (
         <ul className="dex">
           {SPECIES.map((s) => {

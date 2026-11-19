@@ -1,7 +1,7 @@
-import { fireEvent, screen, within } from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { renderApp, setupAppTests, usePhoto } from "./testApp";
+import { playAudio, renderApp, setupAppTests, stopAudio, unlockAudio, usePhoto } from "./testApp";
 
 vi.mock("./callAudio", async () => (await import("./testApp")).callAudioMock);
 vi.mock("./location", async () => (await import("./testApp")).locationMock);
@@ -60,5 +60,28 @@ describe("App: 全種の一覧（#96）", () => {
     localStorage.setItem("bird-finder:collection:v1", JSON.stringify({ japanese_bush_warbler: { count: 2, firstAt: "2026-11-15T07:00:00.000Z" } }));
     const list = await openAll();
     expect(within(list).getAllByRole("img", { name: "捕獲済み" })).toHaveLength(1);
+  });
+  it("行をタップすると、詳細が開いて鳴き声が再生される。閉じると止まる（#141）", async () => {
+    usePhoto.mockReturnValue({ thumbnail: "https://u/330px-a.jpg", pageUrl: "https://w/x" });
+    const list = await openAll();
+    const row = within(list).getAllByRole("listitem").find((r) => r.textContent?.includes("ウグイス"))!;
+    fireEvent.click(row.querySelector(".sp-info") as HTMLElement);
+    expect(unlockAudio).toHaveBeenCalledTimes(1); // タップの同期処理内で解錠する
+    const dialog = await screen.findByRole("dialog", { name: "ウグイスの詳細" });
+    await waitFor(() => expect(playAudio).toHaveBeenCalledWith("https://u/a.mp3", expect.any(Function)));
+    // 再生中の表示と出典が、詳細に出る
+    await waitFor(() => expect(within(dialog).getAllByText(/録音者A ／ CC BY 4.0/).length).toBeGreaterThan(0));
+    stopAudio.mockClear();
+    fireEvent.click(within(dialog).getByRole("button", { name: "閉じる" }));
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(stopAudio).toHaveBeenCalledTimes(1);
+  });
+  it("行の中のボタン（画像の🔍）は、再生せずに拡大するだけ（従来どおり）", async () => {
+    usePhoto.mockReturnValue({ thumbnail: "https://u/330px-a.jpg", pageUrl: "https://w/x" });
+    const list = await openAll();
+    fireEvent.click(within(list).getByRole("button", { name: "ウグイスの写真を拡大" }));
+    await screen.findByRole("dialog", { name: "ウグイスの詳細" });
+    expect(unlockAudio).not.toHaveBeenCalled();
+    expect(playAudio).not.toHaveBeenCalled();
   });
 });

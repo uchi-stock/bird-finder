@@ -44,7 +44,7 @@ export function App() {
         </p>
       )}
       {tab === "dex" ? (
-        <Dex collection={collection} onCatch={onCatch} onShare={shareSighting} />
+        <Dex collection={collection} onCatch={onCatch} onShare={shareSighting} now={now} onPlay={onPlay} onStop={stop} isActive={isActive} />
       ) : tab === "quiz" ? (
         <Quiz />
       ) : tab === "map" ? (
