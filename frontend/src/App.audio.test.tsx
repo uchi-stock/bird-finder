@@ -157,8 +157,13 @@ describe("App: タップで再生と同時に画像を拡大", () => {
     fireEvent.click(document.querySelector(".lightbox") as HTMLElement);
     fireEvent.click(cards[1]);
     await waitFor(() => expect(document.querySelectorAll(".lightbox")).toHaveLength(1));
-    expect(cards[1].querySelector(".lightbox")).not.toBeNull();
-    expect(cards[0].querySelector(".lightbox")).toBeNull();
+    // 詳細は、モーダルとして画面全体に出す（描画先はbody直下。一覧の行の中だと、行の範囲で見切れる）（#146）
+    const box = document.querySelector(".lightbox") as HTMLElement;
+    expect(box.parentElement).toBe(document.body);
+    expect(cards[0].contains(box) || cards[1].contains(box)).toBe(false);
+    // 開いているのは、2番目にタップした鳥の詳細
+    const name = cards[1].querySelector(".photo img")?.getAttribute("alt");
+    expect(box).toHaveAttribute("aria-label", `${name}の詳細`);
   });
   it("写真の角の🔍ボタンは、音声なしで拡大のみ行う", async () => {
     usePhoto.mockReturnValue(photo);
