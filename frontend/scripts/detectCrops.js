@@ -1,6 +1,6 @@
 // 鳥の写真から、鳥の位置を検出して、サムネイルの切り出し範囲を決める（GitHub Actionsで実行する。
 // 手元・サンドボックスからは、WikimediaとHugging Faceへ届かない）。
-// 各鳥の「今、画面に出る画像」（選び直した写真があればそれ、なければWikipediaの代表画像）を取得し、
+// 各鳥の「今、画面に出る画像」（ベース: 選び直した写真があればそれ、なければWikipediaの代表画像。飛ぶ姿: 画面と同じ検索）を取得し、
 // 物体検出モデル（COCOの「bird」クラス）で鳥を検出して、鳥に寄せた正方形の範囲を、
 // src/data/photoCrops.json（画像のファイル名をキーにした表。値は割合。切り出さないときはnull）へ書く。
 // 画像そのものは、保存・加工しない。
@@ -11,6 +11,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { commonsFlightUrl, pickFlightPhoto } from "../src/domain/flightPhoto.ts";
 import { photoKey } from "../src/domain/photoKey.ts";
 import { buildReport, decideCrop, MIN_SCORE, tooManyFailures } from "./cropScore.js";
 
@@ -61,20 +62,14 @@ async function main() {
 
   const rows = [];
   const next = only.length ? { ...crops } : {}; // 全種のときは、今の画像のキーだけを残す（使われなくなったキーを消す）
-  let failed = 0;
-  for (const s of targets) {
-    const url = await imageUrl(s.name_ja, photos);
-    if (!url) {
-      failed++;
-      rows.push({ name: s.name_ja, note: "画像のURLを取得できませんでした" });
-      continue;
-    }
+
+  /** 1枚の画像を取得して、鳥を検出し、切り出し範囲を決める。成功したらtrue（失敗は、行に理由を残す） */
+  async function detectOne(label, url) {
     const key = photoKey(url);
     const buf = await get(url, "buffer");
     if (!buf) {
-      failed++;
-      rows.push({ name: s.name_ja, key, note: "画像を取得できませんでした" });
-      continue;
+      rows.push({ name: label, key, note: "画像を取得できませんでした" });
+      return false;
     }
     try {
       const image = await RawImage.fromBlob(new Blob([buf]));
@@ -82,11 +77,30 @@ async function main() {
       const birds = detections.filter((d) => d.label === "bird");
       const crop = decideCrop(detections, image.width, image.height);
       next[key] = crop;
-      rows.push({ name: s.name_ja, key, birds: birds.length, topScore: birds.length ? Math.max(...birds.map((d) => d.score)).toFixed(2) : "-", crop });
+      rows.push({ name: label, key, birds: birds.length, topScore: birds.length ? Math.max(...birds.map((d) => d.score)).toFixed(2) : "-", crop });
+      return true;
     } catch (e) {
-      failed++;
-      rows.push({ name: s.name_ja, key, note: `検出に失敗しました: ${e.message}` });
+      rows.push({ name: label, key, note: `検出に失敗しました: ${e.message}` });
+      return false;
     }
+  }
+
+  let failed = 0;
+  for (const s of targets) {
+    // ベースの画像（立ち姿・浮かぶ姿）
+    const url = await imageUrl(s.name_ja, photos);
+    if (!url) {
+      failed++;
+      rows.push({ name: s.name_ja, note: "画像のURLを取得できませんでした" });
+    } else if (!(await detectOne(s.name_ja, url))) {
+      failed++;
+    }
+    // 飛ぶ姿の画像（#156）。画面と同じ関数で選ぶため、同じ画像のファイル名で、結果を引ける。
+    // 見つからない・失敗は、失敗の数に含めない（飛ぶ姿は、もともと見つからない鳥がある。画面は、全体表示または予備の推定になる）
+    const fj = await get(commonsFlightUrl(s.scientific_name));
+    const flight = fj ? pickFlightPhoto(fj) : null;
+    if (flight) await detectOne(`${s.name_ja}（飛ぶ姿）`, flight.thumbnail);
+    else rows.push({ name: `${s.name_ja}（飛ぶ姿）`, note: "飛ぶ姿の画像が見つかりませんでした" });
   }
   console.log(buildReport(rows));
   fs.writeFileSync(REPORT, buildReport(rows));

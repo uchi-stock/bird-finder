@@ -1,6 +1,7 @@
 name: Detect crops (鳥を検出して、サムネイルの切り出し範囲を決める)
 
 # サムネイルの余白を詰めるため、鳥の写真から鳥の位置を検出して、切り出し範囲（割合）を決める。人の操作は要らない。
+# - 対象は、各鳥のベースの画像（立ち姿・浮かぶ姿）と、詳細に出す飛ぶ姿の画像
 # - 画像は、保存・加工しない（ライセンスの派生物にならない）。保存するのは、画像のファイル名をキーにした、切り出し範囲だけ（photoCrops.json）
 # - 月1回の定期実行と、写真・鳥種データ・この仕組み自体の変更時に動く（手動実行もできる）。写真の選び直し（curate-photos）の後に動く
 # - 結果が変わったときだけ、PRとして出す。PRは、CIを待たずに自動でマージされる（commit-via-prの仕様）。そのため、コミットの前に、結果の検査（単体テスト）を実行し、失敗したらPRを出さない
@@ -21,6 +22,7 @@ on:
       - "frontend/scripts/detectCrops.js"
       - "frontend/scripts/cropScore.js"
       - "frontend/src/domain/subjectCrop.ts"
+      - "frontend/src/domain/flightPhoto.ts"
   workflow_dispatch:
     inputs:
       species_ids:
