@@ -54,10 +54,6 @@ export function CatchButton({ speciesId, collection, onCatch, onShare }: Props) 
           {result.isNew ? <b className="new">NEW! </b> : null}ゲット！{result.isNew ? "" : `（${result.count}回目）`}
         </span>
       )}
-      {/* 捕まえると必ず共有するため、捕まえる前に分かるよう、常に明示する */}
-      {onShare && (
-        <p className="share-note">捕まえると、約1kmにぼかした位置が、みんなの地図に出ます。自宅の周辺（約2km）は共有しません。あとから取り消せません。記録は期限なく保存されます。</p>
-      )}
       {shareMsg && (
         <p className="share-note" role="status">
           {shareMsg}
