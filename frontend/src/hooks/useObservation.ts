@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { allowedBehaviors, allowedPlaces, appearanceKnown, behaviorsAfterPlaceChange, ENTRY_STEPS, type EntryMode } from "../domain/choices";
+import { allowedBehaviors, allowedPlaces, appearanceKnown, behaviorsAfterPlaceChange, ENTRY_STEPS } from "../domain/choices";
 import { hasAnyInput, identify, pickTop } from "../domain/scoring";
 import { timeSlotFromHour } from "../domain/time";
 import type { Behavior, Color, Habitat, Observation, Place, TimeSlot } from "../domain/types";
@@ -20,11 +20,9 @@ export function useObservation() {
   const [voice, setVoice] = useState("");
   const [noVoice, setNoVoice] = useState(false);
 
-  // 入口（鳴き声から／姿から／両方）。既定は両方。出さないカードの項目は、入力済みでも判定に使わない（値は消さずに保持する）
-  const [mode, setMode] = useState<EntryMode>("both");
   // 見えない（声だけ）なら、姿に関する大きさ（4）・羽の色（5）は回答不要なので、カード自体を出さない
   const seen = appearanceKnown(place);
-  const visibleSteps = ENTRY_STEPS[mode].filter((step) => seen || (step !== 4 && step !== 5));
+  const visibleSteps = ENTRY_STEPS.both.filter((step) => seen || (step !== 4 && step !== 5));
   const showBehavior = visibleSteps.includes(2);
   const showVoice = visibleSteps.includes(3);
   const showSize = visibleSteps.includes(4);
@@ -118,7 +116,7 @@ export function useObservation() {
   return {
     sizeLevel, setSizeLevel, colors, setColors, behaviors, setBehaviors, place, selectPlace,
     habitats, setHabitats, time, setTime, voice, setVoice, noVoice, setNoVoice,
-    locMsg, locBusy, locate, seen, mode, setMode, visibleSteps, results, inputForResults, stepDone, flying, reset,
+    locMsg, locBusy, locate, seen, visibleSteps, results, inputForResults, stepDone, flying, reset,
   };
 }
 

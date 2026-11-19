@@ -241,11 +241,10 @@ describe("App: 見えない（声だけ）のとき、大きさ・羽の色は�
     expect(chip("大きさ", "2")).toHaveAttribute("aria-pressed", "false");
     expect(chip("羽の色", "茶")).toHaveAttribute("aria-pressed", "false");
   });
-  it("入口が「鳴き声から」のときも、見えないを選んでカードの枚数が合う", async () => {
+  it("見えない（声だけ）を選ぶと、大きさ・羽の色のカードが減り、枚数が合う", async () => {
     await renderApp();
-    await userEvent.click(screen.getByRole("button", { name: /鳴き声から/ }));
     await userEvent.click(chip("どこで見たか", "見えない（声だけ）"));
-    expect(dots()).toEqual(["1. 周辺の環境", "2. どこで見たか", "3. 鳴き声", "4. 時間帯"]);
+    expect(dots()).toEqual(["1. 周辺の環境", "2. どこで見たか", "3. 行動", "4. 鳴き声", "5. 時間帯"]);
   });
   it("現在位置の表示は、カードの枚数を超えない", async () => {
     await renderApp();
@@ -281,52 +280,18 @@ describe("App: 検索は常に今をもとにする（#100）", () => {
   });
 });
 
-describe("App: 入口（鳴き声から／姿から／両方）（#60）", () => {
-  const dots = () => screen.getAllByRole("button", { name: /^\d\. / }).map((b) => b.getAttribute("aria-label"));
-  const mode = (name: string) => screen.getByRole("button", { name: new RegExp(name) });
-  const headings = () => screen.queryAllByRole("heading", { level: 2 }).map((h) => h.textContent);
-
-  it("初期は「両方」で、今までと同じ7枚のカードが出る", async () => {
+describe("App: 入口の切替ボタンは出さない（#125）", () => {
+  it("「鳴き声から／姿から／両方」のボタンが無く、常に7枚のカードが出る", async () => {
     await renderApp();
-    expect(mode("両方")).toHaveAttribute("aria-pressed", "true");
-    expect(dots()).toHaveLength(7);
-  });
-  it("鳴き声から: 環境・場所・鳴き声・時間帯の4枚だけになる（行動・大きさ・羽の色は出さない）", async () => {
-    await renderApp();
-    await userEvent.click(mode("鳴き声から"));
-    expect(mode("鳴き声から")).toHaveAttribute("aria-pressed", "true");
-    expect(dots()).toEqual(["1. 周辺の環境", "2. どこで見たか", "3. 鳴き声", "4. 時間帯"]);
-    expect(screen.queryByRole("heading", { name: /^行動/ })).toBeNull();
-    expect(screen.queryByRole("heading", { name: /^大きさ/ })).toBeNull();
-    expect(screen.queryByRole("heading", { name: /^羽の色/ })).toBeNull();
+    expect(screen.queryByRole("group", { name: "何をもとに探すか" })).toBeNull();
+    expect(screen.queryByRole("button", { name: /鳴き声から|姿から/ })).toBeNull();
+    expect(screen.getAllByRole("button", { name: /^\d\. / })).toHaveLength(7);
     expect(screen.getByRole("heading", { name: /鳴き声（オノマトペ）/ })).toBeInTheDocument();
   });
-  it("姿から: 鳴き声のカードを出さない", async () => {
+  it("オノマトペで探せる", async () => {
     await renderApp();
-    await userEvent.click(mode("姿から"));
-    expect(dots()).toEqual(["1. 周辺の環境", "2. どこで見たか", "3. 行動", "4. 大きさ", "5. 羽の色", "6. 時間帯"]);
-    expect(screen.queryByRole("heading", { name: /鳴き声（オノマトペ）/ })).toBeNull();
-  });
-  it("出さないカードの入力済みの値は、判定に使わず、値は消さない。「両方」へ戻すと効く", async () => {
-    await renderApp();
-    await userEvent.click(chip("大きさ", "7")); // アオサギ級の大きさ
-    const names = () => screen.queryAllByRole("listitem").map((l) => l.textContent);
-    const withSize = names().join("|");
-    await userEvent.click(mode("鳴き声から"));
-    const voiceOnly = names().join("|");
-    expect(voiceOnly).not.toBe(withSize); // 大きさ7が判定に使われなくなり、候補が変わる
-    await userEvent.click(mode("両方"));
-    expect(chip("大きさ", "7")).toHaveAttribute("aria-pressed", "true"); // 値は保持されている
-    expect(names().join("|")).toBe(withSize);
-  });
-  it("鳴き声から: オノマトペで探せる。姿からに切り替えると、オノマトペは判定に使わない", async () => {
-    await renderApp();
-    await userEvent.click(mode("鳴き声から"));
     fireEvent.change(screen.getByPlaceholderText(/ホーホケキョ/), { target: { value: "ホーホケキョ" } });
     expect(await screen.findByText("ウグイス")).toBeInTheDocument();
-    await userEvent.click(mode("姿から"));
-    expect(screen.queryByText("ウグイス")).toBeNull();
-    expect(headings()).not.toContain("鳴き声（オノマトペ）");
   });
 });
 

@@ -222,19 +222,12 @@ test.describe("みんなの観察（地図）", () => {
 });
 
 for (const size of SIZES) {
-  test.describe(`入口の切り替え ${size.name}`, () => {
+  test.describe(`入口の切替ボタンなし ${size.name}`, () => {
     test.use({ viewport: { width: size.width, height: size.height } });
-    test("鳴き声から・姿から・両方で、カードの枚数が変わる。切り替えても横スクロールは出ない", async ({ page }, testInfo) => {
+    test("「鳴き声から」等の切替ボタンが無く、常に7枚のカードが出る。横スクロールは出ない", async ({ page }) => {
       await openApp(page);
-      const dots = () => page.locator(".dots button").count();
-      expect(await dots()).toBe(7);
-      await page.getByRole("button", { name: /鳴き声から/ }).click();
-      expect(await dots()).toBe(4);
-      await captureScreenshot(page, testInfo, `${size.name}-7-voice-mode`, `入口: 鳴き声から（${size.name}）`, { fullPage: false });
-      await page.getByRole("button", { name: /姿から/ }).click();
-      expect(await dots()).toBe(6);
-      await page.getByRole("button", { name: /両方/ }).click();
-      expect(await dots()).toBe(7);
+      await expect(page.getByRole("button", { name: /鳴き声から|姿から/ })).toHaveCount(0);
+      expect(await page.locator(".dots button").count()).toBe(7);
       expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBe(0);
     });
   });
