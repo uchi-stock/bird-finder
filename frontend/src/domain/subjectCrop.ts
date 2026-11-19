@@ -11,11 +11,11 @@ export interface Crop {
 }
 
 /** 被写体の範囲の周囲に残す余白（被写体の一辺に対する割合） */
-export const MARGIN = 0.12;
+export const MARGIN = 0.08;
 /** 切り出す正方形の一辺の下限（元の画像の短い辺に対する割合）。寄りすぎると、画質が落ちる */
-export const MIN_SIDE = 0.5;
+export const MIN_SIDE = 0.45;
 /** 切り出す正方形の一辺が、元の画像の短い辺のこの割合を超えるときは、切り出さない（余白が少ない・被写体が大きい） */
-export const MAX_SIDE = 0.85;
+export const MAX_SIDE = 0.95;
 /** 被写体とみなす画素の下限（画像全体に対する割合）。これ未満は、被写体が見つからないとみなす */
 const MIN_SUBJECT = 0.01;
 /** 被写体の範囲を決めるとき、両端から除く割合（ノイズ・細かい点を無視する） */
