@@ -8,6 +8,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { backgroundRatio, decide, filterCandidates, tooManyFailures } from "./photoScore.js";
+import { isFlying, flyingScore, poseName, POSE_LABELS } from "./poseScore.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const SPECIES_FILE = path.resolve(here, "../src/data/species.json");
@@ -51,12 +52,16 @@ function commonsUrl(scientificName) {
   return `https://commons.wikimedia.org/w/api.php?${q.toString()}`;
 }
 
+/** 姿勢の分類（飛んでいる写真かの判定）。モデルを使えないときは、何も返さない（飛んでいないものとして扱う） */
+let classifyPose = async () => null;
+
 async function measure(sharp, url) {
   const buf = await get(url, "buffer");
   if (!buf) return null;
   try {
     const { data } = await sharp(buf).resize(SIZE, SIZE, { fit: "fill" }).greyscale().raw().toBuffer({ resolveWithObject: true });
-    return backgroundRatio(new Uint8Array(data), SIZE, SIZE);
+    const pose = await classifyPose(buf);
+    return { ...backgroundRatio(new Uint8Array(data), SIZE, SIZE), flying: isFlying(pose), flyingScore: flyingScore(pose), pose: poseName(pose) };
   } catch {
     return null;
   }
@@ -64,6 +69,15 @@ async function measure(sharp, url) {
 
 async function main() {
   const { default: sharp } = await import("sharp");
+  // 画像分類モデル（CLIP）で、飛んでいる写真かを見分ける（#157）。取得できなければ、題名の語だけで除く、これまでの動作になる
+  try {
+    const { pipeline, RawImage } = await import("@huggingface/transformers");
+    const clf = await pipeline("zero-shot-image-classification", "Xenova/clip-vit-base-patch32");
+    classifyPose = async (buf) => clf(await RawImage.fromBlob(new Blob([buf])), Object.values(POSE_LABELS));
+    console.log("姿勢の分類モデルを読み込みました");
+  } catch (e) {
+    console.warn(`姿勢の分類モデルを使えません（題名の語だけで除きます）: ${e.message}`);
+  }
   const species = JSON.parse(fs.readFileSync(SPECIES_FILE, "utf8"));
   const only = (process.env.SPECIES_IDS ?? "").split(",").map((s) => s.trim()).filter(Boolean);
   const targets = only.length ? species.filter((s) => only.includes(s.species_id)) : species;
@@ -97,7 +111,7 @@ async function main() {
     if (d.action === "replace") photos[s.name_ja] = { thumbnail: d.best.thumbnail, pageUrl: d.best.pageUrl, credit: d.best.credit, license: d.best.license };
     else if (d.action === "drop") delete photos[s.name_ja];
     const f = (v) => (v == null || !Number.isFinite(v) ? "—" : v.toFixed(2));
-    rows.push({ s, baseUrl, existing, ...d, best: d.best ?? null, count: measured.length });
+    rows.push({ s, baseUrl, existing, ...d, best: d.best ?? null, count: measured.length, nowMeasure: existingMeasure ?? wikipediaMeasure, excludedFlying: measured.filter((m) => m.flying).length });
     console.log(`${s.name_ja}: 候補${measured.length}件 / 基準 ${f(d.baseline?.ratio)} → ${d.action}${d.best ? ` ${f(d.best.ratio)}` : ""}`);
   }
 
@@ -110,9 +124,11 @@ async function main() {
     "",
     `対象 ${rows.length} 種 / 変更 ${changed} 種 / 検索に失敗 ${failed} 種。比は小さいほど、背景が単純で被写体が目立つ。`,
     "",
-    "| 鳥 | 今の画像 | 選んだ画像 | 基準→選択の比 | 結果 | 候補数 |",
-    "|---|---|---|---|---|---|",
-    ...rows.map((r) => `| ${r.s.name_ja} | ${img(r.existing?.thumbnail ?? r.baseUrl)} | ${r.best ? img(r.best.thumbnail) : "—"} | ${f(r.baseline?.ratio)} → ${f(r.best?.ratio)} | ${label[r.action]} | ${r.count} |`),
+    "「今の姿」は、今の画像を分類した姿。「飛ぶ」の写真は、候補から除く・基準にしない（#157）。",
+    "",
+    "| 鳥 | 今の画像 | 今の姿（飛ぶ確度） | 選んだ画像 | 基準→選択の比 | 結果 | 候補数（うち飛ぶ） |",
+    "|---|---|---|---|---|---|---|",
+    ...rows.map((r) => `| ${r.s.name_ja} | ${img(r.existing?.thumbnail ?? r.baseUrl)} | ${r.nowMeasure?.pose ?? "—"}（${f(r.nowMeasure?.flyingScore)}） | ${r.best ? img(r.best.thumbnail) : "—"} | ${f(r.baseline?.ratio)} → ${f(r.best?.ratio)} | ${label[r.action]} | ${r.count}（${r.excludedFlying ?? 0}） |`),
   ];
   fs.writeFileSync(REPORT, lines.join("\n") + "\n");
 

@@ -5,7 +5,7 @@ import { retryPhoto, useFlightPhoto, usePhoto, usePhotoFailed } from "../photo";
 import { useModal } from "../hooks/useModal";
 import { Emoji } from "./Emoji";
 import { SPECIES } from "../options";
-import { ThumbImg } from "./ThumbImg";
+import { FlightImg, ThumbImg } from "./ThumbImg";
 
 interface PhotoProps {
   name: string;
@@ -94,7 +94,7 @@ export function Photo({ name, scientificName, flying = false, zoomed, onZoomChan
       {flight && (
         <figure className="lb-flight">
           <span className="lb-pose">飛ぶ姿</span>
-          <img src={flight.thumbnail} alt={`${name}の飛ぶ姿`} loading="lazy" crossOrigin="anonymous" />
+          <FlightImg src={flight.thumbnail} alt={`${name}の飛ぶ姿`} />
           <a href={flight.pageUrl} target="_blank" rel="noreferrer">
             {`出典: Wikimedia Commons（撮影: ${flight.credit ?? "不明"} ／ ${flight.license ?? "ライセンスはリンク先を参照"}）`}
           </a>

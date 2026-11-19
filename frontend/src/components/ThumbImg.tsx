@@ -50,17 +50,8 @@ function measure(img: HTMLImageElement): Crop | null {
   }
 }
 
-interface Props {
-  src: string;
-  alt: string;
-  loading?: "lazy" | "eager";
-}
-
-/**
- * 常に<span><img/></span>の形で出す（切り出しの有無で要素が入れ替わり、画像が読み込み直されないため）。
- * 切り出さないときのspanは、レイアウトに影響しない（display: contents）
- */
-export function ThumbImg({ src, alt, loading }: Props) {
+/** 切り出し範囲を決めて、返す。保存した範囲があれば、画像の読み込みを待たずに使い、無ければ、読み込み後に推定する */
+function useThumbCrop(src: string) {
   const ref = useRef<HTMLImageElement>(null);
   const [crop, setCrop] = useState<Crop | null>(() => storedCrop(src) ?? cache.get(src) ?? null);
   const compute = (img: HTMLImageElement) => {
@@ -80,9 +71,34 @@ export function ThumbImg({ src, alt, loading }: Props) {
     if (img?.complete && img.naturalWidth > 0) compute(img);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- srcが変わったときだけ計算する
   }, [src]);
+  return { crop, ref, onLoad: (e: React.SyntheticEvent<HTMLImageElement>) => compute(e.currentTarget) };
+}
+
+interface Props {
+  src: string;
+  alt: string;
+  loading?: "lazy" | "eager";
+}
+
+/**
+ * 常に<span><img/></span>の形で出す（切り出しの有無で要素が入れ替わり、画像が読み込み直されないため）。
+ * 切り出さないときのspanは、レイアウトに影響しない（display: contents）
+ */
+export function ThumbImg({ src, alt, loading }: Props) {
+  const { crop, ref, onLoad } = useThumbCrop(src);
   return (
     <span className={crop ? "thumb-sq" : "thumb-plain"}>
-      <img ref={ref} src={src} alt={alt} loading={loading} crossOrigin="anonymous" onLoad={(e) => compute(e.currentTarget)} style={crop ? cropStyle(crop) : undefined} />
+      <img ref={ref} src={src} alt={alt} loading={loading} crossOrigin="anonymous" onLoad={onLoad} style={crop ? cropStyle(crop) : undefined} />
+    </span>
+  );
+}
+
+/** 詳細の「飛ぶ姿」の画像。余白が多ければ、鳥に寄せた正方形で出す（#156）。切り出さない画像は、全体を出す */
+export function FlightImg({ src, alt }: { src: string; alt: string }) {
+  const { crop, ref, onLoad } = useThumbCrop(src);
+  return (
+    <span className={crop ? "lb-flight-sq" : "lb-flight-plain"}>
+      <img ref={ref} src={src} alt={alt} loading="lazy" crossOrigin="anonymous" onLoad={onLoad} style={crop ? cropStyle(crop) : undefined} />
     </span>
   );
 }

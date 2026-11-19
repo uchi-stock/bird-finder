@@ -138,10 +138,14 @@ export function tooManyFailures(failed) {
  * existingMeasure・wikipediaMeasure: backgroundRatioの結果（測れなければnull）
  */
 export function decide({ existing, existingMeasure, wikipediaMeasure, candidates }) {
-  // 選び直し済みの写真も、いまの条件（ライセンス・題名）を満たさなくなったら、使えないものとして扱う（条件を厳しくしたとき、自動で直る）
-  const existingOk = isAllowedEntry(existing) && Boolean(existingMeasure) && existingMeasure.center >= MIN_CENTER && Number.isFinite(existingMeasure.ratio);
-  const baseline = existingOk ? existingMeasure : wikipediaMeasure;
-  const best = pickBest(candidates, baseline);
+  // 飛んでいる写真（画像の姿勢の判定。poseScore.js）は、1枚目（立ち姿・浮かぶ姿）に使わない（#157）。
+  // 空を背景にした飛んでいる写真は、背景が単純で有利になるため、候補から外す。基準としても使わない
+  const notFlying = (m) => !m?.flying;
+  // 選び直し済みの写真も、いまの条件（ライセンス・題名・姿勢）を満たさなくなったら、使えないものとして扱う（条件を厳しくしたとき、自動で直る）
+  const existingOk = isAllowedEntry(existing) && Boolean(existingMeasure) && existingMeasure.center >= MIN_CENTER && Number.isFinite(existingMeasure.ratio) && notFlying(existingMeasure);
+  // Wikipediaの代表画像が飛んでいるなら、基準にしない（立ち姿の候補があれば、無条件で選ぶ）
+  const baseline = existingOk ? existingMeasure : notFlying(wikipediaMeasure) ? wikipediaMeasure : null;
+  const best = pickBest(candidates.filter(notFlying), baseline);
   if (best) return { action: "replace", best, baseline };
   if (existingOk) return { action: "keep", baseline };
   return { action: existing ? "drop" : "none", baseline };

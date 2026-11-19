@@ -9,7 +9,8 @@ const SIZES = [
 
 for (const size of SIZES) {
   test.describe(`スマホ幅 ${size.name}（${size.width}x${size.height}）`, () => {
-    test.use({ viewport: { width: size.width, height: size.height } });
+    // service workerが、模擬の通信（page.route）を横取りしないよう、無効にする
+    test.use({ viewport: { width: size.width, height: size.height }, serviceWorkers: "block" });
 
     test("初期表示: 横スクロールが出ず、ヘッダーは1行で、タブバーは下に固定される", async ({ page }, testInfo) => {
       const errors: string[] = [];
@@ -61,6 +62,32 @@ for (const size of SIZES) {
       const box = await page.locator(".results .thumb-sq").first().boundingBox();
       expect(box && Math.abs(box.width - box.height) <= 1).toBe(true);
       await captureScreenshot(page, testInfo, `${size.name}-2-thumb-crop`, `余白の多い画像の切り出し（${size.name}）`, { fullPage: false });
+    });
+
+    test("詳細の「飛ぶ姿」も、余白が多ければ、鳥に寄せた正方形で出る（#156）", async ({ page }) => {
+      // 被写体が小さい（余白が多い）模擬の画像を、立ち姿・飛ぶ姿の両方に使う
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="500" height="333" viewBox="0 0 500 333"><defs><pattern id="p" width="24" height="24" patternUnits="userSpaceOnUse"><rect width="12" height="24" fill="#222"/><rect x="12" width="12" height="24" fill="#eee"/></pattern></defs><rect width="100%" height="100%" fill="#9bd"/><ellipse cx="270" cy="150" rx="40" ry="32" fill="url(#p)"/></svg>`;
+      const image = (r: import("@playwright/test").Route) => r.fulfill({ status: 200, contentType: "image/svg+xml", headers: { "access-control-allow-origin": "*" }, body: svg });
+      // 後から登録した模擬が優先される。openAppが遮断するCommonsへの通信より、あとに登録する
+      await openApp(page);
+      await page.route("https://thumb.wikimedia.org/**", image);
+      await page.route("https://upload.wikimedia.org/**", image);
+      await page.route("https://ja.wikipedia.org/api/rest_v1/page/summary/**", (r) =>
+        r.fulfill({ status: 200, contentType: "application/json", headers: { "access-control-allow-origin": "*" }, body: JSON.stringify({ type: "standard", thumbnail: { source: "https://thumb.wikimedia.org/s.svg" }, content_urls: { desktop: { page: "https://w/x" } } }) }),
+      );
+      await page.route("https://commons.wikimedia.org/w/api.php**", (r) =>
+        r.fulfill({
+          status: 200,
+          contentType: "application/json",
+          headers: { "access-control-allow-origin": "*" },
+          body: JSON.stringify({ query: { pages: { 1: { index: 1, title: "File:Bird in flight.jpg", imageinfo: [{ thumburl: "https://upload.wikimedia.org/fly-test.svg", descriptionurl: "https://commons.wikimedia.org/wiki/File:Bird_in_flight.jpg", extmetadata: {} }] } } } }),
+        }),
+      );
+      await showResults(page);
+      await page.locator(".results li .tile").first().tap();
+      await expect(page.locator(".lightbox .lb-flight-sq")).toBeVisible();
+      const box = await page.locator(".lightbox .lb-flight-sq").boundingBox();
+      expect(box && Math.abs(box.width - box.height) <= 1).toBe(true);
     });
 
     test("条件を入力すると候補が出て、結果は1画面に収まる。カードを横にスライドできる", async ({ page }, testInfo) => {

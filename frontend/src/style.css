@@ -905,11 +905,32 @@ footer {
   margin: 0;
 }
 
-.lb-flight > img {
+/* 余白が多い飛ぶ姿は、鳥に寄せた正方形に切り出す。切り出さない画像は、囲みがレイアウトに影響せず、全体を出す */
+.lb-flight-plain {
+  display: contents;
+}
+
+.lb-flight-plain img {
   display: block;
   max-width: 100%;
   max-height: 40vh;
   border-radius: 8px;
+}
+
+.lb-flight-sq {
+  position: relative;
+  width: min(100%, 360px);
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.lb-flight-sq img {
+  position: absolute;
+  display: block;
+  max-width: none;
+  max-height: none;
+  border-radius: 0;
 }
 
 .lightbox .lb-large {
