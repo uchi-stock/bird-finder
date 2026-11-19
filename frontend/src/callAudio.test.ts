@@ -42,6 +42,22 @@ describe("pickAudio: 単独の鳴き声らしい録音を選ぶ（#139）", () =
   });
 });
 
+describe("pickAudio: 人の発音・音楽の録音を避ける（#139。調査で、全種に多数あると分かった）", () => {
+  const mp3 = (n: string) => [{ type: "audio/mpeg", src: `https://u/${n}.mp3` }];
+  it("人が鳥の名前を発音した録音（説明・カテゴリ）は、後回しにする。例: ドイツ語でSilberreiherを読み上げたファイル", () => {
+    const say = { ...page("File:De-Silberreiher.ogg", 1, { derivatives: mp3("say"), extmetadata: { ImageDescription: { value: "pronunciation recording" } } }), categories: [{ title: "Category:Ardea alba" }] };
+    const call = page("File:Ardea alba XC1.ogg", 2, { derivatives: mp3("call") });
+    expect(pickAudio(resp(say, call), "Ardea alba", false)?.src).toBe("https://u/call.mp3");
+    const cat = { ...page("File:Jer-gliaineux.ogg", 1, { derivatives: mp3("jer") }), categories: [{ title: "Category:Jèrriais pronunciation" }] };
+    expect(pickAudio(resp(cat, call), "Ardea alba", false)?.src).toBe("https://u/call.mp3");
+  });
+  it("allowSuspicious=falseでは、疑わしい録音を採用しない（ほかの検索を先に試すため）", () => {
+    const opera = { ...page("File:Janacek - kacena divoka.ogg", 1, { derivatives: mp3("opera") }), categories: [{ title: "Category:Audio files of choral music" }] };
+    expect(pickAudio(resp(opera), "Anas platyrhynchos", false, false)).toBeNull();
+    expect(pickAudio(resp(opera), "Anas platyrhynchos", false, true)?.src).toBe("https://u/opera.mp3");
+  });
+});
+
 describe("pickAudio", () => {
   it("OggにはCommonsのMP3版（iPhoneで再生できる）を使う", () => {
     expect(pickAudio(resp(page("File:Hypsipetes amaurotis 1.ogg", 1)), "Hypsipetes amaurotis", true)?.src).toBe("https://u/t/orig.ogg.mp3");
@@ -107,6 +123,19 @@ describe("fetchCallAudio", () => {
     vi.stubGlobal("fetch", f);
     expect((await fetchCallAudio("Motacilla alba"))?.title).toBe("Motacilla alba x.ogg");
     expect(f).toHaveBeenCalledTimes(2);
+  });
+  it("カテゴリが音楽作品だけなら、全文検索の単独の鳴き声を使う（マガモ: オペラ「野鴨」を避ける）（#139）", async () => {
+    const opera = { ...page("File:Janacek - kacena divoka.ogg", 1, { derivatives: [{ type: "audio/mpeg", src: "https://u/opera.mp3" }] }), categories: [{ title: "Category:Audio files of music by Leoš Janáček" }] };
+    const mallard = page("File:Anas platyrhynchos - Mallard - XC112828.ogg", 1, { derivatives: [{ type: "audio/mpeg", src: "https://u/mallard.mp3" }] });
+    const f = vi.fn().mockImplementationOnce(() => json(resp(opera))).mockImplementationOnce(() => json(resp(mallard)));
+    vi.stubGlobal("fetch", f);
+    expect((await fetchCallAudio("Anas platyrhynchos mallard-test"))?.src).toBe("https://u/mallard.mp3");
+    expect(f).toHaveBeenCalledTimes(2);
+  });
+  it("単独の鳴き声がどこにも無ければ、疑わしい録音を使う（音源なしにしない）", async () => {
+    const opera = { ...page("File:Only music.ogg", 1, { derivatives: [{ type: "audio/mpeg", src: "https://u/only.mp3" }] }), categories: [{ title: "Category:Opera" }] };
+    vi.stubGlobal("fetch", vi.fn(() => json(resp(opera))));
+    expect((await fetchCallAudio("Only music-test"))?.src).toBe("https://u/only.mp3");
   });
   it("どちらでも見つからなければnull", async () => {
     vi.stubGlobal("fetch", vi.fn(() => json({})));
