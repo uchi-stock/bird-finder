@@ -49,7 +49,7 @@ describe("App: 捕まえる・図鑑", () => {
       fireEvent.change(screen.getByPlaceholderText(/ホーホケキョ/), { target: { value: "ホーホケキョ" } });
       await openDetail();
       fireEvent.click(within(detail()).getByRole("button", { name: "捕まえる" }));
-      expect(detail().querySelector(".ball.throw")).not.toBeNull();
+      expect(detail().querySelector(".lb-stage > .ball.throw")).not.toBeNull(); // ボールは、画像の枠に重ねて出す
       await act(async () => {
         vi.advanceTimersByTime(600);
       });
@@ -62,7 +62,8 @@ describe("App: 捕まえる・図鑑", () => {
       await act(async () => {
         vi.advanceTimersByTime(900);
       });
-      expect(detail().querySelector(".ball")).toBeNull();
+      // 捕獲後は、鳥の画像の位置（枠）の中央に、ボールが残る
+      expect(detail().querySelector(".lb-stage > .ball.done")).not.toBeNull();
       expect(within(detail()).getByText(/ゲット！/)).toBeInTheDocument();
     } finally {
       vi.useRealTimers();

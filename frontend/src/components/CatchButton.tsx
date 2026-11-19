@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import type { Collection } from "../domain/collection";
 import { Emoji } from "./Emoji";
 
-// throw: ボールが飛ぶ → absorb: 鳥の画像が縮んでボールへ吸い込まれる → shake: ボールが揺れる → done。合計1900ms
+// throw: ボールが画像の中央へ投げられる(600ms) → absorb: 画像が縮んでボールへ吸い込まれる(400ms) → shake: ボールが揺れる(900ms) → done: 中央に拡大して残す。合計1900ms
 type CatchPhase = "idle" | "throw" | "absorb" | "shake" | "done";
 
 interface Props {
@@ -17,6 +18,12 @@ const busyPhase = (p: CatchPhase) => p === "throw" || p === "absorb" || p === "s
 
 export function CatchButton({ speciesId, collection, onCatch, onShare }: Props) {
   const [phase, setPhase] = useState<CatchPhase>("idle");
+  // ボールは、鳥の画像の位置（拡大表示の枠）に重ねて出す。枠を探して、そこへ入れる
+  const rootRef = useRef<HTMLDivElement>(null);
+  const [stage, setStage] = useState<Element | null>(null);
+  useLayoutEffect(() => {
+    setStage(rootRef.current?.closest(".lightbox-inner")?.querySelector(".lb-stage") ?? null);
+  }, []);
   const [result, setResult] = useState<{ isNew: boolean; count: number } | null>(null);
   // 共有は、捕まえるたびに本人が選ぶ（初期はオフ）
   const [share, setShare] = useState(false);
@@ -26,7 +33,7 @@ export function CatchButton({ speciesId, collection, onCatch, onShare }: Props) 
     setResult(null);
     setShareMsg("");
     setPhase("throw");
-    setTimeout(() => setPhase("absorb"), 500);
+    setTimeout(() => setPhase("absorb"), 600);
     setTimeout(() => setPhase("shake"), 1000);
     setTimeout(() => {
       setResult(onCatch(speciesId));
@@ -37,12 +44,12 @@ export function CatchButton({ speciesId, collection, onCatch, onShare }: Props) 
   const owned = collection[speciesId]?.count ?? 0;
   const busy = busyPhase(phase);
   return (
-    <div className="catch">
+    <div className="catch" ref={rootRef}>
       <button className="catch-btn" onClick={start} disabled={busy}>
         <Emoji c="⚾" />
         {busy ? "…" : owned > 0 ? "もう一度捕まえる" : "捕まえる"}
       </button>
-      {busy && <span className={`ball ${phase}`} aria-hidden="true" />}
+      {stage && phase !== "idle" && createPortal(<span className={`ball ${phase}`} aria-hidden="true" />, stage)}
       {phase === "done" && result && (
         <span className="got">
           {result.isNew ? <b className="new">NEW! </b> : null}ゲット！{result.isNew ? "" : `（${result.count}回目）`}
