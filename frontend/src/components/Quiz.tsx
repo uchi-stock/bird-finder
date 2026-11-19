@@ -36,6 +36,8 @@ export function Quiz() {
   const [audio, setAudio] = useState<CallAudio | null | undefined>(undefined);
   const [playing, setPlaying] = useState(false);
   const [playFailed, setPlayFailed] = useState(false);
+  // 自動再生が始まった問題は、ボタンを「もう一度聞く」にする
+  const [autoplayed, setAutoplayed] = useState(false);
   const audioCache = useRef(new Map<string, Promise<CallAudio | null>>());
 
   const loadAudio = useCallback((id: string) => {
@@ -123,10 +125,30 @@ export function Quiz() {
     setAudio(undefined);
     setPlaying(false);
     setPlayFailed(false);
+    setAutoplayed(false);
+    // 音源が取れたら、ボタンを押さなくても自動で再生する（#123）。
+    // 開始・「次へ」のタップで解錠済みの共有<audio>を使う。再生できない環境（自動再生の制限）では、
+    // 例外を投げず、案内を出してボタン再生へ戻す
+    const autoPlay = async (a: CallAudio) => {
+      setPlaying(true);
+      try {
+        await playAudio(a.src, () => {
+          if (alive) setPlaying(false);
+        });
+        if (alive) setAutoplayed(true);
+      } catch {
+        if (alive) {
+          setPlaying(false);
+          setPlayFailed(true);
+        }
+      }
+    };
     void loadAudio(question.answerId).then((a) => {
       if (!alive) return;
-      if (a) setAudio(a);
-      else skipRef.current();
+      if (a) {
+        setAudio(a);
+        void autoPlay(a);
+      } else skipRef.current();
     });
     for (const q of round.slice(index + 1, index + 3)) void loadAudio(q.answerId);
     return () => {
@@ -174,6 +196,8 @@ export function Quiz() {
   };
 
   const next = () => {
+    // 次の問題の自動再生のため、このタップで改めて解錠する
+    if (kind === "call") unlockAudio();
     if (answered < limit && index + 1 < round.length) {
       setIndex(index + 1);
       setPicked(null);
@@ -273,13 +297,13 @@ export function Quiz() {
         {Math.min(answered + (picked === null ? 1 : 0), limit)} / {limit} 問 ・ {score}問正解
       </p>
       {isCall ? (
-        // 名前は出さない。再生ボタンで、何度でも聞き直せる
+        // 名前は出さない。問題が出たら自動で再生し、ボタンで何度でも聞き直せる
         <div className="quiz-call">
           <h2 className="quiz-name">この鳴き声の鳥は？</h2>
           <button type="button" className="quiz-play" onClick={() => void play()} disabled={!audio} aria-pressed={playing}>
-            {audio === undefined ? "音源を探しています…" : playing ? "⏹ 止める" : "🔊 鳴き声を聞く"}
+            {audio === undefined ? "音源を探しています…" : playing ? "⏹ 止める" : autoplayed ? "🔊 もう一度聞く" : "🔊 鳴き声を聞く"}
           </button>
-          {playFailed && <p className="hint warn">再生できませんでした。音量とマナーモードを確認して、もう一度お試しください。</p>}
+          {playFailed && <p className="hint warn">自動で再生できませんでした。ボタンを押してください。音が出ないときは、音量とマナーモードを確認してください。</p>}
           {note && <p className="hint">{note}</p>}
         </div>
       ) : (

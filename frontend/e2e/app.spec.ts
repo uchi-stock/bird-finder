@@ -114,7 +114,7 @@ for (const size of SIZES) {
       expect(errors).toEqual([]);
     });
 
-    test("クイズ（鳴き声）: 名前は出ず、再生ボタンで鳴き声を聞けて、1ラウンド（10問）遊べる", async ({ page }, testInfo) => {
+    test("クイズ（鳴き声）: 名前は出ず、鳴き声は自動で再生され、再生ボタンで聞き直せて、1ラウンド（10問）遊べる", async ({ page }, testInfo) => {
       const errors: string[] = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await openApp(page);
@@ -149,12 +149,12 @@ for (const size of SIZES) {
       await page.getByRole("button", { name: /クイズ/ }).click();
       await page.getByRole("button", { name: /鳴き声を聞いて、写真から選ぶ/ }).click();
       await expect(page.getByRole("heading", { name: "この鳴き声の鳥は？" })).toBeVisible();
-      const play = page.getByRole("button", { name: /鳴き声を聞く/ });
+      // 自動再生の成否（ヘッドレスでは再生できない）で、ボタンの名前が変わる。どれでも、押せる状態になる
+      const play = page.getByRole("button", { name: /鳴き声を聞く|もう一度聞く|止める/ });
       await expect(play).toBeEnabled();
       await expect(page.getByRole("group", { name: "写真の選択肢" }).getByRole("button")).toHaveCount(4);
       expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBe(0);
       await captureScreenshot(page, testInfo, `${size.name}-9-quiz-call`, `鳴き声のクイズ（${size.name}）`, { fullPage: false });
-      await play.tap();
       const group = page.getByRole("group", { name: "写真の選択肢" });
       for (let i = 0; i < 10; i++) {
         await expect(group.getByRole("button").first()).toBeEnabled();
