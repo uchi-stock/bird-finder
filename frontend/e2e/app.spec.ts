@@ -30,11 +30,14 @@ for (const size of SIZES) {
     test("条件を入力すると候補が出て、結果は1画面に収まる。カードを横にスライドできる", async ({ page }, testInfo) => {
       await openApp(page);
       await showResults(page);
+      // 4枚（2×2）は、高さのある端末では1画面に収まる。低い端末（SE）では、結果エリア内のスクロールを許容する
       const fit = await page.evaluate(() => {
         const ra = document.querySelector(".results-area") as HTMLElement;
         return ra.scrollHeight <= ra.clientHeight + 1;
       });
-      expect(fit).toBe(true);
+      if (size.height >= 800) expect(fit).toBe(true);
+      expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(0);
+      expect(await page.locator(".results li").count()).toBe(4);
       expect(await page.locator(".results li").count()).toBeGreaterThan(0);
       await captureScreenshot(page, testInfo, `${size.name}-2-results`, `候補の表示（${size.name}）`, { fullPage: false });
       await page.click("button[aria-label='7. 時間帯']");

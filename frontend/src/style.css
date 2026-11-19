@@ -413,7 +413,7 @@ footer {
   font-weight: bold;
 }
 
-/* 一画面レイアウト: 上=条件の横スライド、下=結果（最大3件） */
+/* 一画面レイアウト: 上=条件の横スライド、下=結果（最大4件） */
 .app.fit {
   height: 100dvh;
   display: flex;
@@ -493,7 +493,7 @@ footer {
   align-items: stretch;
 }
 
-/* 候補カードを詰めて、3件が一画面に収まるようにする */
+/* 候補カードを詰めて、4件が一画面に収まるようにする */
 .note.clamp {
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -535,7 +535,7 @@ footer {
   gap: 6px;
 }
 
-/* 3件が確実に一画面に収まるよう、カード内の行間を詰める */
+/* 4件が確実に一画面に収まるよう、カード内の行間を詰める */
 .results .body {
   display: flex;
   flex-direction: column;
@@ -799,13 +799,13 @@ footer {
   opacity: 1;
 }
 
-/* 検索結果: 鳥の画像と近さだけ（3件を横に並べて、画像を大きく）。詳細は拡大表示へ */
+/* 検索結果: 鳥の画像と近さだけ（4件を2×2に並べて、画像を大きく）。詳細は拡大表示へ */
 .results {
   list-style: none;
   padding: 0;
   display: grid;
   margin: 4px 0 0;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
 }
 
@@ -826,7 +826,7 @@ footer {
 .results .photo {
   width: 100%;
   height: auto;
-  aspect-ratio: 1;
+  aspect-ratio: 4 / 3;
 }
 
 .photo.empty {
@@ -857,7 +857,7 @@ footer {
   margin: 0;
   overflow-y: auto;
   padding: 10px;
-  max-height: 40dvh;
+  max-height: 30dvh;
 }
 
 /* 🔍の印は、小さく・透過にして、画像の邪魔にならないようにする */
