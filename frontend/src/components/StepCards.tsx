@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
-import { allowedBehaviors, allowedPlaces, ENTRY_MODES } from "../domain/choices";
+import { allowedBehaviors, allowedPlaces } from "../domain/choices";
 import { HABITATS } from "../domain/habitat";
-import { ENTRY_MODE_EMOJI, ENTRY_MODE_LABEL, STEP_TITLES } from "../domain/labels";
+import { STEP_TITLES } from "../domain/labels";
 import type { ObservationState } from "../hooks/useObservation";
 import { BEHAVIORS, COLORS, HABITAT_EMOJI, PLACES, SIZES, TIMES, toggle } from "../options";
 import { Emoji } from "./Emoji";
@@ -11,7 +11,7 @@ export function StepCards({ o }: { o: ObservationState }) {
   const {
     sizeLevel, setSizeLevel, colors, setColors, behaviors, setBehaviors, place, selectPlace,
     habitats, setHabitats, time, setTime, voice, setVoice, noVoice, setNoVoice,
-    locMsg, locBusy, locate, mode, setMode, visibleSteps, stepDone,
+    locMsg, locBusy, locate, visibleSteps, stepDone,
   } = o;
   const stepsRef = useRef<HTMLDivElement>(null);
   const [rawIdx, setStepIdx] = useState(0);
@@ -29,23 +29,9 @@ export function StepCards({ o }: { o: ObservationState }) {
     el?.scrollTo?.({ left: i * (el.scrollWidth / visibleSteps.length), behavior: "smooth" });
     setStepIdx(i);
   };
-  // 入口を切り替えたら、最初のカードへ戻る
-  const changeMode = (m: typeof mode) => {
-    setMode(m);
-    setStepIdx(0);
-    stepsRef.current?.scrollTo?.({ left: 0 });
-  };
   const show = (step: number) => visibleSteps.includes(step);
   return (
     <>
-          <div className="entry-mode" role="group" aria-label="何をもとに探すか">
-            {ENTRY_MODES.map((m) => (
-              <button key={m} type="button" className={mode === m ? "on" : ""} aria-pressed={mode === m} onClick={() => changeMode(m)}>
-                <Emoji c={ENTRY_MODE_EMOJI[m]} />
-                {ENTRY_MODE_LABEL[m]}
-              </button>
-            ))}
-          </div>
           <div className="step-nav">
             <div className="dots">
               {visibleSteps.map((step, pos) => (
