@@ -1,0 +1,168 @@
+[
+ {
+  "tag": "CUR",
+  "title": "(current)",
+  "thumbnail": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d8/Schreibers_kleiner_Atlas_der_einheimischen_V%C3%B6gel_%2810572859893%29.jpg/500px-Schreibers_kleiner_Atlas_der_einheimischen_V%C3%B6gel_%2810572859893%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "scores": {
+   "photo": 0.0001686022587819025,
+   "animal": 0.8309333324432373,
+   "prey": 0.7418504953384399
+  }
+ },
+ {
+  "tag": "1",
+  "title": "File:Northern Goshawk ad M2.jpg",
+  "thumbnail": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/81/Northern_Goshawk_ad_M2.jpg/500px-Northern_Goshawk_ad_M2.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "pageUrl": "https://commons.wikimedia.org/wiki/File:Northern_Goshawk_ad_M2.jpg",
+  "credit": "Norbert Kenntner, Berlin",
+  "license": "CC BY-SA 3.0",
+  "scores": {
+   "photo": 0.9365864396095276,
+   "animal": 0.8247915506362915,
+   "prey": 0.45509737730026245
+  }
+ },
+ {
+  "tag": "2",
+  "title": "File:Accipiter nisus w Aleksandrowicach pod Krakowem, 20220212 0915 4173.jpg",
+  "thumbnail": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d3/Accipiter_nisus_w_Aleksandrowicach_pod_Krakowem%2C_20220212_0915_4173.jpg/500px-Accipiter_nisus_w_Aleksandrowicach_pod_Krakowem%2C_20220212_0915_4173.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "pageUrl": "https://commons.wikimedia.org/wiki/File:Accipiter_nisus_w_Aleksandrowicach_pod_Krakowem,_20220212_0915_4173.jpg",
+  "credit": "Jakub Hałun",
+  "license": "CC BY-SA 4.0",
+  "scores": {
+   "photo": 0.9267899990081787,
+   "animal": 0.8375605344772339,
+   "prey": 0.16679677367210388
+  }
+ },
+ {
+  "tag": "3",
+  "title": "File:MNHN-ZO-MO-1999-2156 Doedalion pictum Lesson, 1830 Holotype 3.jpg",
+  "thumbnail": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b7/MNHN-ZO-MO-1999-2156_Doedalion_pictum_Lesson%2C_1830_Holotype_3.jpg/500px-MNHN-ZO-MO-1999-2156_Doedalion_pictum_Lesson%2C_1830_Holotype_3.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "pageUrl": "https://commons.wikimedia.org/wiki/File:MNHN-ZO-MO-1999-2156_Doedalion_pictum_Lesson,_1830_Holotype_3.jpg",
+  "credit": "Lesson, 1830",
+  "license": "CC BY-SA 4.0",
+  "scores": {
+   "photo": 0.21586138010025024,
+   "animal": 0.8139684796333313,
+   "prey": 0.5437094569206238
+  }
+ },
+ {
+  "tag": "4",
+  "title": "File:DSC43940 A.jpg",
+  "thumbnail": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/96/DSC43940_A.jpg/500px-DSC43940_A.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "pageUrl": "https://commons.wikimedia.org/wiki/File:DSC43940_A.jpg",
+  "credit": "Kirill Lapin",
+  "license": "CC BY-SA 4.0",
+  "scores": {
+   "photo": 0.8283006548881531,
+   "animal": 0.9025406837463379,
+   "prey": 0.6344022154808044
+  }
+ },
+ {
+  "tag": "5",
+  "title": "File:Erlache bei Bensheim DSC 0369-Habicht.jpg",
+  "thumbnail": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/62/Erlache_bei_Bensheim_DSC_0369-Habicht.jpg/500px-Erlache_bei_Bensheim_DSC_0369-Habicht.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "pageUrl": "https://commons.wikimedia.org/wiki/File:Erlache_bei_Bensheim_DSC_0369-Habicht.jpg",
+  "credit": "Bernd Herd",
+  "license": "CC BY-SA 4.0",
+  "scores": {
+   "photo": 0.6719462871551514,
+   "animal": 0.6843727827072144,
+   "prey": 0.6152260303497314
+  }
+ },
+ {
+  "tag": "6",
+  "title": "File:MNHN-ZO-MO-1999-2156 Doedalion pictum Lesson, 1830 Holotype 1.jpg",
+  "thumbnail": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b7/MNHN-ZO-MO-1999-2156_Doedalion_pictum_Lesson%2C_1830_Holotype_1.jpg/500px-MNHN-ZO-MO-1999-2156_Doedalion_pictum_Lesson%2C_1830_Holotype_1.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "pageUrl": "https://commons.wikimedia.org/wiki/File:MNHN-ZO-MO-1999-2156_Doedalion_pictum_Lesson,_1830_Holotype_1.jpg",
+  "credit": "Lesson, 1830",
+  "license": "CC BY-SA 4.0",
+  "scores": {
+   "photo": 0.4338957369327545,
+   "animal": 0.8969316482543945,
+   "prey": 0.9409642815589905
+  }
+ },
+ {
+  "tag": "7",
+  "title": "File:Accipiter nisus w Aleksandrowicach pod Krakowem, 20220212 0916 4186.jpg",
+  "thumbnail": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/63/Accipiter_nisus_w_Aleksandrowicach_pod_Krakowem%2C_20220212_0916_4186.jpg/500px-Accipiter_nisus_w_Aleksandrowicach_pod_Krakowem%2C_20220212_0916_4186.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "pageUrl": "https://commons.wikimedia.org/wiki/File:Accipiter_nisus_w_Aleksandrowicach_pod_Krakowem,_20220212_0916_4186.jpg",
+  "credit": "Jakub Hałun",
+  "license": "CC BY-SA 4.0",
+  "scores": {
+   "photo": 0.9424053430557251,
+   "animal": 0.8818440437316895,
+   "prey": 0.17798912525177002
+  }
+ },
+ {
+  "tag": "8",
+  "title": "File:Schreibers kleiner Atlas der einheimischen Vögel (10572859893).jpg",
+  "thumbnail": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d8/Schreibers_kleiner_Atlas_der_einheimischen_V%C3%B6gel_%2810572859893%29.jpg/500px-Schreibers_kleiner_Atlas_der_einheimischen_V%C3%B6gel_%2810572859893%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "pageUrl": "https://commons.wikimedia.org/wiki/File:Schreibers_kleiner_Atlas_der_einheimischen_V%C3%B6gel_(10572859893).jpg",
+  "credit": "Unknown authorUnknown author",
+  "license": "CC BY 2.0",
+  "scores": {
+   "photo": 0.0001686022587819025,
+   "animal": 0.8309333324432373,
+   "prey": 0.7418504953384399
+  }
+ },
+ {
+  "tag": "9",
+  "title": "File:MG 1911 1DPP.jpg",
+  "thumbnail": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9c/MG_1911_1DPP.jpg/500px-MG_1911_1DPP.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "pageUrl": "https://commons.wikimedia.org/wiki/File:MG_1911_1DPP.jpg",
+  "credit": "JPGM-Bdjz",
+  "license": "CC0",
+  "scores": {
+   "photo": 0.9601321816444397,
+   "animal": 0.7976827621459961,
+   "prey": 0.45024654269218445
+  }
+ },
+ {
+  "tag": "10",
+  "title": "File:Sparrowhawk with Blackbird prey in Helsinki 2022-09.jpg",
+  "thumbnail": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/91/Sparrowhawk_with_Blackbird_prey_in_Helsinki_2022-09.jpg/500px-Sparrowhawk_with_Blackbird_prey_in_Helsinki_2022-09.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "pageUrl": "https://commons.wikimedia.org/wiki/File:Sparrowhawk_with_Blackbird_prey_in_Helsinki_2022-09.jpg",
+  "credit": "Morkkis505",
+  "license": "CC BY-SA 4.0",
+  "scores": {
+   "photo": 0.988734245300293,
+   "animal": 0.836402952671051,
+   "prey": 0.26542800664901733
+  }
+ },
+ {
+  "tag": "11",
+  "title": "File:Accipiter gentilis, Palacio Real de Riofrío.jpg",
+  "thumbnail": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/29/Accipiter_gentilis%2C_Palacio_Real_de_Riofr%C3%ADo.jpg/500px-Accipiter_gentilis%2C_Palacio_Real_de_Riofr%C3%ADo.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "pageUrl": "https://commons.wikimedia.org/wiki/File:Accipiter_gentilis,_Palacio_Real_de_Riofr%C3%ADo.jpg",
+  "credit": "José Luis Filpo Cabana",
+  "license": "CC BY-SA 4.0",
+  "scores": {
+   "photo": 0.6603969931602478,
+   "animal": 0.6745254993438721,
+   "prey": 0.7156181335449219
+  }
+ },
+ {
+  "tag": "12",
+  "title": "File:MNHN-ZO-MO-1999-2156 Doedalion pictum Lesson, 1830 Holotype 2.jpg",
+  "thumbnail": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ad/MNHN-ZO-MO-1999-2156_Doedalion_pictum_Lesson%2C_1830_Holotype_2.jpg/500px-MNHN-ZO-MO-1999-2156_Doedalion_pictum_Lesson%2C_1830_Holotype_2.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "pageUrl": "https://commons.wikimedia.org/wiki/File:MNHN-ZO-MO-1999-2156_Doedalion_pictum_Lesson,_1830_Holotype_2.jpg",
+  "credit": "Lesson, 1830",
+  "license": "CC BY-SA 4.0",
+  "scores": {
+   "photo": 0.6000533699989319,
+   "animal": 0.9006510376930237,
+   "prey": 0.34237784147262573
+  }
+ }
+]

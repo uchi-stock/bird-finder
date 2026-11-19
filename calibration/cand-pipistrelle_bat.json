@@ -1,0 +1,168 @@
+[
+ {
+  "tag": "CUR",
+  "title": "(current)",
+  "thumbnail": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6e/Ine_to_Agave_Brewery_%281%29.jpg/500px-Ine_to_Agave_Brewery_%281%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "scores": {
+   "photo": 0.8167465925216675,
+   "animal": 0.0021572925616055727,
+   "prey": 0.42229846119880676
+  }
+ },
+ {
+  "tag": "1",
+  "title": "File:Pipistrellus abramus.jpg",
+  "thumbnail": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e4/Pipistrellus_abramus.jpg/500px-Pipistrellus_abramus.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "pageUrl": "https://commons.wikimedia.org/wiki/File:Pipistrellus_abramus.jpg",
+  "credit": "Original uploader was OAS at ja.wikipedia",
+  "license": "CC BY-SA 3.0",
+  "scores": {
+   "photo": 0.9780617356300354,
+   "animal": 0.9787716865539551,
+   "prey": 0.26033949851989746
+  }
+ },
+ {
+  "tag": "2",
+  "title": "File:Bat (open wing).JPG",
+  "thumbnail": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a3/Bat_%28open_wing%29.JPG/500px-Bat_%28open_wing%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "pageUrl": "https://commons.wikimedia.org/wiki/File:Bat_(open_wing).JPG",
+  "credit": "Photo by メリケン・ステーツ",
+  "license": "CC BY-SA 3.0",
+  "scores": {
+   "photo": 0.9144033789634705,
+   "animal": 0.9718477725982666,
+   "prey": 0.28397876024246216
+  }
+ },
+ {
+  "tag": "3",
+  "title": "File:Pipistrellus abramus from iNaturalist photo 286130949.jpg",
+  "thumbnail": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/Pipistrellus_abramus_from_iNaturalist_photo_286130949.jpg/500px-Pipistrellus_abramus_from_iNaturalist_photo_286130949.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "pageUrl": "https://commons.wikimedia.org/wiki/File:Pipistrellus_abramus_from_iNaturalist_photo_286130949.jpg",
+  "credit": "潘立傑 ( johnnypantw)",
+  "license": "CC BY 4.0",
+  "scores": {
+   "photo": 0.850030243396759,
+   "animal": 0.9772233366966248,
+   "prey": 0.12163256108760834
+  }
+ },
+ {
+  "tag": "4",
+  "title": "File:Pipistrellus abramus from iNaturalist photo 286130916.jpg",
+  "thumbnail": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4f/Pipistrellus_abramus_from_iNaturalist_photo_286130916.jpg/500px-Pipistrellus_abramus_from_iNaturalist_photo_286130916.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "pageUrl": "https://commons.wikimedia.org/wiki/File:Pipistrellus_abramus_from_iNaturalist_photo_286130916.jpg",
+  "credit": "潘立傑 ( johnnypantw)",
+  "license": "CC BY 4.0",
+  "scores": {
+   "photo": 0.8628828525543213,
+   "animal": 0.9800030589103699,
+   "prey": 0.21087738871574402
+  }
+ },
+ {
+  "tag": "5",
+  "title": "File:Pipistrellus abramus from iNaturalist photo 216005126.jpg",
+  "thumbnail": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c4/Pipistrellus_abramus_from_iNaturalist_photo_216005126.jpg/500px-Pipistrellus_abramus_from_iNaturalist_photo_216005126.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "pageUrl": "https://commons.wikimedia.org/wiki/File:Pipistrellus_abramus_from_iNaturalist_photo_216005126.jpg",
+  "credit": "WATANABE Hitoshi 渡辺仁 (tbc_watanabe)",
+  "license": "CC BY 4.0",
+  "scores": {
+   "photo": 0.9934566020965576,
+   "animal": 0.9952464699745178,
+   "prey": 0.28033652901649475
+  }
+ },
+ {
+  "tag": "6",
+  "title": "File:Pipistrellus abramus from iNaturalist photo 252761837.jpg",
+  "thumbnail": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2f/Pipistrellus_abramus_from_iNaturalist_photo_252761837.jpg/500px-Pipistrellus_abramus_from_iNaturalist_photo_252761837.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "pageUrl": "https://commons.wikimedia.org/wiki/File:Pipistrellus_abramus_from_iNaturalist_photo_252761837.jpg",
+  "credit": "林正文 ( lin-chen-wen)",
+  "license": "CC BY 4.0",
+  "scores": {
+   "photo": 0.37356868386268616,
+   "animal": 0.8920807242393494,
+   "prey": 0.27559366822242737
+  }
+ },
+ {
+  "tag": "7",
+  "title": "File:Pipistrellus abramus from iNaturalist photo 231144794.jpg",
+  "thumbnail": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4b/Pipistrellus_abramus_from_iNaturalist_photo_231144794.jpg/500px-Pipistrellus_abramus_from_iNaturalist_photo_231144794.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "pageUrl": "https://commons.wikimedia.org/wiki/File:Pipistrellus_abramus_from_iNaturalist_photo_231144794.jpg",
+  "credit": "林正文 ( lin-chen-wen)",
+  "license": "CC BY 4.0",
+  "scores": {
+   "photo": 0.7561146020889282,
+   "animal": 0.9702282547950745,
+   "prey": 0.5040082335472107
+  }
+ },
+ {
+  "tag": "8",
+  "title": "File:Ine to Agave Brewery (1).jpg",
+  "thumbnail": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6e/Ine_to_Agave_Brewery_%281%29.jpg/500px-Ine_to_Agave_Brewery_%281%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "pageUrl": "https://commons.wikimedia.org/wiki/File:Ine_to_Agave_Brewery_(1).jpg",
+  "credit": "掬茶",
+  "license": "CC BY-SA 4.0",
+  "scores": {
+   "photo": 0.8167465925216675,
+   "animal": 0.0021572925616055727,
+   "prey": 0.42229846119880676
+  }
+ },
+ {
+  "tag": "9",
+  "title": "File:Alionoctula abramus in Hamada, Shimane 07.jpg",
+  "thumbnail": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/68/Alionoctula_abramus_in_Hamada%2C_Shimane_07.jpg/500px-Alionoctula_abramus_in_Hamada%2C_Shimane_07.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "pageUrl": "https://commons.wikimedia.org/wiki/File:Alionoctula_abramus_in_Hamada,_Shimane_07.jpg",
+  "credit": "ノボホショコロトソ",
+  "license": "CC BY 4.0",
+  "scores": {
+   "photo": 0.27454012632369995,
+   "animal": 0.017248403280973434,
+   "prey": 0.4798240661621094
+  }
+ },
+ {
+  "tag": "10",
+  "title": "File:Alionoctula abramus in Hamada, Shimane 04.jpg",
+  "thumbnail": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b2/Alionoctula_abramus_in_Hamada%2C_Shimane_04.jpg/500px-Alionoctula_abramus_in_Hamada%2C_Shimane_04.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "pageUrl": "https://commons.wikimedia.org/wiki/File:Alionoctula_abramus_in_Hamada,_Shimane_04.jpg",
+  "credit": "ノボホショコロトソ",
+  "license": "CC BY 4.0",
+  "scores": {
+   "photo": 0.9294551610946655,
+   "animal": 0.08330298960208893,
+   "prey": 0.21910734474658966
+  }
+ },
+ {
+  "tag": "11",
+  "title": "File:Alionoctula abramus in Hamada, Shimane 02.jpg",
+  "thumbnail": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/11/Alionoctula_abramus_in_Hamada%2C_Shimane_02.jpg/500px-Alionoctula_abramus_in_Hamada%2C_Shimane_02.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "pageUrl": "https://commons.wikimedia.org/wiki/File:Alionoctula_abramus_in_Hamada,_Shimane_02.jpg",
+  "credit": "ノボホショコロトソ",
+  "license": "CC BY 4.0",
+  "scores": {
+   "photo": 0.9875977635383606,
+   "animal": 0.7833669781684875,
+   "prey": 0.1703777313232422
+  }
+ },
+ {
+  "tag": "12",
+  "title": "File:Alionoctula abramus in Hamada, Shimane 06.jpg",
+  "thumbnail": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/16/Alionoctula_abramus_in_Hamada%2C_Shimane_06.jpg/500px-Alionoctula_abramus_in_Hamada%2C_Shimane_06.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "pageUrl": "https://commons.wikimedia.org/wiki/File:Alionoctula_abramus_in_Hamada,_Shimane_06.jpg",
+  "credit": "ノボホショコロトソ",
+  "license": "CC BY 4.0",
+  "scores": {
+   "photo": 0.9714919924736023,
+   "animal": 0.650667130947113,
+   "prey": 0.1431455910205841
+  }
+ }
+]
