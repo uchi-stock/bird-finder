@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { largeImageUrl } from "../domain/habitat";
 import { retryPhoto, useFlightPhoto, usePhoto, usePhotoFailed } from "../photo";
 import { useModal } from "../hooks/useModal";
@@ -36,8 +37,10 @@ export function Photo({ name, scientificName, flying = false, zoomed, onZoomChan
     }
   }, [photo]);
   const modalRef = useModal(open, () => setOpen(false));
-  // 拡大表示（鳥の詳細）。写真が無い鳥でも開く（捕まえる・再生中の表示を載せるため）
-  const lightbox = open && (
+  // 拡大表示（鳥の詳細）。写真が無い鳥でも開く（捕まえる・再生中の表示を載せるため）。
+  // モーダルとして画面全体に出すため、描画先は、一覧の行ではなくdocument.body（行の中だと、
+  // 一覧の行の描画範囲（content-visibility）で見切れる）
+  const lightbox = open && typeof document !== "undefined" && createPortal(
     <div
       className="lightbox"
       ref={modalRef}
@@ -84,7 +87,8 @@ export function Photo({ name, scientificName, flying = false, zoomed, onZoomChan
         </a>
       )}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
   if (!photo) {
     return (
