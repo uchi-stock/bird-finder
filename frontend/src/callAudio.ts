@@ -31,9 +31,10 @@ export type CommonsResponse = { query?: { pages?: Record<string, CommonsPage> } 
 const curated = curatedJson as Record<string, CallAudio>;
 
 // 単独の鳴き声でない録音らしいファイル（合唱・群れ・環境音）の手がかり。ファイル名と説明文で見る
-const NOT_SOLO = /chorus|choir|dawn|flock|colony|ambient|ambience|soundscape|atmosphere|background|ensemble|habitat|合唱|群れ|環境音/i;
+// 人が鳥の名前を発音した録音（例: ドイツ語の「Silberreiher」を読み上げたファイル）も、Commonsの鳥のカテゴリに多く入っている
+const NOT_SOLO = /chorus|choir|dawn|flock|colony|ambient|ambience|soundscape|atmosphere|background|ensemble|habitat|pronunciation|prononc|aussprache|pronunciaci|合唱|群れ|環境音|発音/i;
 // 音楽作品・合唱など、鳥の録音でないものの手がかり（Commonsでは、鳥の名前を題にした音楽作品が、学名のカテゴリに入っていることがある。例: ヤナーチェクのオペラ「野鴨」）
-const NOT_BIRD_CATEGORY = /music|opera|orchestra|symphon|compos|choir|chorus|song|singer|vocal ensemble|ambient|soundscape/i;
+const NOT_BIRD_CATEGORY = /music|opera|orchestra|symphon|compos|choir|chorus|choral|singer|vocal ensemble|ambient|soundscape|pronunciation/i;
 // これより長い録音は、環境音などの可能性が高い（秒）
 const LONG_SECONDS = 180;
 
@@ -66,15 +67,18 @@ function playableSrc(info: NonNullable<CommonsPage["videoinfo"]>[number]): strin
 /**
  * 検索結果から音源を選ぶ。
  * strict=trueのときは、ファイル名に学名を含むものだけを採用する（別の鳥の音源を再生しないため）。
- * 合唱・環境音らしい録音は後回しにする（単独の鳴き声がほかにあれば、そちらを選ぶ）
+ * 合唱・環境音・音楽・人の発音らしい録音は、後回しにする（単独の鳴き声がほかにあれば、そちらを選ぶ）。
+ * allowSuspicious=falseのときは、後回しにする録音を、採用しない（ほかの検索を先に試すため）
  */
-export function pickAudio(json: CommonsResponse, scientificName: string, strict: boolean): CallAudio | null {
+export function pickAudio(json: CommonsResponse, scientificName: string, strict: boolean, allowSuspicious = true): CallAudio | null {
   const pages = Object.values(json?.query?.pages ?? {}).sort((a, b) => (a.index ?? 99) - (b.index ?? 99));
   const usable = pages.flatMap((pg) => {
     const info = pg.videoinfo?.[0];
     if (!info || (strict && !titleMatches(pg.title, scientificName))) return [];
     const src = playableSrc(info);
-    return src ? [{ pg, info, src, bad: suspicious(pg, info) }] : [];
+    if (!src) return [];
+    const bad = suspicious(pg, info);
+    return !bad || allowSuspicious ? [{ pg, info, src, bad }] : [];
   });
   // 単独らしい録音を先に（同じ区分の中では、検索の順位のまま）
   usable.sort((a, b) => Number(a.bad) - Number(b.bad));
@@ -107,21 +111,29 @@ export function commonsAudioUrl(scientificName: string, mode: "category" | "text
   return `https://commons.wikimedia.org/w/api.php?${q.toString()}`;
 }
 
-async function search(scientificName: string, mode: "category" | "text"): Promise<CallAudio | null> {
+async function search(scientificName: string, mode: "category" | "text", allowSuspicious: boolean): Promise<CallAudio | null> {
   const res = await fetch(commonsAudioUrl(scientificName, mode));
   if (!res.ok) return null;
-  return pickAudio(await res.json(), scientificName, mode === "text");
+  return pickAudio(await res.json(), scientificName, mode === "text", allowSuspicious);
 }
 
 const audioCache = new Map<string, Promise<CallAudio | null>>();
 
-/** 学名で音源を探す。まずカテゴリで探し、無ければ学名を含むファイル名に限って全文検索する。失敗・該当なしはnull */
+/**
+ * 学名で音源を探す。まずカテゴリで探し、無ければ学名を含むファイル名に限って全文検索する。失敗・該当なしはnull。
+ * 学名のカテゴリには、音楽作品・人の発音の録音なども入っているため、まず「単独の鳴き声らしい」録音だけで、
+ * カテゴリ → 全文検索の順に探す。どちらにも無いときだけ、後回しにした録音（疑わしいもの）を使う
+ */
 export function fetchCallAudio(scientificName: string): Promise<CallAudio | null> {
   const fixed = curated[scientificName];
   if (fixed?.src) return Promise.resolve(fixed); // 選び直した音源があれば、通信しない
   let p = audioCache.get(scientificName);
   if (!p) {
-    p = (async () => (await search(scientificName, "category")) ?? (await search(scientificName, "text")))().catch(() => null);
+    p = (async () =>
+      (await search(scientificName, "category", false)) ??
+      (await search(scientificName, "text", false)) ??
+      (await search(scientificName, "category", true)) ??
+      (await search(scientificName, "text", true)))().catch(() => null);
     audioCache.set(scientificName, p);
   }
   return p;
