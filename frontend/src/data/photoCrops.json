@@ -103,7 +103,7 @@
   },
   "Common_pigeon_at_Waterlow_Park,_London,_United_Kingdom_01.jpg": null,
   "Daurian_redstart_at_Daisen_Park_in_Osaka,_January_2016_II.jpg": {
-    "x": 0.255,
+    "x": 0.254,
     "y": 0.134,
     "w": 0.575,
     "h": 0.854
@@ -202,10 +202,10 @@
     "h": 0.794
   },
   "Little_egret_at_Varkala_beach_19.jpg": {
-    "x": 0.168,
+    "x": 0.166,
     "y": 0.129,
-    "w": 0.555,
-    "h": 0.833
+    "w": 0.559,
+    "h": 0.838
   },
   "Little_ringed_plover_and_barn_swallow_chasing_each_other_and_banking_right_in_flight.jpg": null,
   "Mareca_penelope_in_flight.jpg": null,
@@ -234,13 +234,18 @@
     "w": 0.564,
     "h": 0.75
   },
+  "Osprey_bombay_hook_8.9.18_DSC_0730.jpg": {
+    "x": 0.473,
+    "y": 0.217,
+    "w": 0.301,
+    "h": 0.45
+  },
   "Osprey_in_Flight_-_Pandion_haliaetus_(23785383926).jpg": {
     "x": 0.223,
     "y": 0.024,
     "w": 0.306,
     "h": 0.46
   },
-  "Osprey_mg_9605.jpg": null,
   "Rock_doves_in_flight.jpg": {
     "x": 0.197,
     "y": 0.246,
