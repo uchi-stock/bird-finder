@@ -113,6 +113,9 @@ async function main() {
     const f = (v) => (v == null || !Number.isFinite(v) ? "—" : v.toFixed(2));
     rows.push({ s, baseUrl, existing, ...d, best: d.best ?? null, count: measured.length, nowMeasure: existingMeasure ?? wikipediaMeasure, excludedFlying: measured.filter((m) => m.flying).length });
     console.log(`${s.name_ja}: 候補${measured.length}件 / 基準 ${f(d.baseline?.ratio)} → ${d.action}${d.best ? ` ${f(d.best.ratio)}` : ""}`);
+    // 姿勢の判定の確認用（飛ぶ確度。今の画像と、候補ごと）
+    const now = existingMeasure ?? wikipediaMeasure;
+    console.log(`  今の姿: ${now?.pose ?? "—"}（飛ぶ確度 ${f(now?.flyingScore)}） / 候補の飛ぶ確度: ${measured.map((m) => f(m.flyingScore)).join(", ")}`);
   }
 
   const f = (v) => (v == null || !Number.isFinite(v) ? "—" : v.toFixed(2));

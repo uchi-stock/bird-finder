@@ -68,8 +68,9 @@ jobs:
       - name: 結果を検査する（失敗したらPRを出さない）
         working-directory: frontend
         run: npx vitest run src/photosData.test.ts scripts
-      - name: 結果をJob Summaryへ出す
-        run: cat curate-report.md >> "$GITHUB_STEP_SUMMARY"
+      # Job Summaryの内容はAPIから取得できないため、ジョブログにも同じ表を出す（飛ぶ確度など、結果の確認と調整に使う）
+      - name: 結果をJob Summaryとログへ出す
+        run: tee -a "$GITHUB_STEP_SUMMARY" < curate-report.md
       - uses: actions/upload-artifact@v7
         with:
           name: curated-photos
