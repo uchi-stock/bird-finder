@@ -1,6 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { captureScreenshot } from "./screenshot.js";
-import { openApp, showResults } from "./helpers";
+import { openApp, shoot, showResults } from "./helpers";
 
 const SIZES = [
   { name: "iphone14", width: 390, height: 844 },
@@ -24,7 +23,7 @@ for (const size of SIZES) {
       expect(h1 && menu && h1.x + h1.width <= menu.x + 1).toBe(true);
       const tabbar = await page.locator(".tabbar").boundingBox();
       expect(tabbar && Math.abs(tabbar.y + tabbar.height - size.height) <= 1).toBe(true);
-      await captureScreenshot(page, testInfo, `${size.name}-1-initial`, `初期表示（${size.name}）`, { fullPage: false });
+      await shoot(page, testInfo, `${size.name}-1-initial`, `初期表示（${size.name}）`, { fullPage: false });
       expect(errors).toEqual([]);
     });
 
@@ -61,7 +60,7 @@ for (const size of SIZES) {
       // 切り出した画像は、セルの中の正方形
       const box = await page.locator(".results .thumb-sq").first().boundingBox();
       expect(box && Math.abs(box.width - box.height) <= 1).toBe(true);
-      await captureScreenshot(page, testInfo, `${size.name}-2-thumb-crop`, `余白の多い画像の切り出し（${size.name}）`, { fullPage: false });
+      await shoot(page, testInfo, `${size.name}-2-thumb-crop`, `余白の多い画像の切り出し（${size.name}）`, { fullPage: false });
     });
 
     test("詳細の「飛ぶ姿」も、余白が多ければ、鳥に寄せた正方形で出る（#156）", async ({ page }) => {
@@ -106,7 +105,7 @@ for (const size of SIZES) {
       expect(fits.length).toBeGreaterThan(0);
       expect(fits.every((f) => f === "contain")).toBe(true);
       expect(await page.locator(".results li").count()).toBeGreaterThan(0);
-      await captureScreenshot(page, testInfo, `${size.name}-2-results`, `候補の表示（${size.name}）`, { fullPage: false });
+      await shoot(page, testInfo, `${size.name}-2-results`, `候補の表示（${size.name}）`, { fullPage: false });
       await page.click("button[aria-label='7. 鳴き声']");
       await expect(page.locator(".step-title")).toContainText("7/7");
     });
@@ -119,7 +118,7 @@ for (const size of SIZES) {
       await expect(dialog).toBeVisible();
       await expect(dialog.locator(".lb-thumb")).toBeVisible();
       await expect(dialog.getByRole("button", { name: /捕まえる/ })).toBeVisible();
-      await captureScreenshot(page, testInfo, `${size.name}-3-detail`, `拡大表示（${size.name}）`, { fullPage: false });
+      await shoot(page, testInfo, `${size.name}-3-detail`, `拡大表示（${size.name}）`, { fullPage: false });
       await page.keyboard.press("Escape");
       await expect(dialog).toBeHidden();
     });
@@ -127,13 +126,13 @@ for (const size of SIZES) {
     test("メニューから使い方のモーダルを開ける。背景が透けず、閉じられる", async ({ page }, testInfo) => {
       await openApp(page);
       await page.tap(".menu-btn");
-      await captureScreenshot(page, testInfo, `${size.name}-4-menu`, `メニュー（${size.name}）`, { fullPage: false });
+      await shoot(page, testInfo, `${size.name}-4-menu`, `メニュー（${size.name}）`, { fullPage: false });
       await page.getByRole("button", { name: "使い方と注意" }).tap();
       const box = page.locator(".help-box");
       await expect(box).toBeVisible();
       const bg = await box.evaluate((el) => getComputedStyle(el).backgroundColor);
       expect(bg).not.toMatch(/rgba\(.*, 0\)|transparent/);
-      await captureScreenshot(page, testInfo, `${size.name}-4-help`, `注意文言のモーダル（${size.name}）`, { fullPage: false });
+      await shoot(page, testInfo, `${size.name}-4-help`, `注意文言のモーダル（${size.name}）`, { fullPage: false });
       await page.getByRole("button", { name: "閉じる" }).click();
       await expect(box).toBeHidden();
     });
@@ -170,14 +169,14 @@ for (const size of SIZES) {
         expect(box && box.width >= 44 && box.height >= 44).toBe(true);
       }
       expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBe(0);
-      await captureScreenshot(page, testInfo, `${size.name}-9-quiz`, `クイズの問題（${size.name}）`, { fullPage: false });
+      await shoot(page, testInfo, `${size.name}-9-quiz`, `クイズの問題（${size.name}）`, { fullPage: false });
       for (let i = 0; i < 10; i++) {
         await group.getByRole("button").first().tap();
-        if (i === 0) await captureScreenshot(page, testInfo, `${size.name}-9-quiz-answer`, `クイズの回答後（${size.name}）`, { fullPage: false });
+        if (i === 0) await shoot(page, testInfo, `${size.name}-9-quiz-answer`, `クイズの回答後（${size.name}）`, { fullPage: false });
         await page.getByRole("button", { name: i < 9 ? "次へ" : "結果を見る" }).tap();
       }
       await expect(page.getByRole("heading", { name: "結果" })).toBeVisible();
-      await captureScreenshot(page, testInfo, `${size.name}-9-quiz-result`, `クイズの結果（${size.name}）`, { fullPage: false });
+      await shoot(page, testInfo, `${size.name}-9-quiz-result`, `クイズの結果（${size.name}）`, { fullPage: false });
       expect(errors).toEqual([]);
     });
 
@@ -198,10 +197,10 @@ for (const size of SIZES) {
       // クイズの選択肢の写真も、欠けさせずに全体を収める（#137）
       expect(await group.locator("img").first().evaluate((el) => getComputedStyle(el).objectFit)).toBe("contain");
       expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBe(0);
-      await captureScreenshot(page, testInfo, `${size.name}-9-quiz-situation`, `状況のクイズ（${size.name}）`, { fullPage: false });
+      await shoot(page, testInfo, `${size.name}-9-quiz-situation`, `状況のクイズ（${size.name}）`, { fullPage: false });
       for (let i = 0; i < 10; i++) {
         await group.getByRole("button").first().tap();
-        if (i === 0) await captureScreenshot(page, testInfo, `${size.name}-9-quiz-situation-answer`, `状況のクイズの回答後（${size.name}）`, { fullPage: false });
+        if (i === 0) await shoot(page, testInfo, `${size.name}-9-quiz-situation-answer`, `状況のクイズの回答後（${size.name}）`, { fullPage: false });
         await page.getByRole("button", { name: i < 9 ? "次へ" : "結果を見る" }).tap();
       }
       await expect(page.getByRole("heading", { name: "結果" })).toBeVisible();
@@ -248,7 +247,7 @@ for (const size of SIZES) {
       await expect(play).toBeEnabled();
       await expect(page.getByRole("group", { name: "写真の選択肢" }).getByRole("button")).toHaveCount(4);
       expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBe(0);
-      await captureScreenshot(page, testInfo, `${size.name}-9-quiz-call`, `鳴き声のクイズ（${size.name}）`, { fullPage: false });
+      await shoot(page, testInfo, `${size.name}-9-quiz-call`, `鳴き声のクイズ（${size.name}）`, { fullPage: false });
       const group = page.getByRole("group", { name: "写真の選択肢" });
       for (let i = 0; i < 10; i++) {
         await expect(group.getByRole("button").first()).toBeEnabled();
@@ -305,7 +304,7 @@ for (const size of SIZES) {
       const last = await list.getByRole("listitem").last().boundingBox();
       expect(last && last.y + last.height <= (page.viewportSize()?.height ?? 0)).toBe(true);
       expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBe(0);
-      await captureScreenshot(page, testInfo, `${size.name}-9-quiz-photo-call`, `写真→鳴き声のクイズ（${size.name}）`, { fullPage: false });
+      await shoot(page, testInfo, `${size.name}-9-quiz-photo-call`, `写真→鳴き声のクイズ（${size.name}）`, { fullPage: false });
       for (let i = 0; i < 10; i++) {
         await expect(list.getByRole("button", { name: /鳴き声1を選ぶ/ })).toBeEnabled();
         await list.getByRole("button", { name: /鳴き声1を選ぶ/ }).tap();
@@ -325,7 +324,7 @@ for (const size of SIZES) {
       expect(await page.locator(".bird-pin.dummy").count()).toBeGreaterThan(0);
       await expect(page.locator(".bird-pin.dummy .pin-dummy").first()).toHaveText("ダミー");
       expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBe(0);
-      await captureScreenshot(page, testInfo, `${size.name}-6-map-dummy`, `地図のダミー（${size.name}）`, { fullPage: false });
+      await shoot(page, testInfo, `${size.name}-6-map-dummy`, `地図のダミー（${size.name}）`, { fullPage: false });
       expect(errors).toEqual([]);
     });
 
@@ -335,10 +334,10 @@ for (const size of SIZES) {
       await openApp(page);
       await page.getByRole("button", { name: /図鑑/ }).click();
       await expect(page.getByRole("heading", { name: "図鑑" })).toBeVisible();
-      await captureScreenshot(page, testInfo, `${size.name}-5-dex`, `図鑑（${size.name}）`, { fullPage: false });
+      await shoot(page, testInfo, `${size.name}-5-dex`, `図鑑（${size.name}）`, { fullPage: false });
       await page.getByRole("button", { name: /地図/ }).click();
       await expect(page.locator(".map-wrap")).toBeVisible();
-      await captureScreenshot(page, testInfo, `${size.name}-6-map`, `地図（${size.name}）`, { fullPage: false });
+      await shoot(page, testInfo, `${size.name}-6-map`, `地図（${size.name}）`, { fullPage: false });
       expect(errors).toEqual([]);
     });
   });
@@ -365,7 +364,7 @@ test.describe("みんなの観察（地図）", () => {
     const tiles = new URL(requested[requested.length - 1]).searchParams.get("tiles")?.split(",") ?? [];
     expect(tiles.length).toBeGreaterThan(0);
     expect(tiles.length).toBeLessThanOrEqual(25);
-    await captureScreenshot(page, testInfo, "shared-map", "みんなの観察（地図）", { fullPage: false });
+    await shoot(page, testInfo, "shared-map", "みんなの観察（地図）", { fullPage: false });
     await page.getByRole("button", { name: "自分の記録" }).click();
     await expect(page.locator(".bird-pin.shared")).toHaveCount(0);
   });
@@ -400,7 +399,7 @@ for (const size of SIZES) {
       expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBe(0);
       // 画面に入っていない行の画像は、まだ取得していない（44件を一度に取得しない）
       expect(wikiRequests.length - before).toBeLessThan(44);
-      await captureScreenshot(page, testInfo, `${size.name}-8-species-list`, `全種の一覧（${size.name}）`, { fullPage: false });
+      await shoot(page, testInfo, `${size.name}-8-species-list`, `全種の一覧（${size.name}）`, { fullPage: false });
     });
   });
 }
