@@ -2,7 +2,8 @@ import { expect, type Page, type TestInfo } from "@playwright/test";
 import { captureScreenshot } from "./screenshot.js";
 
 // 外部サービス（写真・音源・地図・環境判定）は、CIから実際に呼ばない。すべてモックして、結果を安定させる
-const STUB_JPEG = Buffer.from("/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABQODxIPDRQSEBIXFRQYHjIhHhwcHj0sLiQySUBMS0dARkVQWnNiUFVtVkVGZIhlbXd7gYKBTmCNl4x9lnN+gXz/2wBDARUXFx4aHjshITt8U0ZTfHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHz/wAARCABAAEADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwCSiiiszIKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA//2Q==", "base64");
+// 模擬の画像: 空色の背景に、鳥の形（体・頭・くちばし・翼）。縦横比は、実際の写真と同じ3:2
+const STUB_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="450" height="300" viewBox="0 0 450 300"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bfe0f5"/><stop offset="1" stop-color="#e9f3e0"/></linearGradient></defs><rect width="450" height="300" fill="url(#g)"/><ellipse cx="215" cy="160" rx="85" ry="52" fill="#6b5a4a"/><circle cx="292" cy="118" r="30" fill="#6b5a4a"/><polygon points="318,112 350,122 318,130" fill="#d99a2b"/><circle cx="300" cy="112" r="4" fill="#fff"/><path d="M150 150 Q200 80 260 140 Q215 125 150 150Z" fill="#4d3f33"/><rect x="205" y="205" width="6" height="40" fill="#3b3b3b"/><rect x="228" y="205" width="6" height="40" fill="#3b3b3b"/></svg>`;
 
 const BLOCKED_HOSTS = [
   "commons.wikimedia.org",
@@ -30,7 +31,8 @@ export async function mockExternal(page: Page): Promise<void> {
   );
   // 画像の取得先は、すべて模擬にする（実際のWikimediaへ取りに行くと、通信の状況で、画像が抜ける）。
   // CORSのヘッダーも付ける（画像の切り出しの判定が、canvasで画像を読むため）
-  const image = (r: import("@playwright/test").Route) => r.fulfill({ status: 200, contentType: "image/jpeg", headers: { "access-control-allow-origin": "*" }, body: STUB_JPEG });
+  // 実際の写真と同じ縦横比（3:2）で、鳥の形が分かる模擬の画像にする（スクリーンショットで、画像が出ているかを見分けやすい）
+  const image = (r: import("@playwright/test").Route) => r.fulfill({ status: 200, contentType: "image/svg+xml", headers: { "access-control-allow-origin": "*" }, body: STUB_SVG });
   await page.route("https://upload.wikimedia.org/**", image);
   await page.route("https://thumb.wikimedia.org/**", image);
   for (const h of BLOCKED_HOSTS) await page.route(`https://${h}/**`, (r) => r.abort());
