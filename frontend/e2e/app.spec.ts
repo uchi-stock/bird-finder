@@ -314,6 +314,36 @@ for (const size of SIZES) {
       expect(errors).toEqual([]);
     });
 
+    test("地図の画面で、メニューを開いても、地図の部品が、メニューの上に出ない（ハンバーガーが押せる。#209）", async ({ page }) => {
+      await openApp(page);
+      await gotoTab(page, /地図/);
+      await page.waitForSelector(".leaflet-container");
+      // 地図の画面で、ハンバーガーが、いちばん上にあり、押せる
+      const topAtMenuButton = await page.evaluate(() => {
+        const b = document.querySelector(".menu-btn")!.getBoundingClientRect();
+        return document.elementFromPoint(b.x + b.width / 2, b.y + b.height / 2)?.className;
+      });
+      expect(topAtMenuButton).toContain("menu-btn");
+      await page.getByRole("button", { name: "メニュー" }).click();
+      await expect(page.getByRole("dialog", { name: "メニュー" })).toBeVisible();
+      // 地図の部品（切り替え・現在地・注記・拡大縮小・出典）が、メニューの背景より上に出て、タップを奪わない
+      const over = await page.evaluate(() => {
+        const list: string[] = [];
+        for (const sel of [".map-locate", ".map-mode", ".map-note", ".leaflet-control-zoom", ".leaflet-control-attribution"]) {
+          const target = document.querySelector(sel);
+          if (!target) continue;
+          const r = target.getBoundingClientRect();
+          const el = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+          if (el && !el.closest(".help-modal")) list.push(`${sel}がメニューの上にある（${el.className || el.tagName}）`);
+        }
+        return list;
+      });
+      expect(over).toEqual([]);
+      // メニューから、ほかの画面へ戻れる
+      await page.getByRole("dialog", { name: "メニュー" }).getByRole("button", { name: /探す/ }).click();
+      await expect(page.getByPlaceholder(/ホーホケキョ/)).toBeVisible();
+    });
+
     test("地図: 「ダミー（バトル用）」で、ダミーと分かる表示で、鳥が出る", async ({ page }, testInfo) => {
       const errors: string[] = [];
       page.on("pageerror", (e) => errors.push(e.message));
