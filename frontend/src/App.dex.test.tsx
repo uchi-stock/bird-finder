@@ -1,7 +1,7 @@
 import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { playAudio, renderApp, setupAppTests, stopAudio, unlockAudio, usePhoto } from "./testApp";
+import { gotoTab, playAudio, renderApp, setupAppTests, stopAudio, unlockAudio, usePhoto } from "./testApp";
 
 vi.mock("./callAudio", async () => (await import("./testApp")).callAudioMock);
 vi.mock("./location", async () => (await import("./testApp")).locationMock);
@@ -11,7 +11,7 @@ setupAppTests();
 
 const openAll = async () => {
   await renderApp();
-  await userEvent.click(screen.getByRole("button", { name: /図鑑/ }));
+  await gotoTab(/図鑑/);
   await userEvent.click(screen.getByRole("button", { name: "全種の一覧" }));
   return screen.getByRole("list", { name: "全種の一覧" });
 };
@@ -19,7 +19,7 @@ const openAll = async () => {
 describe("App: 全種の一覧（#96）", () => {
   it("図鑑タブに切り替えがあり、初期は集めた鳥。全種の一覧を選ぶと、全44種が行で並ぶ", async () => {
     await renderApp();
-    await userEvent.click(screen.getByRole("button", { name: /図鑑/ }));
+    await gotoTab(/図鑑/);
     expect(screen.getByRole("button", { name: "集めた鳥" })).toHaveAttribute("aria-pressed", "true");
     expect(screen.queryByRole("list", { name: "全種の一覧" })).toBeNull();
     await userEvent.click(screen.getByRole("button", { name: "全種の一覧" }));

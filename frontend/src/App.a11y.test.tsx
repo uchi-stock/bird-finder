@@ -30,10 +30,12 @@ describe("App: アクセシビリティ", () => {
     await userEvent.click(c);
     expect(c).toHaveAttribute("aria-pressed", "true");
   });
-  it("現在のタブがaria-currentで分かる", async () => {
+  it("現在の画面が、メニューの一覧で、aria-currentで分かる", async () => {
     await renderApp();
-    expect(screen.getByRole("button", { name: /探す/ })).toHaveAttribute("aria-current", "page");
-    expect(screen.getByRole("button", { name: /図鑑/ })).not.toHaveAttribute("aria-current");
+    await openMenu();
+    const menu = within(screen.getByRole("dialog", { name: "メニュー" }));
+    expect(menu.getByRole("button", { name: /探す/ })).toHaveAttribute("aria-current", "page");
+    expect(menu.getByRole("button", { name: /図鑑/ })).not.toHaveAttribute("aria-current");
   });
   it("使い方のモーダルは、開くと閉じるボタンへフォーカスし、Escで閉じてメニューのボタンへフォーカスが戻る", async () => {
     await renderApp();
@@ -57,8 +59,10 @@ describe("App: アクセシビリティ", () => {
     await userEvent.keyboard("{Escape}");
     expect(screen.queryByRole("dialog", { name: "メニュー" })).toBeNull();
   });
-  it("画面の切り替えは、名前つきのナビゲーションにある", async () => {
+  it("画面の切り替えは、メニューの中の、名前つきのナビゲーションにある（下部のボタンは無い）", async () => {
     await renderApp();
+    expect(screen.queryByRole("navigation", { name: "画面の切り替え" })).toBeNull();
+    await openMenu();
     const nav = screen.getByRole("navigation", { name: "画面の切り替え" });
     expect(within(nav).getAllByRole("button")).toHaveLength(4);
   });

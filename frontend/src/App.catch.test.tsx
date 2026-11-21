@@ -1,7 +1,6 @@
 import { act, fireEvent, screen, waitFor, within } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { getCoords, usePhoto, uguisuCard, detail, openDetail, renderApp, setupAppTests, openMenu } from "./testApp";
+import { getCoords, usePhoto, uguisuCard, detail, openDetail, renderApp, setupAppTests, openMenu, gotoTab, gotoTabSync } from "./testApp";
 
 vi.mock("./callAudio", async () => (await import("./testApp")).callAudioMock);
 vi.mock("./location", async () => (await import("./testApp")).locationMock);
@@ -28,12 +27,11 @@ describe("App: 捕まえる・図鑑", () => {
       });
       expect(within(detail()).getByText(/NEW!/)).toBeInTheDocument();
       expect(detail()).not.toBeNull(); // ボタンを押しても拡大表示は閉じない
-      expect(screen.getByRole("button", { name: /図鑑 1\/44/ })).toBeInTheDocument();
       expect(localStorage.getItem("bird-finder:collection:v1")).toContain("japanese_bush_warbler");
       fireEvent.click(detail()); // 背景をタップして閉じる
       expect(detail()).toBeNull();
       expect(within(uguisuCard()).getByRole("img", { name: "捕獲済み" })).toBeInTheDocument();
-      fireEvent.click(screen.getByRole("button", { name: /図鑑 1\/44/ }));
+      gotoTabSync(/図鑑 1\/44/);
       expect(screen.getByText("1 / 44 種を捕まえた")).toBeInTheDocument();
       expect(screen.getByText("ウグイス")).toBeInTheDocument();
       expect(screen.getAllByText("？？？")).toHaveLength(43);
@@ -124,7 +122,7 @@ describe("App: 捕まえる・図鑑", () => {
       expect(saved).toHaveLength(1);
       expect(saved[0]).toMatchObject({ speciesId: "japanese_bush_warbler", date: "2026-11-15", lat: 35.6506, lon: 139.5407 });
       fireEvent.click(detail());
-      fireEvent.click(screen.getByRole("button", { name: /地図/ }));
+      gotoTabSync(/地図/);
       expect(await screen.findByTestId("map-canvas")).toBeInTheDocument();
       await waitFor(() => expect(document.querySelectorAll(".bird-pin")).toHaveLength(1));
       expect(document.body.textContent).not.toContain("35.6506"); // 正確な位置は地図に出さない
@@ -144,7 +142,7 @@ describe("App: 捕まえる・図鑑", () => {
         vi.advanceTimersByTime(2000);
       });
       fireEvent.click(detail());
-      fireEvent.click(screen.getByRole("button", { name: /地図/ }));
+      gotoTabSync(/地図/);
       expect(await screen.findByText(/位置が取れなかった記録が1件あります/)).toBeInTheDocument();
       expect(document.querySelectorAll(".bird-pin")).toHaveLength(0);
     } finally {
@@ -153,16 +151,16 @@ describe("App: 捕まえる・図鑑", () => {
   });
   it("地図タブには出典と、記録が無いときの案内が出る。探すタブへ戻れる", async () => {
     await renderApp();
-    await userEvent.click(screen.getByRole("button", { name: /地図/ }));
+    await gotoTab(/地図/);
     expect(await screen.findByText(/見つけた場所つきの記録がありません/)).toBeInTheDocument();
     expect(document.querySelector(".leaflet-control-attribution")).toHaveTextContent("OpenStreetMap");
-    await userEvent.click(screen.getByRole("button", { name: "探す" }));
+    await gotoTab("探す");
     expect(screen.getByPlaceholderText(/ホーホケキョ/)).toBeInTheDocument();
   });
   it("探すタブへ戻れる", async () => {
     await renderApp();
-    await userEvent.click(screen.getByRole("button", { name: /図鑑/ }));
-    await userEvent.click(screen.getByRole("button", { name: "探す" }));
+    await gotoTab(/図鑑/);
+    await gotoTab("探す");
     expect(screen.getByPlaceholderText(/ホーホケキョ/)).toBeInTheDocument();
   });
 });

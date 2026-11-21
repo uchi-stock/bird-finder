@@ -80,3 +80,9 @@ export async function shoot(page: Page, testInfo: TestInfo, name: string, captio
   expect(broken, `${name}: 見えている画像が読み込めていません`).toEqual([]);
   await captureScreenshot(page, testInfo, name, caption, options);
 }
+
+/** ヘッダーのメニュー（☰）から、画面（探す・図鑑・クイズ・地図）へ移る（#199） */
+export async function gotoTab(page: Page, name: string | RegExp): Promise<void> {
+  await page.getByRole("button", { name: "メニュー" }).click();
+  await page.getByRole("dialog", { name: "メニュー" }).getByRole("button", { name }).click();
+}

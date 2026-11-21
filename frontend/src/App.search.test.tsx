@@ -191,9 +191,11 @@ describe("App: 行動の選択肢と絵文字", () => {
         expect(b.querySelector('.emoji[aria-hidden="true"]'), `${title}: ${labelOf(b)}`).not.toBeNull();
       }
     }
-    expect(screen.getByRole("button", { name: "探す" }).querySelector(".emoji")).not.toBeNull();
-    expect(screen.getByRole("button", { name: /図鑑 0\/44/ }).querySelector(".emoji")).not.toBeNull();
     expect(screen.getByRole("button", { name: /現在地から判定する/ }).querySelector(".emoji")).not.toBeNull();
+    await openMenu();
+    const menu = within(screen.getByRole("dialog", { name: "メニュー" }));
+    expect(menu.getByRole("button", { name: "探す" }).querySelector(".emoji")).not.toBeNull();
+    expect(menu.getByRole("button", { name: /図鑑 0\/44/ }).querySelector(".emoji")).not.toBeNull();
   });
 });
 
