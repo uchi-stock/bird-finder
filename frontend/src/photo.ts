@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import curatedJson from "./data/photos.json";
-import { commonsFlightUrl, pickFlightPhoto } from "./domain/flightPhoto";
+import { commonsFlightUrl, curatedFlightPhoto, pickFlightPhoto, type CuratedFlight } from "./domain/flightPhoto";
+import curatedFlightJson from "./data/flightPhotos.json";
 
 export interface BirdPhoto {
   thumbnail: string;
@@ -93,7 +94,10 @@ export function usePhotoFailed(title: string): boolean {
 
 // ---- 飛翔の画像（Wikimedia Commons） ----
 
-export { commonsFlightUrl, pickFlightPhoto } from "./domain/flightPhoto";
+export { commonsFlightUrl, pickFlightPhoto };
+
+// 選び直した飛翔の画像（GitHub Actionsで、画像分類により選ぶ。#212）。あれば、検索より先に使い、通信しない
+const curatedFlight = curatedFlightJson as CuratedFlight;
 
 const flightCache = new Map<string, Promise<BirdPhoto | null>>();
 
@@ -101,6 +105,12 @@ const flightCache = new Map<string, Promise<BirdPhoto | null>>();
 export function fetchFlightPhoto(scientificName: string): Promise<BirdPhoto | null> {
   let p = flightCache.get(scientificName);
   if (!p) {
+    const fixed = curatedFlightPhoto(curatedFlight, scientificName);
+    if (fixed) {
+      p = Promise.resolve(fixed);
+      flightCache.set(scientificName, p);
+      return p;
+    }
     p = fetch(commonsFlightUrl(scientificName))
       .then((r) => (r.ok ? r.json() : null))
       .then((j) => (j ? pickFlightPhoto(j) : null))

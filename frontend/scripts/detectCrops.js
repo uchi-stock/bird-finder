@@ -11,7 +11,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { commonsFlightUrl, pickFlightPhoto } from "../src/domain/flightPhoto.ts";
+import { commonsFlightUrl, curatedFlightPhoto, pickFlightPhoto } from "../src/domain/flightPhoto.ts";
 import { photoKey } from "../src/domain/photoKey.ts";
 import { buildReport, decideCrop, MIN_SCORE, tooManyFailures } from "./cropScore.js";
 
@@ -19,6 +19,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const SPECIES_FILE = path.resolve(here, "../src/data/species.json");
 const PHOTOS_FILE = path.resolve(here, "../src/data/photos.json");
 const CROPS_FILE = path.resolve(here, "../src/data/photoCrops.json");
+const FLIGHT_FILE = path.resolve(here, "../src/data/flightPhotos.json");
 const REPORT = process.env.REPORT ?? "crops-report.md";
 const MODEL = "Xenova/detr-resnet-50";
 const UA = "bird-finder-photo-crops/1.0 (+https://github.com/uchi-stock/bird-finder)";
@@ -97,8 +98,11 @@ async function main() {
     }
     // 飛ぶ姿の画像（#156）。画面と同じ関数で選ぶため、同じ画像のファイル名で、結果を引ける。
     // 見つからない・失敗は、失敗の数に含めない（飛ぶ姿は、もともと見つからない鳥がある。画面は、全体表示または予備の推定になる）
-    const fj = await get(commonsFlightUrl(s.scientific_name));
-    const flight = fj ? pickFlightPhoto(fj) : null;
+    // 選び直した飛翔の画像（flightPhotos.json）があれば、検索より先に使う（画面と同じ順。#212）
+    const curatedFlight = fs.existsSync(FLIGHT_FILE) ? JSON.parse(fs.readFileSync(FLIGHT_FILE, "utf8")) : {};
+    const fixed = curatedFlightPhoto(curatedFlight, s.scientific_name);
+    const fj = fixed ? null : await get(commonsFlightUrl(s.scientific_name));
+    const flight = fixed ?? (fj ? pickFlightPhoto(fj) : null);
     if (flight) await detectOne(`${s.name_ja}（飛ぶ姿）`, flight.thumbnail);
     else rows.push({ name: `${s.name_ja}（飛ぶ姿）`, note: "飛ぶ姿の画像が見つかりませんでした" });
   }

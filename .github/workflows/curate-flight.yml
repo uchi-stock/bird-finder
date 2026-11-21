@@ -1,0 +1,97 @@
+name: Curate flight photos (飛翔の画像の選び直し)
+
+# 詳細画面の「飛ぶ姿」の画像が出ない鳥に、画像分類（CLIP）で選んだ「飛んでいる写真」を固定して補う（#212）。人の操作は要らない。
+# - 画面は、題名に飛翔を示す語を含む画像だけを探す。題名にその語が無い写真しかない鳥は、飛ぶ姿が出ない
+# - 候補を広く集め（学名＋flying・flight、学名のカテゴリ）、画像分類で、飛んでいる写真を選び、flightPhotos.json（学名をキーにした表）へ書く
+# - すでに検索で見つかる鳥・固定済みの鳥は、対象外。結果が変わったときだけ、PRとして出す
+# - 月1回の定期実行と、鳥種データ・この仕組み自体の変更時に動く（手動実行もできる）。写真の選び直し（curate-photos）の後に動く
+# - 結果は、実行のJob Summaryと、ジョブのログの表（鳥・結果・選んだ画像・確度）で、あとから確認できる。気になれば、そのPRを戻せる
+# 手動実行では、applyをfalseにすると、PRを出さずに、表の確認だけができる
+on:
+  schedule:
+    - cron: "41 20 1 * *"
+  push:
+    branches:
+      - main
+    paths:
+      - "frontend/src/data/species.json"
+      - ".github/workflows/curate-flight.yml"
+      - "frontend/scripts/curateFlight.js"
+      - "frontend/scripts/flightScore.js"
+      - "frontend/src/domain/flightPhoto.ts"
+  workflow_dispatch:
+    inputs:
+      species_ids:
+        description: "試す鳥のID（任意。カンマ区切り。例: oriental_turtle_dove,great_tit）。空なら全種"
+        required: false
+        type: string
+      apply:
+        description: "true にすると、結果をPRとして出す。false は確認のみ"
+        required: false
+        type: boolean
+        default: true
+
+concurrency:
+  group: curate-flight
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  curate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: true
+      # TypeScriptの共通ロジック（飛翔の画像の検索）を、そのまま読み込むため、型の除去を標準で行うNode 24を使う
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+      - name: 依存パッケージをインストールする
+        working-directory: frontend
+        run: npm ci
+      # 画像分類（transformers.js）は、この仕組みでだけ使う。依存には加えない（アプリや通常のCIを重くしないため）
+      - name: 画像分類のパッケージをインストールする
+        working-directory: frontend
+        run: npm install --no-save @huggingface/transformers
+      - name: 飛翔の画像を選ぶ
+        working-directory: frontend
+        env:
+          SPECIES_IDS: ${{ inputs.species_ids }}
+          REPORT: ${{ github.workspace }}/flight-report.md
+        run: node scripts/curateFlight.js | tee "$GITHUB_WORKSPACE/flight-log.txt"
+      # 結果は、PRのCIを待たずにマージされることがある（commit-via-prの仕様）。そのため、コミットの前に、
+      # flightPhotos.jsonの検査（ライセンス・URL・鳥の学名）と、選別ロジックの単体テストを実行する。失敗したらPRを出さない
+      - name: 結果を検査する（失敗したらPRを出さない）
+        working-directory: frontend
+        run: npx vitest run src/photosData.test.ts scripts/flightScore.test.js
+      - name: 結果をJob Summaryへ出す
+        if: always()
+        run: |
+          set -eu
+          if [ -f flight-report.md ]; then tee -a "$GITHUB_STEP_SUMMARY" < flight-report.md; fi
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: curated-flight
+          path: |
+            frontend/src/data/flightPhotos.json
+            flight-report.md
+      - name: 結果をPRとして出す
+        # 定期・データの変更時は常にPRを出す。手動実行は、applyの指定に従う
+        if: github.event_name != 'workflow_dispatch' || inputs.apply
+        uses: ./dev-standards/.github/actions/commit-via-pr
+        with:
+          paths: frontend/src/data/flightPhotos.json
+          commit-subject: "feat: 飛翔の画像を、画像分類で選び直す"
+          commit-body: "題名の語の検索では見つからない鳥に、画像分類で選んだ飛んでいる写真を固定した（frontend/scripts/curateFlight.js）。"
+          pr-title: "feat: 飛翔の画像を、画像分類で選び直す"
+          pr-body: "飛翔の画像の選び直しの結果（自動）。鳥・結果・選んだ画像・確度の表は、実行のJob Summaryで確認できる: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          branch-prefix: chore/curate-flight
+          base-branch: main
+          push-token: ${{ secrets.BOT_TOKEN }}
+          github-token: ${{ secrets.BOT_TOKEN }}

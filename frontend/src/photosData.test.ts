@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import photosJson from "./data/photos.json";
 import pinsJson from "./data/photoPins.json";
 import speciesJson from "./data/species.json";
+import flightJson from "./data/flightPhotos.json";
 
 // 写真の選び直しは、自動でPRになり、CIが通れば反映される。人が見なくても壊れたデータが入らないよう、中身を検査する
 const photos = photosJson as Record<string, { thumbnail?: string; pageUrl?: string; credit?: string; license?: string }>;
@@ -70,5 +71,20 @@ describe("species.json: 科と似た鳥（#181）", () => {
   });
   it("ドバトとキジバトは、互いに似た鳥", () => {
     expect(list.find((s) => s.species_id === "rock_dove")?.similar).toContain("oriental_turtle_dove");
+  });
+});
+
+describe("flightPhotos.json（選び直した飛翔の画像）", () => {
+  const flight = flightJson as Record<string, { thumbnail: string; pageUrl: string; credit?: string; license?: string }>;
+  const scientific = new Set((speciesJson as { scientific_name: string }[]).map((s) => s.scientific_name));
+  it("キーは、鳥の学名。画像と説明ページは、Wikimedia Commonsのもの", () => {
+    for (const [key, e] of Object.entries(flight)) {
+      expect(scientific.has(key), `${key}: 鳥の学名`).toBe(true);
+      expect(e.thumbnail, `${key}: 画像`).toMatch(/^https:\/\/upload\.wikimedia\.org\//);
+      expect(e.pageUrl, `${key}: 説明ページ`).toMatch(/^https:\/\/commons\.wikimedia\.org\/wiki\/File:/);
+    }
+  });
+  it("ライセンスは、使えるもの（CC0・CC BY・CC BY-SA）", () => {
+    for (const [key, e] of Object.entries(flight)) expect(e.license ?? "", `${key}: ライセンス`).toMatch(/^(CC0|CC BY(-SA)? [\d.]+)/i);
   });
 });

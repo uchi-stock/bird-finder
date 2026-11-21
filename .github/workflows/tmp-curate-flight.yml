@@ -1,0 +1,31 @@
+# 一時調査用（#212）。飛翔の画像の選び直しを、PRを出さずに試す。確認が終わったら削除する
+# 目的: curateFlight.jsが、Actionsで動くこと・全種の結果を、ログで確認する
+on:
+  push:
+    branches: [claude/brave-goodall-y1e0n1]
+    paths: [".github/workflows/tmp-curate-flight.yml"]
+permissions:
+  contents: read
+jobs:
+  trial:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+      - name: 依存パッケージをインストールする
+        working-directory: frontend
+        run: npm ci
+      - name: 画像分類のパッケージをインストールする
+        working-directory: frontend
+        run: npm install --no-save @huggingface/transformers
+      - name: 飛翔の画像を選ぶ（確認のみ）
+        working-directory: frontend
+        env:
+          REPORT: ${{ github.workspace }}/flight-report.md
+        run: |
+          node scripts/curateFlight.js
+          echo "=====RESULT====="
+          cat src/data/flightPhotos.json
