@@ -80,7 +80,8 @@ describe("flightPhotos.json（選び直した飛翔の画像）", () => {
   it("キーは、鳥の学名。画像と説明ページは、Wikimedia Commonsのもの", () => {
     for (const [key, e] of Object.entries(flight)) {
       expect(scientific.has(key), `${key}: 鳥の学名`).toBe(true);
-      expect(e.thumbnail, `${key}: 画像`).toMatch(/^https:\/\/upload\.wikimedia\.org\//);
+      // 画像のホストは、サムネイルのthumb.wikimedia.orgか、元のupload.wikimedia.org
+      expect(e.thumbnail, `${key}: 画像`).toMatch(/^https:\/\/(thumb|upload)\.wikimedia\.org\//);
       expect(e.pageUrl, `${key}: 説明ページ`).toMatch(/^https:\/\/commons\.wikimedia\.org\/wiki\/File:/);
     }
   });
