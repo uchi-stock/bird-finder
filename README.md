@@ -110,3 +110,9 @@ standard-tech-stackの「選定の考え方」に沿って要否を判断した�
 - 結果が変わったときだけPRとして出し、自動で反映される（PRはCIを待たずにマージされるため、コミットの前に、結果の検査（単体テスト）を実行し、失敗したらPRを出さない）。今の画像と選んだ画像の表は、実行のJob Summaryで確認できる（気になれば、そのPRを戻せる）
 - 毎回入れ替わらないよう、選び直し済みの写真は、明らかに良い候補があるときだけ入れ替える。検索の失敗が多いとき（障害）は、何も書き換えない。図版・絵画・標本・Public domainの画像は使わない
 
+## アプリアイコン・ファビコン
+
+元画像は`frontend/icon-source/app-icon-source.png`である。各サイズ（`frontend/public/`のアイコン・ファビコン）は、`frontend/icon-source/make_icons.py`で作る。
+元画像を替えたときは、`frontend`で`python3 icon-source/make_icons.py`を実行して、生成物をコミットする。Pillowとnumpyが要る。
+マスク可能なアイコンは、端末が丸く切り抜いても絵が欠けないよう、絵を中央の約80%に収める。PWAのキャッシュを更新するため、`public/sw-config.js`の`cacheVersion`も上げる。
+
