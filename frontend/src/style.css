@@ -38,10 +38,11 @@ body {
   line-height: 1.5;
 }
 
+/* 下部のボタンは廃止した（#199）。端末の下端の安全領域だけ、下の余白に足す */
 .app {
   max-width: 640px;
   margin: 0 auto;
-  padding: 16px;
+  padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
 }
 
 h1 {
@@ -245,23 +246,6 @@ footer {
 
 .chip:disabled {
   opacity: 0.6;
-}
-
-.tab {
-  flex: 1;
-  padding: 12px;
-  border-radius: 10px;
-  border: 1px solid var(--line);
-  background: var(--card);
-  color: var(--fg);
-  font-size: 15px;
-  font-weight: bold;
-}
-
-.tab.on {
-  background: var(--acc);
-  color: var(--accfg);
-  border-color: var(--acc);
 }
 
 .catch {
@@ -533,7 +517,7 @@ footer {
   height: 100dvh;
   display: flex;
   flex-direction: column;
-  padding: 8px 12px;
+  padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
   overflow: hidden;
 }
 
@@ -1373,32 +1357,16 @@ footer {
   text-align: left;
 }
 
-.tabbar {
-  position: fixed;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 5;
+.menu-item.on {
+  background: var(--acc);
+  color: var(--accfg);
+  border-color: var(--acc);
+}
+
+.menu-nav {
   display: flex;
-  gap: 6px;
-  max-width: 640px;
-  margin: 0 auto;
-  padding: 6px 12px calc(6px + env(safe-area-inset-bottom));
-  border-top: 1px solid var(--line);
-  background: var(--bg);
-}
-
-.tabbar .tab {
-  min-height: 44px;
-  padding: 6px 4px;
-  font-size: 13px;
-  white-space: nowrap;
-}
-
-/* 下部のタブバーに隠れないよう、余白を取る */
-.app,
-.app.fit {
-  padding-bottom: calc(64px + env(safe-area-inset-bottom));
+  flex-direction: column;
+  gap: 8px;
 }
 
 /* クイズ */

@@ -1,7 +1,7 @@
 import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { usePhoto, usePhotoFailed, retryPhoto, fetchCallAudio, useFlightPhoto, chip, firstCard, renderApp, setupAppTests } from "./testApp";
+import { usePhoto, usePhotoFailed, retryPhoto, fetchCallAudio, useFlightPhoto, chip, firstCard, gotoTab, renderApp, setupAppTests } from "./testApp";
 import { poseLabel } from "./components/Photo";
 
 vi.mock("./callAudio", async () => (await import("./testApp")).callAudioMock);
@@ -137,13 +137,13 @@ describe("App: 外部サービスの失敗時の案内（#75）", () => {
   });
   it("端末へ保存できないときは、図鑑タブに案内を出す。保存できるときは出さない", async () => {
     await renderApp();
-    await userEvent.click(screen.getByRole("button", { name: /図鑑/ }));
+    await gotoTab(/図鑑/);
     expect(screen.queryByText(/図鑑を保存できません/)).toBeNull();
-    await userEvent.click(screen.getByRole("button", { name: /探す/ }));
+    await gotoTab("探す");
     const spy = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
       throw new Error("quota");
     });
-    await userEvent.click(screen.getByRole("button", { name: /図鑑/ }));
+    await gotoTab(/図鑑/);
     expect(screen.getByText(/図鑑を保存できません/)).toBeInTheDocument();
     spy.mockRestore();
   });

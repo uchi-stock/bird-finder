@@ -1,7 +1,7 @@
 import { act, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fetchCallAudio, fetchPhoto, playAudio, renderApp, renderAppNoWait, setupAppTests, stopAudio, unlockAudio } from "./testApp";
+import { fetchCallAudio, fetchPhoto, gotoTab, openMenu, playAudio, renderApp, renderAppNoWait, setupAppTests, stopAudio, unlockAudio } from "./testApp";
 import { SPECIES } from "./options";
 
 vi.mock("./callAudio", async () => (await import("./testApp")).callAudioMock);
@@ -12,7 +12,7 @@ setupAppTests();
 
 const openQuiz = async () => {
   await renderApp();
-  await userEvent.click(screen.getByRole("button", { name: /クイズ/ }));
+  await gotoTab(/クイズ/);
 };
 const start = async () => {
   await userEvent.click(screen.getByRole("button", { name: /名前を見て、写真から選ぶ/ }));
@@ -33,9 +33,11 @@ describe("App: クイズ", () => {
     vi.useRealTimers();
   });
 
-  it("タブバーからクイズを開き、はじめるを押すと、名前と4枚の写真の選択肢が出る", async () => {
+  it("メニューからクイズを開き、はじめるを押すと、名前と4枚の写真の選択肢が出る", async () => {
     await openQuiz();
-    expect(screen.getByRole("button", { name: /クイズ/ })).toHaveAttribute("aria-current", "page");
+    await openMenu();
+    expect(within(screen.getByRole("dialog", { name: "メニュー" })).getByRole("button", { name: /クイズ/ })).toHaveAttribute("aria-current", "page");
+    await userEvent.click(screen.getByRole("button", { name: "閉じる" }));
     await start();
     expect(SPECIES.map((s) => s.name_ja)).toContain(shownName());
     expect(choices()).toHaveLength(4);
@@ -230,7 +232,7 @@ describe("App: クイズ（鳴き声を聞いて、写真から選ぶ）", () =>
     try {
       // オフラインでは環境の判定をしないため、判定を待たずに開く
       await renderAppNoWait();
-      await userEvent.click(screen.getByRole("button", { name: /クイズ/ }));
+      await gotoTab(/クイズ/);
       expect(screen.getByRole("button", { name: /鳴き声を聞いて、写真から選ぶ/ })).toBeDisabled();
       expect(screen.getByText(/オフラインでは使えません/)).toBeInTheDocument();
       expect(screen.getByRole("button", { name: /名前を見て、写真から選ぶ/ })).toBeEnabled();
@@ -437,7 +439,7 @@ describe("App: クイズ（写真を見て、鳴き声から選ぶ）（#175）"
     const onLine = vi.spyOn(window.navigator, "onLine", "get").mockReturnValue(false);
     try {
       await renderAppNoWait();
-      await userEvent.click(screen.getByRole("button", { name: /クイズ/ }));
+      await gotoTab(/クイズ/);
       expect(screen.getByRole("button", { name: /写真を見て、鳴き声から選ぶ/ })).toBeDisabled();
     } finally {
       onLine.mockRestore();

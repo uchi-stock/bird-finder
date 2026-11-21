@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { openApp, shoot, showResults } from "./helpers";
+import { gotoTab, openApp, shoot, showResults } from "./helpers";
 
 const SIZES = [
   { name: "iphone14", width: 390, height: 844 },
@@ -21,8 +21,8 @@ for (const size of SIZES) {
       const h1 = await page.locator("h1").boundingBox();
       expect(header && header.height <= 60).toBe(true);
       expect(h1 && menu && h1.x + h1.width <= menu.x + 1).toBe(true);
-      const tabbar = await page.locator(".tabbar").boundingBox();
-      expect(tabbar && Math.abs(tabbar.y + tabbar.height - size.height) <= 1).toBe(true);
+      // 下部のボタンは無い（画面の移動は、メニューから。#199）
+      expect(await page.locator(".tabbar").count()).toBe(0);
       await shoot(page, testInfo, `${size.name}-1-initial`, `初期表示（${size.name}）`, { fullPage: false });
       expect(errors).toEqual([]);
     });
@@ -159,7 +159,7 @@ for (const size of SIZES) {
       const errors: string[] = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await openApp(page);
-      await page.getByRole("button", { name: /クイズ/ }).click();
+      await gotoTab(page, /クイズ/);
       await page.getByRole("button", { name: /名前を見て、写真から選ぶ/ }).click();
       const group = page.getByRole("group", { name: "写真の選択肢" });
       await expect(group.getByRole("button")).toHaveCount(4);
@@ -184,7 +184,7 @@ for (const size of SIZES) {
       const errors: string[] = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await openApp(page);
-      await page.getByRole("button", { name: /クイズ/ }).click();
+      await gotoTab(page, /クイズ/);
       await page.getByRole("button", { name: /状況を読んで、写真から選ぶ/ }).click();
       await expect(page.getByRole("heading", { name: "この状況にあてはまる鳥は？" })).toBeVisible();
       await expect(page.locator(".quiz-clues li")).toHaveCount(3);
@@ -239,7 +239,7 @@ for (const size of SIZES) {
         }),
       );
       await page.route("https://upload.wikimedia.org/**/*.mp3", (r) => r.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.alloc(64) }));
-      await page.getByRole("button", { name: /クイズ/ }).click();
+      await gotoTab(page, /クイズ/);
       await page.getByRole("button", { name: /鳴き声を聞いて、写真から選ぶ/ }).click();
       await expect(page.getByRole("heading", { name: "この鳴き声の鳥は？" })).toBeVisible();
       // 自動再生の成否（ヘッドレスでは再生できない）で、ボタンの名前が変わる。どれでも、押せる状態になる
@@ -290,7 +290,7 @@ for (const size of SIZES) {
         }),
       );
       await page.route("https://upload.wikimedia.org/**/*.mp3", (r) => r.fulfill({ status: 200, contentType: "audio/mpeg", body: Buffer.alloc(64) }));
-      await page.getByRole("button", { name: /クイズ/ }).click();
+      await gotoTab(page, /クイズ/);
       await page.getByRole("button", { name: /写真を見て、鳴き声から選ぶ/ }).click();
       await expect(page.getByRole("heading", { name: "この鳥の鳴き声は？" })).toBeVisible();
       const list = page.getByRole("list", { name: "鳴き声の選択肢" });
@@ -318,7 +318,7 @@ for (const size of SIZES) {
       const errors: string[] = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await openApp(page);
-      await page.getByRole("button", { name: /地図/ }).click();
+      await gotoTab(page, /地図/);
       await page.getByRole("button", { name: "ダミー（バトル用）" }).click();
       await expect(page.getByText("ダミーデータです。実際の観察ではありません")).toBeVisible();
       expect(await page.locator(".bird-pin.dummy").count()).toBeGreaterThan(0);
@@ -332,10 +332,10 @@ for (const size of SIZES) {
       const errors: string[] = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await openApp(page);
-      await page.getByRole("button", { name: /図鑑/ }).click();
+      await gotoTab(page, /図鑑/);
       await expect(page.getByRole("heading", { name: "図鑑" })).toBeVisible();
       await shoot(page, testInfo, `${size.name}-5-dex`, `図鑑（${size.name}）`, { fullPage: false });
-      await page.getByRole("button", { name: /地図/ }).click();
+      await gotoTab(page, /地図/);
       await expect(page.locator(".map-wrap")).toBeVisible();
       await shoot(page, testInfo, `${size.name}-6-map`, `地図（${size.name}）`, { fullPage: false });
       expect(errors).toEqual([]);
@@ -356,7 +356,7 @@ test.describe("みんなの観察（地図）", () => {
       });
     });
     await openApp(page);
-    await page.getByRole("button", { name: /地図/ }).click();
+    await gotoTab(page, /地図/);
     await page.getByRole("button", { name: "みんなの観察" }).click();
     await expect(page.locator(".bird-pin.shared")).toHaveCount(1);
     await expect(page.getByText("地図を拡大すると")).toHaveCount(0);
@@ -392,7 +392,7 @@ for (const size of SIZES) {
       });
       await openApp(page);
       const before = wikiRequests.length;
-      await page.getByRole("button", { name: /図鑑/ }).click();
+      await gotoTab(page, /図鑑/);
       await page.getByRole("button", { name: "全種の一覧" }).click();
       await expect(page.locator(".sp-row")).toHaveCount(44);
       await expect(page.locator(".sp-row .photo img").first()).toBeVisible();

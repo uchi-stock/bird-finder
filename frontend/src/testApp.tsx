@@ -88,6 +88,16 @@ export async function renderApp() {
 export const openMenu = async () => {
   await userEvent.click(screen.getByRole("button", { name: "メニュー" }));
 };
+/** メニューから、画面（探す・図鑑・クイズ・地図）へ移る（#199） */
+export const gotoTab = async (name: string | RegExp) => {
+  await openMenu();
+  await userEvent.click(within(screen.getByRole("dialog", { name: "メニュー" })).getByRole("button", { name }));
+};
+/** gotoTabの同期版（fakeタイマーのテスト用。fireEventで操作する） */
+export const gotoTabSync = (name: string | RegExp) => {
+  fireEvent.click(screen.getByRole("button", { name: "メニュー" }));
+  fireEvent.click(within(screen.getByRole("dialog", { name: "メニュー" })).getByRole("button", { name }));
+};
 /** メニューから「使い方と注意」を開く */
 export const openHelp = async () => {
   await openMenu();
