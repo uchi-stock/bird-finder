@@ -314,6 +314,19 @@ for (const size of SIZES) {
       expect(errors).toEqual([]);
     });
 
+    test("メニューは、上から下へ滑って開く。「動きを減らす」設定では、動かない（#214）", async ({ page }) => {
+      await openApp(page);
+      const animationName = () => page.evaluate(() => getComputedStyle(document.querySelector(".menu-box")!).animationName);
+      await page.getByRole("button", { name: "メニュー" }).click();
+      await expect(page.getByRole("dialog", { name: "メニュー" })).toBeVisible();
+      expect(await animationName()).toBe("menu-drop");
+      await page.getByRole("button", { name: "閉じる" }).click();
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      await page.getByRole("button", { name: "メニュー" }).click();
+      await expect(page.getByRole("dialog", { name: "メニュー" })).toBeVisible();
+      expect(await animationName()).toBe("none");
+    });
+
     test("地図の画面で、メニューを開いても、地図の部品が、メニューの上に出ない（ハンバーガーが押せる。#209）", async ({ page }) => {
       await openApp(page);
       await gotoTab(page, /地図/);
