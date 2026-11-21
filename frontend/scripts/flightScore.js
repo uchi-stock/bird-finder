@@ -4,6 +4,9 @@
 
 import { isAllowedPhoto } from "./photoScore.js";
 
+// 固定する写真の、飛んでいる確度の下限。飛んでいない写真を「飛ぶ姿」と出すより、出さないほうがよいため、判定のしきい値（0.5・0.65）より高くする。
+// 確認の実行で、選べた6種は0.80〜0.96、境界の1種（走る姿に近い写真）は0.72だった
+export const MIN_SCORE = 0.75;
 const MIN_WIDTH = 500;
 const MIN_HEIGHT = 300;
 // 飛翔を示す題名の語。候補の並びを、これに該当するものから先にする（分類の対象を絞る）
@@ -47,7 +50,7 @@ export function filterFlightCandidates(pages) {
  * 最も確度の高い、飛んでいる写真を選ぶ。無ければnull
  */
 export function pickFlight(measured) {
-  const eligible = measured.filter((m) => m.flying && !m.unsuitable && Number.isFinite(m.score));
+  const eligible = measured.filter((m) => m.flying && !m.unsuitable && Number.isFinite(m.score) && m.score >= MIN_SCORE);
   eligible.sort((a, b) => b.score - a.score);
   return eligible[0] ?? null;
 }

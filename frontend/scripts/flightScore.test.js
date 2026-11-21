@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { filterFlightCandidates, pickFlight, toEntry } from "./flightScore.js";
+import { filterFlightCandidates, MIN_SCORE, pickFlight, toEntry } from "./flightScore.js";
 
 const page = (title, extra = {}) => ({
   title,
@@ -50,6 +50,10 @@ describe("pickFlight", () => {
       { title: "d", flying: false, score: 0.99, unsuitable: false },
     ]);
     expect(best?.title).toBe("c");
+  });
+  it("確度が下限（MIN_SCORE）未満の候補は、飛んでいると判定されても選ばない", () => {
+    expect(pickFlight([{ title: "a", flying: true, score: MIN_SCORE - 0.01, unsuitable: false }])).toBeNull();
+    expect(pickFlight([{ title: "a", flying: true, score: MIN_SCORE, unsuitable: false }])?.title).toBe("a");
   });
   it("該当が無ければnull", () => {
     expect(pickFlight([{ title: "a", flying: false, score: 0.3, unsuitable: false }])).toBeNull();
