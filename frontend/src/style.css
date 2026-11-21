@@ -778,7 +778,8 @@ footer {
   font-size: 0.95rem;
 }
 
-/* 地図 */
+/* 地図。.map-wrapのisolationは、地図の中の層（Leafletは400〜1000、地図の部品は500）を、地図の中に閉じ込める。
+   閉じ込めないと、ヘッダーやメニュー（z-index 5・40）より上に出て、ハンバーガーやメニューの項目を、地図がタップで奪う（#209） */
 .map-wrap {
   flex: 1;
   min-height: 0;
@@ -786,6 +787,7 @@ footer {
   margin-top: 6px;
   border-radius: 12px;
   overflow: hidden;
+  isolation: isolate;
   border: 1px solid var(--line);
 }
 
