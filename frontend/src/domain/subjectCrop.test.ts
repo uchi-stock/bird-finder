@@ -16,9 +16,9 @@ describe("subjectCrop: 余白が多い画像を、被写体に寄せて正方形
   it("中央に小さな被写体があれば、被写体を含む正方形を、下限の大きさで切り出す", () => {
     const c = subjectCrop(image(100, 100, { x0: 40, y0: 40, x1: 60, y1: 60 }), 100, 100)!;
     expect(c).not.toBeNull();
-    expect(c.w).toBeCloseTo(0.45, 1); // 被写体は小さいため、寄りすぎない下限（短辺の45%）
-    expect(c.x).toBeCloseTo(0.275, 1);
-    expect(c.y).toBeCloseTo(0.275, 1);
+    expect(c.w).toBeCloseTo(0.35, 1); // 被写体は小さいため、寄りすぎない下限（短辺の35%）
+    expect(c.x).toBeCloseTo(0.325, 1);
+    expect(c.y).toBeCloseTo(0.325, 1);
     // 被写体が、切り出し範囲に含まれる
     expect(c.x).toBeLessThanOrEqual(0.4);
     expect(c.x + c.w).toBeGreaterThanOrEqual(0.6);
@@ -34,7 +34,7 @@ describe("subjectCrop: 余白が多い画像を、被写体に寄せて正方形
   it("被写体がやや大きければ、被写体に余白を足した大きさで切り出す", () => {
     const c = subjectCrop(image(100, 100, { x0: 25, y0: 25, x1: 65, y1: 65 }), 100, 100)!;
     expect(c).not.toBeNull();
-    expect(c.w).toBeCloseTo((40 * 1.16) / 100, 1);
+    expect(c.w).toBeCloseTo((40 * 1.06) / 100, 1);
   });
   it("縦長・横長の画像でも、切り出しは、画素では正方形", () => {
     for (const [w, h] of [
@@ -88,13 +88,13 @@ describe("cropStyle: 切り出し範囲を、正方形のセルいっぱいに�
 });
 
 describe("cropFromBox: 被写体の範囲（物体検出の結果など）から、切り出す正方形を決める（#150）", () => {
-  it("被写体の周囲に余白（8%）を足した正方形で、被写体の中心に合わせる", () => {
-    // 100x100の画像で、中央の30x30の被写体 → 一辺は 30 * 1.16 = 34.8 だが、下限（短辺の45%）の45
+  it("被写体の周囲に余白（3%）を足した正方形で、被写体の中心に合わせる", () => {
+    // 100x100の画像で、中央の30x30の被写体 → 一辺は 30 * 1.06 = 31.8 だが、下限（短辺の35%）の35
     const c = cropFromBox({ x0: 35, y0: 35, x1: 65, y1: 65 }, 100, 100)!;
-    expect(c.w).toBeCloseTo(0.45, 5);
-    expect(c.x).toBeCloseTo(0.275, 5);
-    const d = cropFromBox({ x0: 25, y0: 25, x1: 70, y1: 70 }, 100, 100)!; // 45 * 1.16 = 52.2
-    expect(d.w).toBeCloseTo(0.522, 3);
+    expect(c.w).toBeCloseTo(0.35, 5);
+    expect(c.x).toBeCloseTo(0.325, 5);
+    const d = cropFromBox({ x0: 25, y0: 25, x1: 70, y1: 70 }, 100, 100)!; // 45 * 1.06 = 47.7
+    expect(d.w).toBeCloseTo(0.477, 3);
   });
   it("被写体が隅にあれば、画像の中に収める", () => {
     const c = cropFromBox({ x0: 0, y0: 0, x1: 20, y1: 20 }, 100, 100)!;
@@ -110,6 +110,6 @@ describe("cropFromBox: 被写体の範囲（物体検出の結果など）から
     expect(cropFromBox({ x0: 5, y0: 20, x1: 95, y1: 40 }, 100, 60)).toBeNull();
   });
   it("被写体が点（大きさ0）でも、下限の大きさで切り出す", () => {
-    expect(cropFromBox({ x0: 10, y0: 10, x1: 10, y1: 10 }, 100, 100)?.w).toBeCloseTo(0.45, 5);
+    expect(cropFromBox({ x0: 10, y0: 10, x1: 10, y1: 10 }, 100, 100)?.w).toBeCloseTo(0.35, 5);
   });
 });
