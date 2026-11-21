@@ -17,6 +17,8 @@ on:
     paths:
       - "frontend/src/data/species.json"
       - "frontend/src/data/photos.json"
+      # 飛翔の画像を固定した（curate-flight）とき、その画像の切り出し範囲も作る
+      - "frontend/src/data/flightPhotos.json"
       # 仕組み自体を変えたとき（初回の導入を含む）にも、結果を作り直す
       - ".github/workflows/detect-crops.yml"
       - "frontend/scripts/detectCrops.js"

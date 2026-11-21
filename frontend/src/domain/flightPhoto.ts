@@ -51,3 +51,15 @@ export function commonsFlightUrl(scientificName: string): string {
   });
   return `https://commons.wikimedia.org/w/api.php?${q.toString()}`;
 }
+
+/** 選び直した飛翔の画像（flightPhotos.json）。学名をキーにする。画像分類で、飛んでいる写真を選んで固定したもの（#212） */
+export type CuratedFlight = Record<string, { thumbnail: string; pageUrl: string; credit?: string; license?: string }>;
+
+/**
+ * 選び直した飛翔の画像があれば返す（無ければnull）。画面と、検出workflowの両方で、検索より先に使う。
+ * 題名の語による検索では見つからない鳥（題名に飛翔を示す語が無い写真しかない鳥）の画像を、補うため
+ */
+export function curatedFlightPhoto(curated: CuratedFlight, scientificName: string): FlightPhoto | null {
+  const c = curated[scientificName];
+  return c?.thumbnail ? { ...c, flight: true } : null;
+}
