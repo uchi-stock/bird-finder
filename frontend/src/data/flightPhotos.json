@@ -1,1 +1,38 @@
-{}
+{
+ "Cyanopica cyanus": {
+  "thumbnail": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6d/Taking_Off_%287634113474%29.jpg/500px-Taking_Off_%287634113474%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "pageUrl": "https://commons.wikimedia.org/wiki/File:Taking_Off_(7634113474).jpg",
+  "credit": "Charles Lam from Hong Kong, China",
+  "license": "CC BY-SA 2.0"
+ },
+ "Fulica atra": {
+  "thumbnail": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3c/Coot_in_Landing_%2811240825545%29.jpg/500px-Coot_in_Landing_%2811240825545%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "pageUrl": "https://commons.wikimedia.org/wiki/File:Coot_in_Landing_(11240825545).jpg",
+  "credit": "Jacob  Spinks from Northamptonshire, England",
+  "license": "CC BY 2.0"
+ },
+ "Lanius bucephalus": {
+  "thumbnail": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/df/Bull_Headed_Shrike_Lanius_Bucephalus_%E3%83%A2%E3%82%BA_%28190989559%29.jpeg/500px-Bull_Headed_Shrike_Lanius_Bucephalus_%E3%83%A2%E3%82%BA_%28190989559%29.jpeg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "pageUrl": "https://commons.wikimedia.org/wiki/File:Bull_Headed_Shrike_Lanius_Bucephalus_%E3%83%A2%E3%82%BA_(190989559).jpeg",
+  "credit": "Greg Peterson",
+  "license": "CC BY-SA 3.0"
+ },
+ "Parus minor": {
+  "thumbnail": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a0/Flying_%2840213749182%29.jpg/500px-Flying_%2840213749182%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "pageUrl": "https://commons.wikimedia.org/wiki/File:Flying_(40213749182).jpg",
+  "credit": "Charles Lam from Hong Kong, China",
+  "license": "CC BY-SA 2.0"
+ },
+ "Pipistrellus abramus": {
+  "thumbnail": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c4/Pipistrellus_abramus_from_iNaturalist_photo_216005126.jpg/500px-Pipistrellus_abramus_from_iNaturalist_photo_216005126.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "pageUrl": "https://commons.wikimedia.org/wiki/File:Pipistrellus_abramus_from_iNaturalist_photo_216005126.jpg",
+  "credit": "WATANABE Hitoshi 渡辺仁 (tbc_watanabe)",
+  "license": "CC BY 4.0"
+ },
+ "Streptopelia orientalis": {
+  "thumbnail": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8e/Taking_Off_%2819182724509%29.jpg/500px-Taking_Off_%2819182724509%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "pageUrl": "https://commons.wikimedia.org/wiki/File:Taking_Off_(19182724509).jpg",
+  "credit": "Charles Lam from Hong Kong, China",
+  "license": "CC BY-SA 2.0"
+ }
+}
