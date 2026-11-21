@@ -7,9 +7,7 @@
   --line: #d8d8d0;
   --acc: #2f7d4f;
   --accfg: #fff;
-  --soft-edge:
-    linear-gradient(to right, transparent, #000 9%, #000 91%, transparent),
-    linear-gradient(to bottom, transparent, #000 9%, #000 91%, transparent);
+  --soft-edge: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cdefs%3E%3Cfilter id='b' x='-20%25' y='-20%25' width='140%25' height='140%25'%3E%3CfeGaussianBlur stdDeviation='3.5'/%3E%3C/filter%3E%3C/defs%3E%3Crect x='7' y='7' width='86' height='86' rx='16' fill='%23000' filter='url(%23b)'/%3E%3C/svg%3E");
 }
 
 @media (prefers-color-scheme: dark) {
@@ -193,7 +191,7 @@ footer {
 /* サムネイルは、画像を欠けさせずに全体を収める（coverだと、上下が切れて顔が見えないことがある）。
    外枠は、セルではなく画像そのものの周囲につける（画像が正方形でなくても、ずれない）。角は丸くする。
    画像は、セルの中で中央に置き、縦横比を保ったまま、セルに収まる大きさにする。
-   縁は、くっきりした枠線ではなく、ぼかしてなじませる（#196）。四辺を、グラデーション（--soft-edge）の透明で抜く。
+   縁は、くっきりした枠線ではなく、ぼかしてなじませる（#196）。角を丸くしたぼかし（--soft-edge。ぼかした角丸の四角のマスク）で抜く（#198）。
    マスクは、iOS Safari 15.4以降で、接頭辞なしで使える */
 .photo img {
   position: absolute;
@@ -209,7 +207,8 @@ footer {
   border-radius: 8px;
   object-fit: contain;
   mask-image: var(--soft-edge);
-  mask-composite: intersect;
+  mask-size: 100% 100%;
+  mask-repeat: no-repeat;
 }
 
 /* 切り出さない画像は、囲みの要素が、レイアウトに影響しない */
@@ -230,7 +229,8 @@ footer {
   border: 0;
   border-radius: 8px;
   mask-image: var(--soft-edge);
-  mask-composite: intersect;
+  mask-size: 100% 100%;
+  mask-repeat: no-repeat;
 }
 
 .lightbox img {
@@ -1416,8 +1416,8 @@ footer {
 .quiz-choices {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 6px;
-  max-width: 320px;
+  gap: 4px;
+  max-width: 360px;
   margin: 8px auto;
 }
 
@@ -1446,7 +1446,8 @@ footer {
   background: transparent;
   object-fit: contain;
   mask-image: var(--soft-edge);
-  mask-composite: intersect;
+  mask-size: 100% 100%;
+  mask-repeat: no-repeat;
 }
 
 /* 切り出した画像は、正方形のセルの中に、切り出し範囲がいっぱいになる大きさと位置で置く（大きさと位置はstyleで指定）。外枠は、囲みの正方形につける */
@@ -1644,7 +1645,7 @@ footer {
 /* 背の低い画面でも、回答後の「次へ」が1画面に収まるようにする */
 @media (height <= 700px) {
   .quiz-choices {
-    max-width: 250px;
+    max-width: 290px;
   }
 
   .quiz-name {
