@@ -7,6 +7,9 @@
   --line: #d8d8d0;
   --acc: #2f7d4f;
   --accfg: #fff;
+  --soft-edge:
+    linear-gradient(to right, transparent, #000 9%, #000 91%, transparent),
+    linear-gradient(to bottom, transparent, #000 9%, #000 91%, transparent);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -189,7 +192,9 @@ footer {
 
 /* サムネイルは、画像を欠けさせずに全体を収める（coverだと、上下が切れて顔が見えないことがある）。
    外枠は、セルではなく画像そのものの周囲につける（画像が正方形でなくても、ずれない）。角は丸くする。
-   画像は、セルの中で中央に置き、縦横比を保ったまま、セルに収まる大きさにする */
+   画像は、セルの中で中央に置き、縦横比を保ったまま、セルに収まる大きさにする。
+   縁は、くっきりした枠線ではなく、ぼかしてなじませる（#196）。四辺を、グラデーション（--soft-edge）の透明で抜く。
+   マスクは、iOS Safari 15.4以降で、接頭辞なしで使える */
 .photo img {
   position: absolute;
   inset: 0;
@@ -200,9 +205,11 @@ footer {
   width: auto;
   height: auto;
   margin: auto;
-  border: 1px solid var(--line);
+  border: 0;
   border-radius: 8px;
   object-fit: contain;
+  mask-image: var(--soft-edge);
+  mask-composite: intersect;
 }
 
 /* 切り出さない画像は、囲みの要素が、レイアウトに影響しない */
@@ -220,8 +227,10 @@ footer {
   margin: auto;
   overflow: hidden;
   aspect-ratio: 1;
-  border: 1px solid var(--line);
+  border: 0;
   border-radius: 8px;
+  mask-image: var(--soft-edge);
+  mask-composite: intersect;
 }
 
 .lightbox img {
@@ -978,6 +987,13 @@ footer {
   aspect-ratio: 4 / 3;
 }
 
+/* 背の高い画面では、画像を少し縦長にして大きくする（1画面に収まる範囲）。短い画面（iPhone SE等）は、4件が1画面に収まることを優先する（#196） */
+@media (height > 750px) {
+  .results .photo {
+    aspect-ratio: 5 / 4;
+  }
+}
+
 .photo.empty {
   /* 画像が無いときの「写真なし」の枠は、枠そのものに外枠をつける */
   border: 1px solid var(--line);
@@ -1400,8 +1416,8 @@ footer {
 .quiz-choices {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  max-width: 280px;
+  gap: 6px;
+  max-width: 320px;
   margin: 8px auto;
 }
 
@@ -1425,10 +1441,12 @@ footer {
   width: auto;
   height: auto;
   margin: auto;
-  border: 3px solid var(--line);
+  border: 0;
   border-radius: 12px;
-  background: var(--card);
+  background: transparent;
   object-fit: contain;
+  mask-image: var(--soft-edge);
+  mask-composite: intersect;
 }
 
 /* 切り出した画像は、正方形のセルの中に、切り出し範囲がいっぱいになる大きさと位置で置く（大きさと位置はstyleで指定）。外枠は、囲みの正方形につける */
@@ -1446,23 +1464,18 @@ footer {
 
 .quiz-choice .thumb-sq,
 .quiz-pc-photo .thumb-sq {
-  border-width: 3px;
   border-radius: 12px;
-  background: var(--card);
+  background: transparent;
 }
 
-.quiz-choice.correct img,
-.quiz-choice.correct .thumb-sq {
-  border-color: #2e8b57;
+/* 回答後の正誤は、枠線ではなく、ぼかした縁に沿った光（影）の色で示す（縁をマスクで抜くため、枠線は使えない） */
+.quiz-choice.correct {
+  filter: drop-shadow(0 0 5px #2e8b57) drop-shadow(0 0 2px #2e8b57);
 }
 
 .quiz-choice.wrong {
   opacity: 0.8;
-}
-
-.quiz-choice.wrong img,
-.quiz-choice.wrong .thumb-sq {
-  border-color: #c0392b;
+  filter: drop-shadow(0 0 5px #c0392b) drop-shadow(0 0 2px #c0392b);
 }
 
 .quiz-mark {
@@ -1631,7 +1644,7 @@ footer {
 /* 背の低い画面でも、回答後の「次へ」が1画面に収まるようにする */
 @media (height <= 700px) {
   .quiz-choices {
-    max-width: 230px;
+    max-width: 250px;
   }
 
   .quiz-name {
