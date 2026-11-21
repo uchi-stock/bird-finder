@@ -42,7 +42,7 @@ export function AppHeader({ tab, onTab, caught, total }: Props) {
 
   return (
     <header className="app-header">
-      <h1>声しか知らない鳥を探す</h1>
+      <h1>とりのめ</h1>
       <button ref={menuButton} className="menu-btn" aria-label="メニュー" aria-haspopup="dialog" onClick={() => setPanel("menu")}>
         ☰
       </button>
