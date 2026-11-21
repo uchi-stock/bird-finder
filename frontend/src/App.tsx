@@ -43,9 +43,9 @@ export function App() {
         </p>
       )}
       {tab === "dex" ? (
-        <Dex collection={collection} onCatch={onCatch} onShare={shareSighting} now={now} onPlay={onPlay} onStop={stop} isActive={isActive} />
+        <Dex collection={collection} now={now} onPlay={onPlay} onStop={stop} isActive={isActive} />
       ) : tab === "quiz" ? (
-        <Quiz />
+        <Quiz collection={collection} onCatch={onCatch} onShare={shareSighting} />
       ) : tab === "map" ? (
         <Suspense fallback={<p className="hint">地図を読み込み中…</p>}>
           <MapView points={mapPoints} speciesLabel={speciesLabel} withoutLocation={countWithoutLocation(sightings)} locate={getCoords} shared={shared} dummy={DUMMY_POINTS} />

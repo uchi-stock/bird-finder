@@ -1,8 +1,9 @@
 import { act, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fetchCallAudio, fetchPhoto, gotoTab, openMenu, playAudio, renderApp, renderAppNoWait, setupAppTests, stopAudio, unlockAudio } from "./testApp";
+import { fetchCallAudio, fetchPhoto, gotoTab, openMenu, playAudio, renderApp, renderAppNoWait, setupAppTests, stopAudio, unlockAudio, usePhoto } from "./testApp";
 import { SPECIES } from "./options";
+import { buildRound, seededRng } from "./domain/quiz";
 
 vi.mock("./callAudio", async () => (await import("./testApp")).callAudioMock);
 vi.mock("./location", async () => (await import("./testApp")).locationMock);
@@ -444,5 +445,64 @@ describe("App: クイズ（写真を見て、鳴き声から選ぶ）（#175）"
     } finally {
       onLine.mockRestore();
     }
+  });
+});
+
+describe("App: クイズで正解したら、詳細を開いて捕まえられる（#213）", () => {
+  const AUDIO = { src: "https://u/a.mp3", pageUrl: "https://c/File:a", title: "a.ogg", credit: "録音者A", license: "CC BY 4.0" };
+  // 出題の乱数の種（開始時刻）を固定して、最初の問題を、テストの側でも計算し、正解の選択肢を知る
+  const firstQuestion = (kind: "name" | "photoCall") => buildRound(SPECIES, { rng: seededRng(1), count: 10, kind })[0];
+  const withFixedSeed = async (fn: () => Promise<void>) => {
+    const spy = vi.spyOn(Date, "now").mockReturnValue(1);
+    try {
+      await fn();
+    } finally {
+      spy.mockRestore();
+    }
+  };
+  const nameOf = (id: string) => SPECIES.find((s) => s.species_id === id)!.name_ja;
+
+  beforeEach(() => {
+    vi.useRealTimers();
+    fetchCallAudio.mockReset().mockResolvedValue(AUDIO);
+    usePhoto.mockReturnValue({ thumbnail: "https://u/330px-a.jpg", pageUrl: "https://w/x" }); // 詳細を開く🔍は、写真があるときに出る
+  });
+
+  it("名前のクイズで正解すると、詳細に、捕まえるボタンが出て、捕まえると図鑑に載る", async () => {
+    await openQuiz();
+    const q = firstQuestion("name");
+    await withFixedSeed(start);
+    await userEvent.click(choices()[q.choiceIds.indexOf(q.answerId)]);
+    expect(screen.getByText(/写真をタップして詳細を開くと、捕まえられます/)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: `${nameOf(q.answerId)}の写真を拡大` }));
+    const dialog = await screen.findByRole("dialog", { name: `${nameOf(q.answerId)}の詳細` });
+    await userEvent.click(within(dialog).getByRole("button", { name: "捕まえる" }));
+    await waitFor(() => expect(localStorage.getItem("bird-finder:collection:v1") ?? "").toContain(q.answerId), { timeout: 4000 });
+  });
+
+  it("名前のクイズで不正解のときは、詳細は開けるが、捕まえるボタンは出ない", async () => {
+    await openQuiz();
+    const q = firstQuestion("name");
+    await withFixedSeed(start);
+    const wrong = q.choiceIds.findIndex((id) => id !== q.answerId);
+    await userEvent.click(choices()[wrong]);
+    expect(screen.queryByText(/写真をタップして詳細を開くと、捕まえられます/)).toBeNull();
+    await userEvent.click(screen.getByRole("button", { name: `${nameOf(q.answerId)}の写真を拡大` }));
+    const dialog = await screen.findByRole("dialog", { name: `${nameOf(q.answerId)}の詳細` });
+    expect(within(dialog).queryByRole("button", { name: /捕まえる/ })).toBeNull();
+  });
+
+  it("写真→鳴き声のクイズでも、正解すると、詳細に、捕まえるボタンが出る。不正解では出ない", async () => {
+    await openQuiz();
+    const q = firstQuestion("photoCall");
+    await withFixedSeed(async () => {
+      await userEvent.click(screen.getByRole("button", { name: /写真を見て、鳴き声から選ぶ/ }));
+      await screen.findByRole("list", { name: "鳴き声の選択肢" });
+    });
+    await waitFor(() => expect(screen.getByRole("button", { name: /鳴き声1を聞く/ })).toBeEnabled());
+    await userEvent.click(screen.getByRole("button", { name: `鳴き声${q.choiceIds.indexOf(q.answerId) + 1}を選ぶ` }));
+    await userEvent.click(screen.getByRole("button", { name: `${nameOf(q.answerId)}の写真を拡大` }));
+    const dialog = await screen.findByRole("dialog", { name: `${nameOf(q.answerId)}の詳細` });
+    expect(within(dialog).getByRole("button", { name: "捕まえる" })).toBeInTheDocument();
   });
 });

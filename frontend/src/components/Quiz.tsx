@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { fetchCallAudio, playAudio, stopAudio, unlockAudio, type CallAudio } from "../callAudio";
+import type { Collection } from "../domain/collection";
 import { buildRound, seededRng, type QuizKind, type QuizQuestion } from "../domain/quiz";
 import { buildSituationRound } from "../domain/situationQuiz";
 import { useOnline } from "../hooks/useOnline";
 import { SPECIES, SIZES } from "../options";
 import { fetchPhoto, type BirdPhoto } from "../photo";
 import { loadQuizStats, saveQuizStats, type QuizStats } from "../storage";
+import { CatchButton } from "./CatchButton";
 import { Photo } from "./Photo";
 import { ThumbImg } from "./ThumbImg";
 
@@ -22,9 +24,16 @@ type Phase = "intro" | "loading" | "playing" | "result" | "unavailable";
  * 写真から選ぶクイズ。「名前を見て選ぶ」「鳴き声を聞いて選ぶ」「状況を読んで選ぶ」と、
  * 逆向きの「写真を見て、鳴き声から選ぶ」の4種類。
  * 写真を取得できた鳥だけを出題する（問題の途中で破綻しない）。
- * 鳴き声の問題は、音源が見つからない・失敗したときに、その問題を飛ばして別の問題に差し替える
+ * 鳴き声の問題は、音源が見つからない・失敗したときに、その問題を飛ばして別の問題に差し替える。
+ * 正解したあとは、その鳥の詳細（拡大表示）を開いて、捕まえられる（#213）。不正解のときは、詳細は見るだけで、捕まえるボタンは出さない
  */
-export function Quiz() {
+interface QuizProps {
+  collection: Collection;
+  onCatch: (id: string) => { isNew: boolean; count: number };
+  onShare: (id: string) => Promise<string>;
+}
+
+export function Quiz({ collection, onCatch, onShare }: QuizProps) {
   const online = useOnline();
   const [phase, setPhase] = useState<Phase>("intro");
   const [kind, setKind] = useState<QuizKind>("name");
@@ -411,6 +420,14 @@ export function Quiz() {
   const size = SIZES.find((s) => s.level === answer.size_level);
   const isCall = kind === "call";
   const isSituation = kind === "situation";
+  // 回答後に開ける、その鳥の詳細（拡大表示）に添える内容。正解したときだけ、捕まえるボタンを出す（#213）
+  const correct = picked === question.answerId;
+  const detailCaption = (
+    <>
+      <p className="note">{answer.note}</p>
+      {correct && <CatchButton speciesId={answer.species_id} collection={collection} onCatch={onCatch} onShare={onShare} />}
+    </>
+  );
   if (kind === "photoCall") {
     // 正解の鳥の写真を見せ、鳴き声を4つ聞き比べて選ぶ。回答前は、どの鳴き声がどの鳥か分からない（名前を出さない）
     const answered_ = picked !== null;
@@ -453,11 +470,15 @@ export function Quiz() {
         {answered_ && (
           <>
             <div className="quiz-feedback" role="status">
+              <div className="quiz-detail">
+                <Photo name={answer.name_ja} scientificName={answer.scientific_name} caption={detailCaption} />
+              </div>
               <div className="quiz-result-text">
-                <strong>{picked === question.answerId ? "⭕ 正解！" : "❌ ざんねん"}</strong>
+                <strong>{correct ? "⭕ 正解！" : "❌ ざんねん"}</strong>
                 <span>
                   {answer.name_ja}（{answer.scientific_name}）{size ? ` ・ ${size.cm}` : ""}
                 </span>
+                {correct && <span className="hint">写真をタップして詳細を開くと、捕まえられます。</span>}
               </div>
             </div>
             <button type="button" className="primary quiz-next" onClick={next}>
@@ -532,13 +553,14 @@ export function Quiz() {
         <>
           <div className="quiz-feedback" role="status">
             <div className="quiz-detail">
-              <Photo name={answer.name_ja} scientificName={answer.scientific_name} />
+              <Photo name={answer.name_ja} scientificName={answer.scientific_name} caption={detailCaption} />
             </div>
             <div className="quiz-result-text">
-              <strong>{picked === question.answerId ? "⭕ 正解！" : "❌ ざんねん"}</strong>
+              <strong>{correct ? "⭕ 正解！" : "❌ ざんねん"}</strong>
               <span>
                 {answer.name_ja}（{answer.scientific_name}）{size ? ` ・ ${size.cm}` : ""}
               </span>
+              {correct && <span className="hint">写真をタップして詳細を開くと、捕まえられます。</span>}
               {isSituation && <span className="hint">決め手: {(question.clues ?? []).join(" ／ ")}。{answer.name_ja}は、すべてにあてはまります（図鑑データは暫定値です）。</span>}
             </div>
           </div>
