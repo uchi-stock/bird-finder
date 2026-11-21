@@ -9,6 +9,9 @@ const MIN_HEIGHT = 300;
 // 飛翔を示す題名の語。候補の並びを、これに該当するものから先にする（分類の対象を絞る）
 const FLIGHT_WORD = /in flight|flying|flight|take.?off|landing|soaring|hover|flies|fly\b/i;
 
+// 飛んでいない姿を示す題名の語（水の上を走る・歩く・泳ぐ・水浴び・餌を食べる等）。翼を広げていても、飛ぶ姿ではないため、候補から外す
+const NOT_FLYING_WORD = /running|runs\b|walking|swimming|bathing|diving|feeding|perch|sitting|standing|nest|chick|egg/i;
+
 /** 題名から、飛翔を示す語を除く（photoScoreの条件は、飛翔の題名を、標準の姿でないとして外すため。飛翔の画像では、その条件だけを外す） */
 function withoutFlightWords(title) {
   return String(title ?? "").replace(/in flight|flying|take.?off|landing|soaring|hover/gi, " ");
@@ -26,7 +29,7 @@ export function filterFlightCandidates(pages) {
     if ((info.width ?? 0) < MIN_WIDTH || (info.height ?? 0) < MIN_HEIGHT) continue;
     const meta = info.extmetadata ?? {};
     const license = meta.LicenseShortName?.value ?? "";
-    if (!isAllowedPhoto(withoutFlightWords(pg.title), license)) continue;
+    if (NOT_FLYING_WORD.test(pg.title ?? "") || !isAllowedPhoto(withoutFlightWords(pg.title), license)) continue;
     out.push({
       title: pg.title,
       thumbnail: info.thumburl,

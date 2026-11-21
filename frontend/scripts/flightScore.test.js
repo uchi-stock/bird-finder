@@ -18,6 +18,15 @@ describe("filterFlightCandidates", () => {
     expect(out[0].flightTitle).toBe(true);
     expect(out[0].credit).toBe("撮影者");
   });
+  it("飛んでいない姿を示す題名（水の上を走る・水浴び・止まる）は、翼を広げていても外す", () => {
+    const out = filterFlightCandidates({
+      run: page("File:Little grebe running on water.jpg"),
+      bath: page("File:Carduelis sinica bathing and flying.jpg"),
+      sit: page("File:Shrike sitting on a branch.jpg"),
+      ok: page("File:Lanius bucephalus flying.jpg"),
+    });
+    expect(out.map((c) => c.title)).toEqual(["File:Lanius bucephalus flying.jpg"]);
+  });
   it("JPEG以外・小さい画像・使えないライセンスは外す", () => {
     const out = filterFlightCandidates({
       png: page("File:a.png", { mime: "image/png" }),

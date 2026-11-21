@@ -3,7 +3,7 @@
 on:
   push:
     branches: [claude/brave-goodall-y1e0n1]
-    paths: [".github/workflows/tmp-curate-flight.yml"]
+    paths: [".github/workflows/tmp-curate-flight.yml", "frontend/scripts/curateFlight.js", "frontend/scripts/flightScore.js"]
 permissions:
   contents: read
 jobs:

@@ -21,7 +21,7 @@ const FLIGHT_FILE = path.resolve(here, "../src/data/flightPhotos.json");
 const REPORT = process.env.REPORT ?? "flight-report.md";
 const UA = "bird-finder-flight-curation/1.0 (+https://github.com/uchi-stock/bird-finder)";
 const DELAY_MS = 300;
-const MAX_CANDIDATES = 14;
+const MAX_CANDIDATES = 30;
 const MAX_FAILURES = 5;
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -47,7 +47,7 @@ function searchUrl(query) {
     format: "json",
     generator: "search",
     gsrnamespace: "6",
-    gsrlimit: "30",
+    gsrlimit: "50",
     gsrsearch: query,
     prop: "imageinfo",
     iiprop: "url|extmetadata|size|mime",
@@ -57,7 +57,7 @@ function searchUrl(query) {
 }
 
 /** 学名から、候補を集める検索。飛翔の語つきの検索と、学名のカテゴリ（Commonsの「Category:学名」）の画像 */
-const queriesFor = (sci) => [`"${sci}" flying`, `"${sci}" flight`, `incategory:"${sci}" filetype:bitmap`];
+const queriesFor = (sci) => [`"${sci}" flying`, `"${sci}" flight`, `"${sci}" "taking off"`, `"${sci}" wings`, `incategory:"${sci}" filetype:bitmap`];
 
 async function main() {
   const { pipeline, RawImage } = await import("@huggingface/transformers");
