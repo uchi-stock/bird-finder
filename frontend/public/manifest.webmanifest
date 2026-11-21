@@ -1,6 +1,6 @@
 {
-  "name": "声しか知らない鳥を探す",
-  "short_name": "鳥さがし",
+  "name": "とりのめ",
+  "short_name": "とりのめ",
   "description": "鳴き声・外見・場所から野鳥を探して図鑑に集める",
   "start_url": "./",
   "scope": "./",

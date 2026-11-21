@@ -12,7 +12,7 @@ setupAppTests();
 describe("App: 基本表示", () => {
   it("タイトルを表示し、バージョン・更新日時はメニューの中にある", async () => {
     await renderApp();
-    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("声しか知らない鳥を探す");
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("とりのめ");
     expect(screen.queryByText(/v0\.0\.0-test/)).toBeNull();
     await openMenu();
     expect(screen.getByText(/v0\.0\.0-test/)).toBeInTheDocument();
