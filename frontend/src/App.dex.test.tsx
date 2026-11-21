@@ -47,13 +47,13 @@ describe("App: 全種の一覧（#96）", () => {
     expect(imgs.length).toBe(44);
     expect(imgs[0]).toHaveAttribute("src", "https://u/330px-a.jpg");
   });
-  it("画像の🔍で拡大表示が開き、説明・鳴き声・捕まえるがある。捕まえた鳥には✅が付く", async () => {
+  it("画像の🔍で拡大表示が開き、説明・鳴き声がある。捕まえるボタンは、出ない（#211）", async () => {
     usePhoto.mockReturnValue({ thumbnail: "https://u/330px-a.jpg", pageUrl: "https://w/x" });
     const list = await openAll();
     fireEvent.click(within(list).getByRole("button", { name: "ウグイスの写真を拡大" }));
     const dialog = await screen.findByRole("dialog", { name: "ウグイスの詳細" });
     expect(within(dialog).getByText(/鳴き声:/)).toBeInTheDocument();
-    expect(within(dialog).getByRole("button", { name: "捕まえる" })).toBeInTheDocument();
+    expect(within(dialog).queryByRole("button", { name: /捕まえる/ })).toBeNull();
     expect(within(list).queryByRole("img", { name: "捕獲済み" })).toBeNull();
   });
   it("捕獲済みの鳥の行に、捕獲済みの印が出る", async () => {

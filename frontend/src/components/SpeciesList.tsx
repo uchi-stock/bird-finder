@@ -4,7 +4,6 @@ import type { Species } from "../domain/types";
 import type { NowPlaying } from "../hooks/useCallPlayer";
 import { useInView } from "../hooks/useInView";
 import { ABUNDANCE_LABEL, COLORS, CONFIDENCE_LABEL, SIZES, SPECIES } from "../options";
-import { CatchButton } from "./CatchButton";
 import { Photo } from "./Photo";
 import { PlayStatus } from "./PlayStatus";
 
@@ -24,11 +23,10 @@ interface PlayProps {
 interface RowProps extends PlayProps {
   species: Species;
   collection: Collection;
-  onCatch: (id: string) => { isNew: boolean; count: number };
-  onShare: (id: string) => Promise<string>;
 }
 
-function Row({ species: s, collection, onCatch, onShare, now, onPlay, onStop, isActive }: RowProps) {
+// 図鑑から開く詳細には、捕まえるボタンを出さない（#211）。捕まえるのは、検索結果と、クイズの正解から
+function Row({ species: s, collection, now, onPlay, onStop, isActive }: RowProps) {
   const { ref, seen } = useInView<HTMLLIElement>();
   const caught = collection[s.species_id];
   const size = SIZES[s.size_level - 1];
@@ -62,7 +60,6 @@ function Row({ species: s, collection, onCatch, onShare, now, onPlay, onStop, is
                 <p className="note">{s.note}</p>
                 <p className="note">鳴き声: {s.onomatopoeia.join(" / ") || "聞こえない"}</p>
                 {now?.id === s.species_id && <PlayStatus now={now} />}
-                <CatchButton speciesId={s.species_id} collection={collection} onCatch={onCatch} onShare={onShare} />
               </>
             }
           />
@@ -91,11 +88,11 @@ function Row({ species: s, collection, onCatch, onShare, now, onPlay, onStop, is
   );
 }
 
-export function SpeciesList({ collection, onCatch, onShare, now, onPlay, onStop, isActive }: Omit<RowProps, "species">) {
+export function SpeciesList({ collection, now, onPlay, onStop, isActive }: Omit<RowProps, "species">) {
   return (
     <ul className="sp-list" aria-label="全種の一覧">
       {SORTED.map((s) => (
-        <Row key={s.species_id} species={s} collection={collection} onCatch={onCatch} onShare={onShare} now={now} onPlay={onPlay} onStop={onStop} isActive={isActive} />
+        <Row key={s.species_id} species={s} collection={collection} now={now} onPlay={onPlay} onStop={onStop} isActive={isActive} />
       ))}
     </ul>
   );
