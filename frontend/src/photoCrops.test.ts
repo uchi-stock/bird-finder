@@ -13,9 +13,10 @@ describe("photoCrops.json: 切り出し範囲の表", () => {
       for (const v of [c.x, c.y, c.w, c.h]) expect(Number.isFinite(v), `${key}: 数値`).toBe(true);
       expect(c.x, `${key}: x`).toBeGreaterThanOrEqual(0);
       expect(c.y, `${key}: y`).toBeGreaterThanOrEqual(0);
-      // 一辺の下限は、元の画像の「短辺」の割合。横長・縦長の画像では、幅・高さの割合は、それより小さくなる
-      expect(c.w, `${key}: w`).toBeGreaterThan(0.2);
-      expect(c.h, `${key}: h`).toBeGreaterThan(0.2);
+      // 一辺の下限（MIN_SIDE=35%）は、元の画像の「短辺」の割合。横長・縦長の画像では、幅・高さの割合は、それより小さくなる
+      // （例: 縦横比が2:1なら、幅は17.5%）。ここでは、極端に小さい（壊れた）値だけを弾く
+      expect(c.w, `${key}: w`).toBeGreaterThan(0.1);
+      expect(c.h, `${key}: h`).toBeGreaterThan(0.1);
       expect(c.x + c.w, `${key}: 右端`).toBeLessThanOrEqual(1.001);
       expect(c.y + c.h, `${key}: 下端`).toBeLessThanOrEqual(1.001);
     }
