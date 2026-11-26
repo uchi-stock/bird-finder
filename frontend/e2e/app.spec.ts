@@ -357,20 +357,6 @@ for (const size of SIZES) {
       await expect(page.getByPlaceholder(/ホーホケキョ/)).toBeVisible();
     });
 
-    test("地図: 「ダミー（バトル用）」で、ダミーと分かる表示で、鳥が出る", async ({ page }, testInfo) => {
-      const errors: string[] = [];
-      page.on("pageerror", (e) => errors.push(e.message));
-      await openApp(page);
-      await gotoTab(page, /地図/);
-      await page.getByRole("button", { name: "ダミー（バトル用）" }).click();
-      await expect(page.getByText("ダミーデータです。実際の観察ではありません")).toBeVisible();
-      expect(await page.locator(".bird-pin.dummy").count()).toBeGreaterThan(0);
-      await expect(page.locator(".bird-pin.dummy .pin-dummy").first()).toHaveText("ダミー");
-      expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBe(0);
-      await shoot(page, testInfo, `${size.name}-6-map-dummy`, `地図のダミー（${size.name}）`, { fullPage: false });
-      expect(errors).toEqual([]);
-    });
-
     test("図鑑タブ・地図タブが開き、JavaScriptのエラーが出ない", async ({ page }, testInfo) => {
       const errors: string[] = [];
       page.on("pageerror", (e) => errors.push(e.message));
@@ -402,6 +388,11 @@ test.describe("みんなの観察（地図）", () => {
     await gotoTab(page, /地図/);
     await page.getByRole("button", { name: "みんなの観察" }).click();
     await expect(page.locator(".bird-pin.shared")).toHaveCount(1);
+    // ダミー（バトルの試作用）も、「ダミー」の札つきで混ざる。専用の切り替えは無い
+    await expect(page.locator(".map-mode button", { hasText: "ダミー" })).toHaveCount(0);
+    expect(await page.locator(".bird-pin.dummy").count()).toBeGreaterThan(0);
+    await expect(page.locator(".bird-pin.dummy .pin-dummy").first()).toHaveText("ダミー");
+    await expect(page.getByText("「ダミー」の札つきのピンは、実際の観察ではありません")).toBeVisible();
     await expect(page.getByText("地図を拡大すると")).toHaveCount(0);
     // 取得した区画は、バックエンドの上限（25）以内
     const tiles = new URL(requested[requested.length - 1]).searchParams.get("tiles")?.split(",") ?? [];
@@ -410,6 +401,7 @@ test.describe("みんなの観察（地図）", () => {
     await shoot(page, testInfo, "shared-map", "みんなの観察（地図）", { fullPage: false });
     await page.getByRole("button", { name: "自分の記録" }).click();
     await expect(page.locator(".bird-pin.shared")).toHaveCount(0);
+    await expect(page.locator(".bird-pin.dummy")).toHaveCount(0);
   });
 });
 

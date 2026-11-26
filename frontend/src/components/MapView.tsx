@@ -16,7 +16,7 @@ interface Props {
   locate: () => Promise<LatLon>;
   /** みんなの観察（共有された記録）。省略すると、自分の記録だけを出す */
   shared?: { points: MapPoint[]; message: string; loading: boolean; load: (bounds: Bounds) => void };
-  /** バトル試作用のダミー（実際の観察ではない）。指定すると、「ダミー（バトル用）」の表示を足す */
+  /** バトル試作用のダミー（実際の観察ではない）。指定すると、「みんなの観察」に、「ダミー」の札つきで混ぜて出す */
   dummy?: DummyPoint[];
 }
 
@@ -80,7 +80,7 @@ export default function MapView({ points, speciesLabel, withoutLocation, locate,
   const layerRef = useRef<L.LayerGroup | null>(null);
   const sharedLayerRef = useRef<L.LayerGroup | null>(null);
   const dummyLayerRef = useRef<L.LayerGroup | null>(null);
-  const [mode, setMode] = useState<"mine" | "all" | "dummy">("mine");
+  const [mode, setMode] = useState<"mine" | "all">("mine");
   const meRef = useRef<L.CircleMarker | null>(null);
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
@@ -145,15 +145,12 @@ export default function MapView({ points, speciesLabel, withoutLocation, locate,
     if (mode === "all" && sharedPoints) drawPins(layer, sharedPoints, speciesLabel, "bird-pin shared");
   }, [sharedPoints, speciesLabel, mode]);
 
-  // ダミー（バトル用）: 本物の記録とは別のレイヤーに出す。ダミー地点がすべて見える範囲へ寄せる
+  // ダミー: 「みんなの観察」に、本物の記録と別のレイヤーで混ぜる（札・破線の枠で区別する）。本物の記録の取得・表示には影響しない
   useEffect(() => {
-    const map = mapRef.current;
     const layer = dummyLayerRef.current;
-    if (!map || !layer) return;
+    if (!layer) return;
     layer.clearLayers();
-    if (mode !== "dummy" || !dummy) return;
-    drawDummyPins(layer, dummy, speciesLabel);
-    if (dummy.length > 0) map.fitBounds(L.latLngBounds(dummy.map((p) => [p.lat, p.lon] as [number, number])), { padding: [40, 40], maxZoom: 13 });
+    if (mode === "all" && dummy) drawDummyPins(layer, dummy, speciesLabel);
   }, [dummy, speciesLabel, mode]);
 
   const goToMe = async () => {
@@ -176,27 +173,15 @@ export default function MapView({ points, speciesLabel, withoutLocation, locate,
   return (
     <div className="map-wrap">
       <div className="map-canvas" ref={elRef} data-testid="map-canvas" />
-      {(shared || dummy) && (
+      {shared && (
         <div className="map-mode" role="group" aria-label="表示する記録">
           <button type="button" className={mode === "mine" ? "on" : ""} aria-pressed={mode === "mine"} onClick={() => setMode("mine")}>
             自分の記録
           </button>
-          {shared && (
-            <button type="button" className={mode === "all" ? "on" : ""} aria-pressed={mode === "all"} onClick={() => setMode("all")}>
-              みんなの観察
-            </button>
-          )}
-          {dummy && (
-            <button type="button" className={mode === "dummy" ? "on" : ""} aria-pressed={mode === "dummy"} onClick={() => setMode("dummy")}>
-              ダミー（バトル用）
-            </button>
-          )}
+          <button type="button" className={mode === "all" ? "on" : ""} aria-pressed={mode === "all"} onClick={() => setMode("all")}>
+            みんなの観察
+          </button>
         </div>
-      )}
-      {mode === "dummy" && (
-        <p className="map-note dummy-note" role="status">
-          ダミーデータです。実際の観察ではありません（バトルの試作用）。
-        </p>
       )}
       <button type="button" className="map-locate" onClick={goToMe} disabled={busy}>
         <span className="emoji" aria-hidden="true">
@@ -204,9 +189,10 @@ export default function MapView({ points, speciesLabel, withoutLocation, locate,
         </span>
         {busy ? "取得中…" : "現在地へ"}
       </button>
-      {mode === "all" && shared && (shared.loading || shared.message) && (
-        <p className="map-note" role="status">
+      {mode === "all" && shared && (shared.loading || shared.message || (dummy && dummy.length > 0)) && (
+        <p className={dummy && dummy.length > 0 ? "map-note dummy-note" : "map-note"} role="status">
           {shared.loading ? "みんなの観察を取得しています…" : shared.message}
+          {dummy && dummy.length > 0 && <>{shared.loading || shared.message ? " " : ""}「ダミー」の札つきのピンは、実際の観察ではありません（バトルの試作用）。</>}
         </p>
       )}
       {mode === "mine" && points.length === 0 && (
