@@ -1,19 +1,28 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["github>bamiyanapp/dev-standards"],
+  "extends": [
+    "github>bamiyanapp/dev-standards"
+  ],
+  "mode": "full",
   "packageRules": [
     {
       "description": "ci.ymlのuses:行とself_ref:は、同じバージョンに揃える。別々のPRにならないよう、1つにまとめる",
       "groupName": "dev-standards",
-      "matchPackageNames": ["bamiyanapp/dev-standards"]
+      "matchPackageNames": [
+        "bamiyanapp/dev-standards"
+      ]
     }
   ],
   "customManagers": [
     {
       "customType": "regex",
       "description": "self_refはuses:行と同じdev-standardsバージョンを指すべきだが、Renovateのgithub-actionsマネージャーはプレーンな文字列入力であるself_ref:を検知しない。正規表現で明示的に検知対象へ加える",
-      "managerFilePatterns": ["/^\\.github/workflows/.*\\.yml$/"],
-      "matchStrings": ["self_ref: v(?<currentValue>[\\d.]+)"],
+      "managerFilePatterns": [
+        "/^\\.github/workflows/.*\\.yml$/"
+      ],
+      "matchStrings": [
+        "self_ref: v(?<currentValue>[\\d.]+)"
+      ],
       "depNameTemplate": "bamiyanapp/dev-standards",
       "datasourceTemplate": "github-tags",
       "extractVersionTemplate": "^v(?<version>.*)$"
