@@ -1702,3 +1702,129 @@ footer {
   background: var(--card);
   font-size: 0.9rem;
 }
+
+/* バトル（#117・#221）: 捕まえた鳥と、ダミーの鳥が、物語で出会う。勝ち負けは無い */
+.battle .battle-sub {
+  margin: 8px 0 4px;
+  font-size: 1rem;
+}
+
+.battle .dummy-note-text {
+  padding: 6px 8px;
+  border: 1px dashed #888;
+  border-radius: 8px;
+}
+
+.battle .battle-ring {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.battle .battle-fighter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.battle .battle-motion {
+  width: 100%;
+  transform-origin: 50% 80%;
+}
+
+.battle .battle-fighter.dummy .battle-motion {
+  outline: 2px dashed #888;
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+.battle .battle-text {
+  margin: 8px 0;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--card);
+  line-height: 1.6;
+}
+
+.battle .battle-start,
+.battle .battle-back {
+  margin: 4px 8px 4px 0;
+}
+
+.popup-battle {
+  display: block;
+  margin-top: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--fg);
+  font: inherit;
+}
+
+/* 画像の動きは、transformだけで動かす（描画を軽くする）。「動きを減らす」設定では動かさない */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes battle-sway-slow {
+    0%,
+    100% {
+      transform: rotate(-4deg);
+    }
+
+    50% {
+      transform: rotate(4deg);
+    }
+  }
+
+  @keyframes battle-sway-quick {
+    0%,
+    100% {
+      transform: translateX(-3px) rotate(-6deg);
+    }
+
+    50% {
+      transform: translateX(3px) rotate(6deg);
+    }
+  }
+
+  @keyframes battle-glide {
+    0%,
+    100% {
+      transform: translate(-10px, 0) rotate(-10deg);
+    }
+
+    50% {
+      transform: translate(10px, -6px) rotate(8deg);
+    }
+  }
+
+  @keyframes battle-float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+
+    50% {
+      transform: translateY(5px);
+    }
+  }
+
+  .battle .motion-sway-slow {
+    animation: battle-sway-slow 2.4s ease-in-out infinite;
+  }
+
+  .battle .motion-sway-quick {
+    animation: battle-sway-quick 0.6s ease-in-out infinite;
+  }
+
+  .battle .motion-glide {
+    animation: battle-glide 2s ease-in-out infinite;
+  }
+
+  .battle .motion-float {
+    animation: battle-float 2.2s ease-in-out infinite;
+  }
+}

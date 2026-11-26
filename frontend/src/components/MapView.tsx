@@ -18,6 +18,8 @@ interface Props {
   shared?: { points: MapPoint[]; message: string; loading: boolean; load: (bounds: Bounds) => void };
   /** バトル試作用のダミー（実際の観察ではない）。指定すると、「みんなの観察」に、「ダミー」の札つきで混ぜて出す */
   dummy?: DummyPoint[];
+  /** ダミーのピンの「バトルする」を押したときに呼ぶ（種ID）。省略すると、ボタンを出さない */
+  onBattle?: (speciesId: string) => void;
 }
 
 // みんなの観察を取得できる縮尺（これより広いと、区画が多すぎて取得しない）。切り替えたとき、これより広ければ寄せる
@@ -52,7 +54,7 @@ function drawPins(layer: L.LayerGroup, list: MapPoint[], speciesLabel: Props["sp
 }
 
 /** ダミーのピン。破線の枠・灰色がかった色・「ダミー」の札で、本物の記録と取り違えないようにする */
-function drawDummyPins(layer: L.LayerGroup, list: DummyPoint[], speciesLabel: Props["speciesLabel"]): void {
+function drawDummyPins(layer: L.LayerGroup, list: DummyPoint[], speciesLabel: Props["speciesLabel"], onBattle?: (speciesId: string) => void): void {
   for (const p of list) {
     const { name, emoji } = speciesLabel(p.speciesId);
     const icon = L.divIcon({
@@ -69,12 +71,20 @@ function drawDummyPins(layer: L.LayerGroup, list: DummyPoint[], speciesLabel: Pr
     const info = document.createElement("div");
     info.textContent = `${p.spotLabel}・いる可能性: ${p.likelihood}`;
     el.append(strong, warn, info);
+    if (onBattle) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "popup-battle";
+      btn.textContent = "バトルする";
+      btn.addEventListener("click", () => onBattle(p.speciesId));
+      el.append(btn);
+    }
     L.marker([p.lat, p.lon], { icon, title: `（ダミー）${name}` }).bindPopup(el).addTo(layer);
   }
 }
 
 /** 地図に、見つけた鳥をプロットする。位置はぼかし済みの点だけを受け取る（正確な位置は渡さない） */
-export default function MapView({ points, speciesLabel, withoutLocation, locate, shared, dummy }: Props) {
+export default function MapView({ points, speciesLabel, withoutLocation, locate, shared, dummy, onBattle }: Props) {
   const elRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const layerRef = useRef<L.LayerGroup | null>(null);
@@ -150,8 +160,8 @@ export default function MapView({ points, speciesLabel, withoutLocation, locate,
     const layer = dummyLayerRef.current;
     if (!layer) return;
     layer.clearLayers();
-    if (mode === "all" && dummy) drawDummyPins(layer, dummy, speciesLabel);
-  }, [dummy, speciesLabel, mode]);
+    if (mode === "all" && dummy) drawDummyPins(layer, dummy, speciesLabel, onBattle);
+  }, [dummy, speciesLabel, mode, onBattle]);
 
   const goToMe = async () => {
     setBusy(true);

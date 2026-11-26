@@ -403,6 +403,32 @@ test.describe("みんなの観察（地図）", () => {
     await expect(page.locator(".bird-pin.shared")).toHaveCount(0);
     await expect(page.locator(".bird-pin.dummy")).toHaveCount(0);
   });
+
+  test("ダミーのピンから、バトル（勝ち負けの無い物語）を始められる。ダミーと明示され、最後まで進めて、地図へ戻れる（#221）", async ({ page }, testInfo) => {
+    await page.addInitScript(() => localStorage.setItem("bird-finder:collection:v1", JSON.stringify({ sparrow: { firstAt: "2026-11-01T00:00:00.000Z", count: 1 } })));
+    await page.route("https://*.execute-api.ap-northeast-1.amazonaws.com/**", (r) =>
+      r.fulfill({ status: 200, contentType: "application/json", headers: { "access-control-allow-origin": "*" }, body: JSON.stringify({ items: [] }) }),
+    );
+    const errors: string[] = [];
+    page.on("pageerror", (e) => errors.push(e.message));
+    await openApp(page);
+    await gotoTab(page, /地図/);
+    await page.getByRole("button", { name: "みんなの観察" }).click();
+    // ダミーのピンは、地図の範囲の外にもあるため、クリックの操作を直接送る
+    await page.locator(".bird-pin.dummy").first().dispatchEvent("click");
+    await page.getByRole("button", { name: "バトルする" }).click();
+    await expect(page.getByText(/相手は「ダミー」の.*です（実際の観察ではありません）。勝ち負けはありません/)).toBeVisible();
+    await page.getByRole("button", { name: "スズメ" }).click();
+    await page.getByRole("button", { name: "はじめる" }).click();
+    await expect(page.getByRole("heading", { name: /1\/5 出会い/ })).toBeVisible();
+    await shoot(page, testInfo, "battle-meet", "バトル（出会い）", { fullPage: false });
+    for (let i = 0; i < 4; i++) await page.getByRole("button", { name: "つぎへ" }).click().catch(() => {});
+    await expect(page.getByRole("status").filter({ hasText: "勝ち負けなく" })).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBe(0);
+    await page.getByRole("button", { name: "地図へもどる" }).click();
+    await expect(page.getByTestId("map-canvas")).toBeVisible();
+    expect(errors).toEqual([]);
+  });
 });
 
 for (const size of SIZES) {

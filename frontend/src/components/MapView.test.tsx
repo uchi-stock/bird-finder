@@ -147,6 +147,22 @@ describe("MapView", () => {
       expect(popup).toHaveTextContent("ダミー地点A（水辺）・いる可能性: 中");
     });
 
+    it("ダミーのピンのポップアップに「バトルする」があり、押すと、その種IDで呼ぶ。onBattleが無ければ出さない", async () => {
+      const onBattle = vi.fn();
+      const { container, unmount } = render(<MapView points={[]} speciesLabel={label} withoutLocation={0} locate={locate} shared={sharedOf({})} dummy={[dp()]} onBattle={onBattle} />);
+      fireEvent.click(screen.getByRole("button", { name: "みんなの観察" }));
+      fireEvent.click(container.querySelector(".bird-pin.dummy") as HTMLElement);
+      await waitFor(() => expect(container.querySelector(".popup-battle")).not.toBeNull());
+      fireEvent.click(container.querySelector(".popup-battle") as HTMLElement);
+      expect(onBattle).toHaveBeenCalledWith("sparrow");
+      unmount();
+      const r = render(<MapView points={[]} speciesLabel={label} withoutLocation={0} locate={locate} shared={sharedOf({})} dummy={[dp()]} />);
+      fireEvent.click(screen.getByRole("button", { name: "みんなの観察" }));
+      fireEvent.click(r.container.querySelector(".bird-pin.dummy") as HTMLElement);
+      await waitFor(() => expect(r.container.querySelector(".leaflet-popup-content")).not.toBeNull());
+      expect(r.container.querySelector(".popup-battle")).toBeNull();
+    });
+
     it("取得中・失敗の案内とダミーの注記は、同じ枠に並べて出す（重ならない）", () => {
       render(<MapView points={[]} speciesLabel={label} withoutLocation={0} locate={locate} shared={sharedOf({ loading: true })} dummy={[dp()]} />);
       fireEvent.click(screen.getByRole("button", { name: "みんなの観察" }));
