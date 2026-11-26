@@ -11,9 +11,9 @@ describe("buildStory: 勝ち負けの無い、特徴を生かした物語", () =
   const mine = byId("sparrow");
   const opp = byId("grey_heron");
 
-  it("5つの場面（出会い・大きさ・動き・声・おわり）を、この順で作る。同じ入力なら、同じ物語", () => {
+  it("6つの場面（出会い・大きさ・めずらしさ・動き・声・おわり）を、この順で作る。同じ入力なら、同じ物語", () => {
     const story = buildStory(mine, opp);
-    expect(story.map((s) => s.id)).toEqual(["meet", "size", "move", "voice", "end"]);
+    expect(story.map((s) => s.id)).toEqual(["meet", "size", "rarity", "move", "voice", "end"]);
     expect(buildStory(mine, opp)).toEqual(story);
   });
 
@@ -49,9 +49,39 @@ describe("buildStory: 勝ち負けの無い、特徴を生かした物語", () =
 
   it("鳴き声の場面は、普段鳴かない鳥は鳴かないと言い、鳴く鳥はデータのオノマトペを出す", () => {
     const silent = { ...opp, silent: true } as Species;
-    const voice = buildStory(mine, silent)[3].text;
+    const voice = buildStory(mine, silent)[4].text;
     expect(voice).toContain("ほとんど鳴かない");
     expect(voice).toContain(`「${mine.onomatopoeia[0]}」`);
+  });
+
+  describe("めずらしさの場面（レア度と、見つけた回数）", () => {
+    const rarity = (a: Species, b: Species, collection = {}) => buildStory(a, b, collection)[2].text;
+    const entry = (count: number) => ({ firstAt: "2026-11-01T00:00:00.000Z", count });
+
+    it("出現しやすさ（4段階）を、この地域での目安として言う", () => {
+      const say = { very_common: "とてもよく見られる", common: "ふつうに見られる", uncommon: "あまり見られない", rare: "めったに見られない" } as const;
+      for (const [abundance, text] of Object.entries(say)) {
+        expect(rarity({ ...mine, abundance } as Species, opp)).toContain(`この地域で${abundance === "uncommon" || abundance === "rare" ? "は" : ""}、${text}`);
+      }
+    });
+
+    it("見つけた回数: 1回ははじめて、複数回は回数を言う。相手は、未発見なら、まだ見つけていないと言う", () => {
+      expect(rarity(mine, opp, { [mine.species_id]: entry(1) })).toContain("はじめて見つけた");
+      expect(rarity(mine, opp, { [mine.species_id]: entry(7) })).toContain("7回、見つけている");
+      expect(rarity(mine, opp, { [mine.species_id]: entry(1) })).toContain("あなたは、まだ見つけていない");
+      expect(rarity(mine, opp, { [mine.species_id]: entry(1), [opp.species_id]: entry(3) })).toContain("あなたは、3回、見つけている");
+    });
+
+    it("めずらしい鳥（少ない・まれ）を見つけていたら、特別なことと言う。よく見られる鳥には言わない", () => {
+      const rare = { ...mine, abundance: "rare" } as Species;
+      expect(rarity(rare, opp, { [rare.species_id]: entry(1) })).toContain("見つけたことは、特別だ");
+      const common = { ...mine, abundance: "very_common" } as Species;
+      expect(rarity(common, opp, { [common.species_id]: entry(1) })).not.toContain("特別");
+    });
+
+    it("記録を渡さなくても、例外を投げず、物語になる（どちらも未発見として扱う）", () => {
+      expect(buildStory(mine, opp)[2].text).toContain("まだ見つけていない");
+    });
   });
 
   it("動きは、特徴に結びつく（飛ぶ→滑る、泳ぐ→浮かぶ、小さい→素早く、大きい→ゆっくり）。動きの場面だけ動かす", () => {

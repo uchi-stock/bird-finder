@@ -24,8 +24,8 @@ describe("Battle: ダミーの鳥との、勝ち負けの無い物語", () => {
     expect(screen.getByRole("button", { name: "はじめる" })).toBeDisabled();
     await userEvent.click(screen.getByRole("button", { name: "スズメ" }));
     await userEvent.click(screen.getByRole("button", { name: "はじめる" }));
-    expect(screen.getByRole("heading", { name: /1\/5 出会い/ })).toBeInTheDocument();
-    for (const title of ["大きさ", "動き", "声"]) {
+    expect(screen.getByRole("heading", { name: /1\/6 出会い/ })).toBeInTheDocument();
+    for (const title of ["大きさ", "めずらしさ", "動き", "声"]) {
       await userEvent.click(screen.getByRole("button", { name: "つぎへ" }));
       expect(screen.getByRole("heading", { name: new RegExp(title) })).toBeInTheDocument();
     }

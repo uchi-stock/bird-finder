@@ -1,14 +1,16 @@
+import type { Collection } from "./collection";
 import { HABITAT_LABEL } from "./labels";
-import type { Behavior, Species } from "./types";
+import type { Abundance, Behavior, Species } from "./types";
 
 // バトル（#117・#221）の物語。捕まえた鳥と、相手の鳥（ダミー）が、特徴を生かした短い場面で出会う。勝ち負けは無い。
 // 材料は、鳥のデータのうち、大きさ・暮らす環境・行動・鳴き声だけを使う（暫定値だが、事実と違う展開を作らないため、
-// データに無いこと・推測は書かない）。UIに依存しない純粋関数にして、同じ入力なら同じ物語になる。
+// データに無いこと・推測は書かない）。めずらしさは、鳥のデータの出現しやすさ（暫定値・この地域での目安）と、
+// ユーザーが見つけた回数（図鑑の記録）から言う。UIに依存しない純粋関数にして、同じ入力なら同じ物語になる。
 
 /** 画像の動き（CSSの`transform`だけで表す）。鳥の特徴に結びつける */
 export type Motion = "sway-slow" | "sway-quick" | "glide" | "float" | "still";
 
-export type SceneId = "meet" | "size" | "move" | "voice" | "end";
+export type SceneId = "meet" | "size" | "rarity" | "move" | "voice" | "end";
 
 export interface Scene {
   id: SceneId;
@@ -52,12 +54,43 @@ function voiceText(sp: Species): string {
   return o ? `「${o}」と聞こえる` : "鳴き声のデータは、まだ無い";
 }
 
+/** この地域での見られやすさ（データの出現しやすさ。暫定値の目安） */
+const RARITY_TEXT: Record<Abundance, string> = {
+  very_common: "この地域で、とてもよく見られる",
+  common: "この地域で、ふつうに見られる",
+  uncommon: "この地域では、あまり見られない",
+  rare: "この地域では、めったに見られない",
+};
+
+const isScarce = (sp: Species) => sp.abundance === "uncommon" || sp.abundance === "rare";
+
+/** ユーザーが、その鳥を見つけた回数（図鑑の記録）。未発見は0 */
+function foundCount(collection: Collection, sp: Species): number {
+  return collection[sp.species_id]?.count ?? 0;
+}
+
+/** 自分の鳥について、見つけた回数と、めずらしさ。見つけた回数が1回・複数回で言い方を変える */
+function mineRarityText(sp: Species, count: number): string {
+  const found = count <= 1 ? `${sp.name_ja}は、あなたが、はじめて見つけた鳥だ。` : `${sp.name_ja}は、あなたが、これまでに${count}回、見つけている。`;
+  const special = isScarce(sp) ? `${RARITY_TEXT[sp.abundance]}鳥を見つけたことは、特別だ。` : "";
+  return `${sp.name_ja}は、${RARITY_TEXT[sp.abundance]}。${found}${special}`;
+}
+
+/** 相手の鳥について、めずらしさと、あなたが見つけた回数（見つけていなければ、まだ見つけていない旨） */
+function opponentRarityText(sp: Species, count: number): string {
+  const found = count === 0 ? "あなたは、まだ見つけていない。" : `あなたは、${count}回、見つけている。`;
+  return `${sp.name_ja}は、${RARITY_TEXT[sp.abundance]}。${found}`;
+}
+
 function habitatText(sp: Species): string {
   return sp.habitats.length > 0 ? sp.habitats.map((h) => HABITAT_LABEL[h]).join("・") : "さまざまな場所";
 }
 
-/** 捕まえた鳥と、相手の鳥の物語を、5つの場面（出会い・大きさ・動き・声・おわり）で作る */
-export function buildStory(mine: Species, opp: Species): Scene[] {
+/**
+ * 捕まえた鳥と、相手の鳥の物語を、6つの場面（出会い・大きさ・めずらしさ・動き・声・おわり）で作る。
+ * collectionは、ユーザーが見つけた回数（めずらしさの場面で使う）。省略すると、どちらも未発見として扱う
+ */
+export function buildStory(mine: Species, opp: Species, collection: Collection = {}): Scene[] {
   const shared = mine.habitats.filter((h) => opp.habitats.includes(h));
   const meet =
     shared.length > 0
@@ -71,6 +104,13 @@ export function buildStory(mine: Species, opp: Species): Scene[] {
   return [
     { id: "meet", title: "出会い", text: meet, mine: "still", opponent: "still" },
     { id: "size", title: "大きさ", text: `${sizeLine(mine)}。${sizeLine(opp)}。${compare}`, mine: "still", opponent: "still" },
+    {
+      id: "rarity",
+      title: "めずらしさ",
+      text: `${mineRarityText(mine, foundCount(collection, mine))}${opponentRarityText(opp, foundCount(collection, opp))}`,
+      mine: "still",
+      opponent: "still",
+    },
     { id: "move", title: "動き", text: `${mine.name_ja}は、${moveText(mine)}。${opp.name_ja}は、${moveText(opp)}。`, mine: motionOf(mine), opponent: motionOf(opp) },
     { id: "voice", title: "声", text: `${mine.name_ja}は、${voiceText(mine)}。${opp.name_ja}は、${voiceText(opp)}。`, mine: "still", opponent: "still" },
     { id: "end", title: "おわり", text: `${mine.name_ja}と${opp.name_ja}は、勝ち負けなく、それぞれの場所へ帰っていった。`, mine: "still", opponent: "still" },
