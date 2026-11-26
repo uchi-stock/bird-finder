@@ -56,8 +56,26 @@ function searchUrl(query) {
   return `https://commons.wikimedia.org/w/api.php?${q.toString()}`;
 }
 
-/** 学名から、候補を集める検索。飛翔の語つきの検索と、学名のカテゴリ（Commonsの「Category:学名」）の画像 */
-const queriesFor = (sci) => [`"${sci}" flying`, `"${sci}" flight`, `"${sci}" "taking off"`, `"${sci}" wings`, `incategory:"${sci}" filetype:bitmap`];
+// 題名に、学名ではなく、英名や旧学名が使われている鳥（Commonsの題名は、これらのことが多い。#223）
+const ALT_NAMES = {
+  "Tachybaptus ruficollis": ["Little Grebe"],
+  "Motacilla grandis": ["Japanese Wagtail"],
+  "Turdus eunomus": ["Turdus naumanni", "Dusky Thrush", "Naumann's Thrush"],
+  "Emberiza cioides": ["Meadow Bunting"],
+  "Emberiza spodocephala": ["Black-faced Bunting"],
+  "Acrocephalus orientalis": ["Oriental Reed Warbler"],
+  "Garrulax canorus": ["Pterorhinus canorus", "Hwamei", "Chinese Hwamei"],
+};
+
+/** 学名から、候補を集める検索。飛翔の語つきの検索と、学名のカテゴリ（Commonsの「Category:学名」）の画像。英名・旧学名があれば、それでも探す */
+const queriesFor = (sci) => [
+  `"${sci}" flying`,
+  `"${sci}" flight`,
+  `"${sci}" "taking off"`,
+  `"${sci}" wings`,
+  `incategory:"${sci}" filetype:bitmap`,
+  ...(ALT_NAMES[sci] ?? []).flatMap((n) => [`"${n}" flying`, `"${n}" flight`, `"${n}" "taking off"`]),
+];
 
 async function main() {
   const { pipeline, RawImage } = await import("@huggingface/transformers");
