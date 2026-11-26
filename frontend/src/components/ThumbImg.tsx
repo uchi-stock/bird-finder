@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { photoKey } from "../domain/photoKey";
+import { sharperThumb } from "../domain/sharperThumb";
 import { cropStyle, subjectCrop, type Crop } from "../domain/subjectCrop";
 import cropsJson from "../data/photoCrops.json";
 
@@ -71,7 +72,18 @@ function useThumbCrop(src: string) {
     if (img?.complete && img.naturalWidth > 0) compute(img);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- srcが変わったときだけ計算する
   }, [src]);
-  return { crop, ref, onLoad: (e: React.SyntheticEvent<HTMLImageElement>) => compute(e.currentTarget) };
+  // 保存した切り出し範囲がある画像は、小さく切り出すほど、大きい幅で取る（#224）。大きい幅を作れない（元画像が小さい）ときは、元の幅へ戻す
+  const [fallback, setFallback] = useState(false);
+  const shownSrc = !fallback && storedCrop(src) ? sharperThumb(src, crop) : src;
+  return {
+    crop,
+    ref,
+    shownSrc,
+    onLoad: (e: React.SyntheticEvent<HTMLImageElement>) => compute(e.currentTarget),
+    onError: () => {
+      if (shownSrc !== src) setFallback(true);
+    },
+  };
 }
 
 interface Props {
@@ -85,20 +97,20 @@ interface Props {
  * 切り出さないときのspanは、レイアウトに影響しない（display: contents）
  */
 export function ThumbImg({ src, alt, loading }: Props) {
-  const { crop, ref, onLoad } = useThumbCrop(src);
+  const { crop, ref, shownSrc, onLoad, onError } = useThumbCrop(src);
   return (
     <span className={crop ? "thumb-sq" : "thumb-plain"}>
-      <img ref={ref} src={src} alt={alt} loading={loading} crossOrigin="anonymous" onLoad={onLoad} style={crop ? cropStyle(crop) : undefined} />
+      <img ref={ref} src={shownSrc} alt={alt} loading={loading} crossOrigin="anonymous" onLoad={onLoad} onError={onError} style={crop ? cropStyle(crop) : undefined} />
     </span>
   );
 }
 
 /** 詳細の「飛ぶ姿」の画像。余白が多ければ、鳥に寄せた正方形で出す（#156）。切り出さない画像は、全体を出す */
 export function FlightImg({ src, alt }: { src: string; alt: string }) {
-  const { crop, ref, onLoad } = useThumbCrop(src);
+  const { crop, ref, shownSrc, onLoad, onError } = useThumbCrop(src);
   return (
     <span className={crop ? "lb-flight-sq" : "lb-flight-plain"}>
-      <img ref={ref} src={src} alt={alt} loading="lazy" crossOrigin="anonymous" onLoad={onLoad} style={crop ? cropStyle(crop) : undefined} />
+      <img ref={ref} src={shownSrc} alt={alt} loading="lazy" crossOrigin="anonymous" onLoad={onLoad} onError={onError} style={crop ? cropStyle(crop) : undefined} />
     </span>
   );
 }
