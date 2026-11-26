@@ -35,7 +35,7 @@ jobs:
           echo "RATE_PEPPER=$pepper" >> "$GITHUB_ENV"
 
       - name: デプロイする
-        uses: bamiyanapp/dev-standards/.github/actions/deploy-serverless@v2.124.1
+        uses: bamiyanapp/dev-standards/.github/actions/deploy-serverless@v2.184.3
         with:
           working-directory: backend
           deploy-command: npx osls deploy --stage prod
