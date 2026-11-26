@@ -35,7 +35,7 @@ export function Battle({ opponentId, collection, onBack }: Props) {
     );
   }
 
-  const story = mine ? buildStory(mine, opp) : [];
+  const story = mine ? buildStory(mine, opp, collection) : [];
   const scene = step !== undefined ? story[step] : undefined;
 
   return (
